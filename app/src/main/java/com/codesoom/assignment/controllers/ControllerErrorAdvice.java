@@ -55,6 +55,13 @@ public class ControllerErrorAdvice {
         return new ErrorResponse(messageTemplate);
     }
 
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(UnAuthorizedUserAccessException.class)
+    public ErrorResponse handleUnAuthorizedUserAccessError() {
+        return new ErrorResponse("Unauthorized user access resources");
+    }
+
     private String getViolatedMessage(ConstraintViolationException exception) {
         String messageTemplate = null;
         Set<ConstraintViolation<?>> violations = exception.getConstraintViolations();
