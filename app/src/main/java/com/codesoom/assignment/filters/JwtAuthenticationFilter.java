@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.errors.InvalidTokenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -62,8 +63,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         String authorization = request.getHeader(AUTH_HEADER);
 
         if (authorization == null) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value());
-            return;
+            throw new InvalidTokenException("");
         }
 
         String accessToken = authorization.substring(BEARER_TOKEN_PREFIX.length());
