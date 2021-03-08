@@ -5,7 +5,10 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
+import com.codesoom.assignment.errors.UnAuthorizedUserAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -28,19 +31,39 @@ public class UserController {
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     UserResultData update(
+            Authentication authentication,
             @PathVariable Long id,
             @RequestBody @Valid UserModificationData modificationData
     ) {
+        validateForbiddenAccess(authentication, id);
         User user = userService.updateUser(id, modificationData);
         return getUserResultData(user);
     }
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void destroy(@PathVariable Long id) {
+    @PreAuthorize("isAuthenticated()")
+    void destroy(
+            Authentication authentication,
+            @PathVariable Long id
+    ) {
+        validateForbiddenAccess(authentication, id);
         userService.deleteUser(id);
     }
+
+    private void validateForbiddenAccess(
+            Authentication authentication,
+            Long id
+    ) {
+        Long userId = (Long) authentication.getPrincipal();
+
+        if (!id.equals(userId)) {
+            throw new UnAuthorizedUserAccessException();
+        }
+    }
+
 
     private UserResultData getUserResultData(User user) {
         return UserResultData.builder()
