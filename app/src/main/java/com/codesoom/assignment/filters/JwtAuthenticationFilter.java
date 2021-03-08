@@ -8,8 +8,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.security.UserAuthentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
@@ -30,11 +34,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws IOException, ServletException {
-        if (filterWithPathAndMethod(request)) {
-            chain.doFilter(request, response);
-            return;
-        }
-
         doAuthentication(request, response, chain);
     }
 
@@ -62,15 +61,15 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             throws IOException, ServletException {
         String authorization = request.getHeader(AUTH_HEADER);
 
-        if (authorization == null) {
-            throw new InvalidTokenException("");
+        if (authorization != null) {
+            String accessToken = authorization.substring(BEARER_TOKEN_PREFIX.length());
+            Long userId = authenticationService.parseToken(accessToken);
+
+            Authentication authentication = new UserAuthentication(userId);
+
+            SecurityContext context = SecurityContextHolder.getContext();
+            context.setAuthentication(authentication);
         }
-
-        String accessToken = authorization.substring(BEARER_TOKEN_PREFIX.length());
-        Long userId = authenticationService.parseToken(accessToken);
-
-        request.setAttribute("userId", userId);
-
         chain.doFilter(request, response);
     }
 }
