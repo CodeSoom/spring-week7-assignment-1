@@ -37,24 +37,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         doAuthentication(request, response, chain);
     }
 
-    private boolean filterWithPathAndMethod(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        if (!path.startsWith("/products")) {
-            return true;
-        }
-
-        String method = request.getMethod();
-        if (method.equals("GET")) {
-            return true;
-        }
-
-        if (method.equals("OPTIONS")) {
-            return true;
-        }
-
-        return false;
-    }
-
     private void doAuthentication(HttpServletRequest request,
                                   HttpServletResponse response,
                                   FilterChain chain)
