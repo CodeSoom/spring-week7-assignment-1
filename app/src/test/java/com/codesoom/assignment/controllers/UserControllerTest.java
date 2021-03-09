@@ -165,4 +165,13 @@ class UserControllerTest {
         )
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void destroyWithAnotherUserId() throws Exception {
+        mockMvc.perform(
+                delete("/users/101")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+        )
+                .andExpect(status().isForbidden());
+    }
 }
