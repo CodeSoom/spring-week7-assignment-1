@@ -6,6 +6,7 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import jdk.jfr.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +68,9 @@ class UserControllerTest {
 
         given(userService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
+
+        given(authenticationService.parseToken(VALID_TOKEN))
+                .willReturn(1L);
     }
 
     @Test
@@ -106,6 +110,7 @@ class UserControllerTest {
         mockMvc.perform(
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
         )
                 .andExpect(status().isOk())
@@ -134,17 +139,19 @@ class UserControllerTest {
         mockMvc.perform(
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
         )
-                .andExpect(status().isNotFound());
-
-        verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
+                .andExpect(status().isForbidden());
     }
 
     @Test
     void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
+        mockMvc.perform(
+                delete("/users/1")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+        )
                 .andExpect(status().isNoContent());
 
         verify(userService).deleteUser(1L);
@@ -152,9 +159,10 @@ class UserControllerTest {
 
     @Test
     void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
-                .andExpect(status().isNotFound());
-
-        verify(userService).deleteUser(100L);
+        mockMvc.perform(
+                delete("/users/100")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+        )
+                .andExpect(status().isForbidden());
     }
 }
