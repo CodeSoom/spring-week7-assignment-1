@@ -29,10 +29,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
                 .csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/h2-console/**").permitAll()
-                .anyRequest().permitAll()
-                .and()
                 .addFilter(authenticationFilter)
                 .addFilterBefore(authenticationErrorFilter,
                         JwtAuthenticationFilter.class)
