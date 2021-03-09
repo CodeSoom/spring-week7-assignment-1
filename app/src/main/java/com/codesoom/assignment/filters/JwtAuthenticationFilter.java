@@ -1,4 +1,4 @@
-package com.codesoom.assignment.interceptors;
+package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.errors.InvalidTokenException;
