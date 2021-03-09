@@ -26,19 +26,28 @@ public class UserService {
     }
 
     public User registerUser(UserRegistrationData registrationData) {
-        String email = registrationData.getEmail();
+        final String email = registrationData.getEmail();
         if (userRepository.existsByEmail(email)) {
             throw new UserEmailDuplicationException(email);
         }
+        final String encodedPassword = passwordEncoder.encode(registrationData.getPassword());
+        final User user = User.builder()
+                .name(registrationData.getName())
+                .email(registrationData.getEmail())
+                .password(encodedPassword)
+                .build();
 
-        User user = mapper.map(registrationData, User.class);
         return userRepository.save(user);
     }
 
     public User updateUser(Long id, UserModificationData modificationData) {
-        User user = findUser(id);
+        final User user = findUser(id);
+        final String encodedPassword = passwordEncoder.encode(modificationData.getPassword());
+        final User source = User.builder()
+                .name(modificationData.getName())
+                .password(encodedPassword)
+                .build();
 
-        User source = mapper.map(modificationData, User.class);
         user.changeWith(source);
 
         return user;

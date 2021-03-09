@@ -7,13 +7,13 @@ import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -25,22 +25,30 @@ class AuthenticationServiceTest {
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+    private static final String ENCODE_PASSWORD = "$2a$10$hfmGZDxIJ5of6BesJlffqeMFF4nIEr2aEivlXE/PmBAPGtJvri5Ku";
+    private static final String WRONG_ENCODED_PASSWORD = "$2a$10$hfmGZDxIJ5of6BesJlffqeMFF4nIEr2aEivlXE/PmBAPGtJvri5Ku"+"_WRONG";
 
     private AuthenticationService authenticationService;
 
     private UserRepository userRepository = mock(UserRepository.class);
 
+    private PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
+
     @BeforeEach
     void setUp() {
         JwtUtil jwtUtil = new JwtUtil(SECRET);
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
         authenticationService = new AuthenticationService(
                 userRepository, jwtUtil, passwordEncoder);
-
         User user = User.builder()
-                .password("test")
+                .deleted(false)
+                .password(ENCODE_PASSWORD)
                 .build();
+
+        given(passwordEncoder.encode(eq("test")))
+                .willReturn(ENCODE_PASSWORD);
+
+        given(passwordEncoder.encode(eq("xxx")))
+                .willReturn(WRONG_ENCODED_PASSWORD);
 
         given(userRepository.findByEmail("tester@example.com"))
                 .willReturn(Optional.of(user));
