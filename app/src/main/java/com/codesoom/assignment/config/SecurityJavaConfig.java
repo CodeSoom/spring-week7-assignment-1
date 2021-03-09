@@ -1,14 +1,20 @@
 package com.codesoom.assignment.config;
 
+import com.codesoom.assignment.interceptors.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+
+import javax.servlet.Filter;
 
 @Configuration
 public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        Filter authenticationFilter = new JwtAuthenticationFilter(authenticationManager());
+
         http
-                .csrf().disable();
+                .csrf().disable()
+                .addFilter(authenticationFilter);
     }
 }
