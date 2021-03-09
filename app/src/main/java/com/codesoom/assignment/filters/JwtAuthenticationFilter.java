@@ -1,6 +1,10 @@
 package com.codesoom.assignment.filters;
 
-import javax.servlet.Filter;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-public class JwtAuthenticationFilter implements Filter {
+public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+        super(authenticationManager);
+    }
 }
