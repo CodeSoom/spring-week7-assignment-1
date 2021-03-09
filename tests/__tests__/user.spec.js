@@ -95,9 +95,9 @@ describe('Users', () => {
         id = 9999;
       });
 
-      it('responses Forbidden', async () => {
+      it('responses Not Found', async () => {
         await frisby.patch(`/users/${id}`, userData)
-          .expect('status', 403);
+          .expect('status', 404);
       });
     });
 

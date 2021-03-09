@@ -8,6 +8,8 @@ import io.jsonwebtoken.Claims;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import static java.util.function.Predicate.not;
+
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
@@ -25,14 +27,14 @@ public class AuthenticationService {
 
     public String login(String email, String password) {
         final User user = userRepository.findByEmail(email)
+                .filter(not(User::isDeleted))
                 .orElseThrow(() -> new LoginFailException(email));
-        final String encodedPassword = passwordEncoder.encode(password);
 
-        if (!user.authenticate(encodedPassword)) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new LoginFailException(email);
         }
 
-        return jwtUtil.encode(1L);
+        return jwtUtil.encode(user.getId());
     }
 
     public Long parseToken(String accessToken) {
