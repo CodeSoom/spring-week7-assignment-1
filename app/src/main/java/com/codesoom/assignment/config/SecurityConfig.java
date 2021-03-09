@@ -2,6 +2,7 @@ package com.codesoom.assignment.config;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.filters.AuthenticationErrorFilter;
+import com.codesoom.assignment.filters.EncodingFilter;
 import com.codesoom.assignment.filters.JwtAuthenticationFilter;
 
 import javax.servlet.Filter;
@@ -29,6 +30,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         Filter authenticationFilter = new JwtAuthenticationFilter(
                 authenticationManager(), authenticationService);
         Filter authenticationErrorFilter = new AuthenticationErrorFilter();
+        Filter encodingFilter = new EncodingFilter();
+
         http
                 .csrf().disable()
                 .addFilter(authenticationFilter)
@@ -38,5 +41,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+
+        http
+                .addFilterBefore(encodingFilter, AuthenticationErrorFilter.class);
     }
 }
