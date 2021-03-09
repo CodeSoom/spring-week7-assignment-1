@@ -163,6 +163,6 @@ class UserControllerTest {
                 delete("/users/100")
                         .header("Authorization", "Bearer " + VALID_TOKEN)
         )
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
     }
 }
