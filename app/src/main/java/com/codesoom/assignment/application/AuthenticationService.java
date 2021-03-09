@@ -7,6 +7,10 @@ import com.codesoom.assignment.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Service;
 
+/**
+ *
+ * 사용자 인증을 담당한다.
+ */
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
@@ -18,6 +22,15 @@ public class AuthenticationService {
         this.jwtUtil = jwtUtil;
     }
 
+    /**
+     * 주어진 회원의 email과 password를 처리하고
+     * 토큰을 리턴합니다.
+     *
+     * @param email
+     * @param password
+     * @return accessToken
+     * @throws LoginFailException Email이 등록되지 않은 email일때
+     */
     public String login(String email, String password) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new LoginFailException(email));
@@ -29,6 +42,11 @@ public class AuthenticationService {
         return jwtUtil.encode(1L);
     }
 
+    /**
+     *
+     * @param accessToken
+     * @return  parsing 처리된 userId
+     */
     public Long parseToken(String accessToken) {
         Claims claims = jwtUtil.decode(accessToken);
         return claims.get("userId", Long.class);

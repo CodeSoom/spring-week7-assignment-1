@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
+/**
+ * 사용자의 요청에 따라 서비스에 데이터를 전달해준다.
+ *
+ */
 @RestController
 @RequestMapping("/products")
 @CrossOrigin

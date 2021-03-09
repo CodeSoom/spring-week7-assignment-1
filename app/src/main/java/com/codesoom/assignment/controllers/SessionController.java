@@ -6,6 +6,10 @@ import com.codesoom.assignment.dto.SessionResponseData;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ *
+ * 세션과 관련된 Http 요청을 처리한다.
+ */
 @RestController
 @RequestMapping("/session")
 @CrossOrigin
