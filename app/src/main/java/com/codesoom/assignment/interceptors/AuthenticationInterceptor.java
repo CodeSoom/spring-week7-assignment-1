@@ -1,6 +1,8 @@
 package com.codesoom.assignment.interceptors;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -10,13 +12,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
+@RequiredArgsConstructor
 public class AuthenticationInterceptor implements HandlerInterceptor {
-    private AuthenticationService authenticationService;
 
-    public AuthenticationInterceptor(
-            AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
+    @Autowired
+    private AuthenticationService authenticationService;
 
     @Override
     public boolean preHandle(HttpServletRequest request,
@@ -28,25 +28,22 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     private boolean filterWithPathAndMethod(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (!path.startsWith("/products")) {
+
+        if (path.equals("/products")) {
             return true;
         }
 
         String method = request.getMethod();
+
         if (method.equals("GET")) {
             return true;
         }
-
-        if (method.equals("OPTIONS")) {
-            return true;
-        }
-
         return false;
     }
 
-    private boolean doAuthentication(HttpServletRequest request,
-                                     HttpServletResponse response)
-            throws IOException {
+    private boolean doAuthentication(
+            HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
         String authorization = request.getHeader("Authorization");
 
         if (authorization == null) {
@@ -55,9 +52,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         }
 
         String accessToken = authorization.substring("Bearer ".length());
-        Long userId = authenticationService.parseToken(accessToken);
-
-        request.setAttribute("userId", userId);
+        authenticationService.parseToken(accessToken);
 
         return true;
     }

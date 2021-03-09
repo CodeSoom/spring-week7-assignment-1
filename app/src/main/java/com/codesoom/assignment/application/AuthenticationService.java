@@ -2,35 +2,41 @@ package com.codesoom.assignment.application;
 
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
+import com.codesoom.assignment.dto.SessionRequestData;
+import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.security.SignatureException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AuthenticationService {
-    private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
-    public AuthenticationService(UserRepository userRepository,
-                                 JwtUtil jwtUtil) {
-        this.userRepository = userRepository;
-        this.jwtUtil = jwtUtil;
-    }
+    public String login(SessionRequestData userLoginData) {
+        User user = userRepository.findByEmail(userLoginData.getEmail())
+                .orElseThrow(() -> new LoginFailException(userLoginData.getEmail()));
 
-    public String login(String email, String password) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new LoginFailException(email));
-
-        if (!user.authenticate(password)) {
-            throw new LoginFailException(email);
+        if (!user.authenticate(userLoginData.getPassword())) {
+            throw new LoginFailException(userLoginData.getEmail());
         }
 
-        return jwtUtil.encode(1L);
+        return jwtUtil.encode(user.getId());
     }
 
     public Long parseToken(String accessToken) {
-        Claims claims = jwtUtil.decode(accessToken);
-        return claims.get("userId", Long.class);
+        if (accessToken == null || accessToken.isBlank()) {
+            throw new InvalidTokenException(accessToken);
+        }
+        try {
+            Claims claims = jwtUtil.decode(accessToken);
+            return claims.get("userId", Long.class);
+        } catch (SignatureException e) {
+            throw new InvalidTokenException(accessToken);
+        }
     }
 }
