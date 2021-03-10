@@ -47,8 +47,6 @@ public class UserResultData {
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
-                .password(user.getPassword())
-                .deleted(user.isDeleted())
                 .build();
     }
 }
