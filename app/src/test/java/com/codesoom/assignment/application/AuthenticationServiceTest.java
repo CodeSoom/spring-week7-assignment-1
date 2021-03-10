@@ -27,7 +27,6 @@ class AuthenticationServiceTest {
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
     private static final String ENCODE_PASSWORD = "$2a$10$hfmGZDxIJ5of6BesJlffqeMFF4nIEr2aEivlXE/PmBAPGtJvri5Ku";
-    private static final String WRONG_ENCODED_PASSWORD = "$2a$10$hfmGZDxIJ5of6BesJlffqeMFF4nIEr2aEivlXE/PmBAPGtJvri5Ku"+"_WRONG";
 
     private AuthenticationService authenticationService;
 

@@ -7,6 +7,7 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.AccessDeniedException;
 import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,7 +74,6 @@ class UserControllerTest {
         given(userService.updateUser(
                 any(Authentication.class), eq(1L), any(UserModificationData.class)))
                 .willReturn(user);
-
 
         given(userService.updateUser(
                 any(Authentication.class), eq(100L), any(UserModificationData.class)))
@@ -145,6 +145,17 @@ class UserControllerTest {
     }
 
     @Test
+    void updateUserWithInValidAttributes() throws Exception {
+        mockMvc.perform(
+                patch("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"\",\"password\":\"1\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+        )
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void updateUserWithInvalidToken() throws Exception {
         mockMvc.perform(
                 patch("/users/1")
@@ -201,5 +212,19 @@ class UserControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
+    }
+
+    @Test
+    void registerUserWithExistedEmail() throws Exception {
+        given(userService.registerUser(any(UserRegistrationData.class)))
+                .willThrow(new UserEmailDuplicationException("tester@example.com"));
+
+        mockMvc.perform(
+                post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"tester@example.com\"," +
+                                "\"name\":\"Tester\",\"password\":\"test\"}")
+        )
+                .andExpect(status().isBadRequest());
     }
 }

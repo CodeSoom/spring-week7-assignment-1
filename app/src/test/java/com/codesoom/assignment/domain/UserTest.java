@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class UserTest {
     @Test
     void changeWith() {
-        User user = User.builder().build();
+        User user = new User();
 
         user.changeWith(User.of("TEST", "TEST"));
 
