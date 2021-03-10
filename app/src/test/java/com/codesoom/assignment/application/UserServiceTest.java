@@ -4,7 +4,7 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
-import com.codesoom.assignment.errors.UserEmailDuplicationException;
+import com.codesoom.assignment.errors.UserEmailDuplicatedException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
@@ -91,7 +91,7 @@ class UserServiceTest {
                 .build();
 
         assertThatThrownBy(() -> userService.registerUser(registrationData))
-                .isInstanceOf(UserEmailDuplicationException.class);
+                .isInstanceOf(UserEmailDuplicatedException.class);
 
         verify(userRepository).existsByEmail(EXISTED_EMAIL_ADDRESS);
     }

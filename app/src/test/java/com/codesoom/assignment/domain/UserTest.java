@@ -19,7 +19,7 @@ class UserTest {
     void changeWith() {
         User user = User.builder().build();
 
-        user.changeWith(User.builder()
+        user.updateName(User.builder()
                 .name("TEST")
                 .build());
 
@@ -30,7 +30,7 @@ class UserTest {
     void changePassword() {
         User user = User.builder().build();
 
-        user.changePassword("TEST", passwordEncoder);
+        user.updatePassword("TEST", passwordEncoder);
 
         assertThat(user.getPassword()).isNotEmpty();
         assertThat(user.getPassword()).isNotEqualTo("TEST");
@@ -42,7 +42,7 @@ class UserTest {
 
         assertThat(user.isDeleted()).isFalse();
 
-        user.destroy();
+        user.delete();
 
         assertThat(user.isDeleted()).isTrue();
     }

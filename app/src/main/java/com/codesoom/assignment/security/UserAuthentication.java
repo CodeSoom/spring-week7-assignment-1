@@ -1,5 +1,6 @@
 package com.codesoom.assignment.security;
 
+import com.codesoom.assignment.dto.AuthenticationResultData;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -8,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserAuthentication extends AbstractAuthenticationToken {
-    private final Long userId;
+    private final AuthenticationResultData authenticationResultData;
 
-    public UserAuthentication(Long userId) {
+    public UserAuthentication(AuthenticationResultData authenticationResultData) {
         super(authorities());
-        this.userId = userId;
+        this.authenticationResultData = authenticationResultData;
     }
 
     @Override
@@ -22,19 +23,19 @@ public class UserAuthentication extends AbstractAuthenticationToken {
 
     @Override
     public Object getPrincipal() {
-        return userId;
-    }
-
-    @Override
-    public String toString() {
-        return "Authentication{" +
-                "userId=" + userId +
-                '}';
+        return authenticationResultData.getEmail();
     }
 
     @Override
     public boolean isAuthenticated() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "UserAuthentication{" +
+                "authenticationResultData=" + authenticationResultData +
+                '}';
     }
 
     private static List<GrantedAuthority> authorities() {

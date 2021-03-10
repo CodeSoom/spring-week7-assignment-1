@@ -26,13 +26,13 @@ class SessionControllerTest {
 
     @BeforeEach
     void setUp() {
-        given(authenticationService.login("tester@example.com", "test"))
+        given(authenticationService.createToken("tester@example.com", "test"))
                 .willReturn("a.b.c");
 
-        given(authenticationService.login("badguy@example.com", "test"))
+        given(authenticationService.createToken("badguy@example.com", "test"))
                 .willThrow(new LoginFailException("badguy@example.com"));
 
-        given(authenticationService.login("tester@example.com", "xxx"))
+        given(authenticationService.createToken("tester@example.com", "xxx"))
                 .willThrow(new LoginFailException("tester@example.com"));
     }
 

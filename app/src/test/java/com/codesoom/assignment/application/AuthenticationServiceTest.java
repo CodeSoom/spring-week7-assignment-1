@@ -41,7 +41,7 @@ class AuthenticationServiceTest {
         User user = User.builder()
                  .id(1L)
                 .build();
-        user.changePassword("test", passwordEncoder);
+        user.updatePassword("test", passwordEncoder);
 
         given(userRepository.findByEmail("tester@example.com"))
                 .willReturn(Optional.of(user));
@@ -49,7 +49,7 @@ class AuthenticationServiceTest {
 
     @Test
     void loginWithRightEmailAndPassword() {
-        String accessToken = authenticationService.login(
+        String accessToken = authenticationService.createToken(
                 "tester@example.com", "test");
 
         assertThat(accessToken).isEqualTo(VALID_TOKEN);
@@ -60,7 +60,7 @@ class AuthenticationServiceTest {
     @Test
     void loginWithWrongEmail() {
         assertThatThrownBy(
-                () -> authenticationService.login("badguy@example.com", "test")
+                () -> authenticationService.createToken("badguy@example.com", "test")
         ).isInstanceOf(LoginFailException.class);
 
         verify(userRepository).findByEmail("badguy@example.com");
@@ -69,7 +69,7 @@ class AuthenticationServiceTest {
     @Test
     void loginWithWrongPassword() {
         assertThatThrownBy(
-                () -> authenticationService.login("tester@example.com", "xxx")
+                () -> authenticationService.createToken("tester@example.com", "xxx")
         ).isInstanceOf(LoginFailException.class);
 
         verify(userRepository).findByEmail("tester@example.com");
