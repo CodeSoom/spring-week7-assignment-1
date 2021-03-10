@@ -6,6 +6,7 @@ import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -64,6 +65,7 @@ public class ProductController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("isAuthenticated()")
     public Product create(
             @RequestBody @Valid ProductData productData
     ) {
@@ -79,6 +81,7 @@ public class ProductController {
      * @return 수정된 상품
      */
     @RequestMapping(value = "{id}", method = {RequestMethod.PUT, RequestMethod.PATCH})
+    @PreAuthorize("isAuthenticated()")
     public Product update(
             @RequestHeader("Authorization") String authorization,
             @PathVariable Long id,
@@ -97,6 +100,7 @@ public class ProductController {
      */
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("isAuthenticated()")
     public void delete(@PathVariable Long id) {
         productService.deleteProduct(id);
     }
