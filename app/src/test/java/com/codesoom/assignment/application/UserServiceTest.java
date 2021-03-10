@@ -156,6 +156,9 @@ class UserServiceTest {
 
     @Test
     void updateUserWithNotExistedId() {
+        given(authentication.getPrincipal())
+                .willReturn(NOT_EXIST_USER_ID);
+
         UserModificationData modificationData = UserModificationData.builder()
                 .name(MODIFIED_NAME)
                 .password(MODIFIED_PASSWORD)
