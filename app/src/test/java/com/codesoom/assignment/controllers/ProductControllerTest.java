@@ -303,4 +303,25 @@ public class ProductControllerTest {
 
         verify(productService).deleteProduct(NOT_EXIST_ID);
     }
+
+    @Test
+    void deleteWithInvalidAccessToken() throws Exception {
+        mockMvc.perform(
+                delete("/products/1")
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + INVALID_TOKEN)
+        )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void deleteWithoutAccessToken() throws Exception {
+        mockMvc.perform(
+                delete("/products/1")
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isUnauthorized());
+    }
 }
