@@ -33,14 +33,13 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
         String authorization = request.getHeader("Authorization");
 
-        if (authorization == null) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value());
-            return;
-        }
-
-        String accessToken = authorization.substring("Bearer ".length());
-
         try {
+            if (authorization == null) {
+                throw new InvalidTokenException("");
+            }
+
+            String accessToken = authorization.substring("Bearer ".length());
+
             authenticationService.parseToken(accessToken);
         } catch (InvalidTokenException e) {
             response.sendError(HttpStatus.UNAUTHORIZED.value());
