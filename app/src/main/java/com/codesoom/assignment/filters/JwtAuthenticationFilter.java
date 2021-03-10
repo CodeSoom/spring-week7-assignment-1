@@ -49,6 +49,12 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         chain.doFilter(request, response);
     }
 
+    /**
+     * 경로와 http method를 기준으로 필터한다.
+     *
+     * @param request
+     * @return boolean 필터 후 참/거짓 값
+     */
     private boolean filterWithPathAndMethod(HttpServletRequest request) {
         String path = request.getRequestURI();
         if (!path.startsWith("/products")) {
