@@ -38,7 +38,7 @@ public class ControllerErrorAdvice {
     public ErrorResponse handleLoginFailException() {
         return new ErrorResponse("Log-in failed");
     }
-    
+
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(AccessDeniedException.class)
     public ErrorResponse handleUserIdNotMatchException() {
