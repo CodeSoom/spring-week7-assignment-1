@@ -174,7 +174,7 @@ class UserControllerTest {
                         .andExpect(status().isOk());
             }
         }
-        
+
         @Nested
         @DisplayName("올바르지 않은 회원 수정 정보가 주어진다면")
         class Context_with_an_invalid_user_modification_data {
@@ -190,6 +190,21 @@ class UserControllerTest {
             }
         }
 
+        @Nested
+        @DisplayName("존재하지 않는 회원 id가 주어진다면")
+        class Context_with_not_existing_user_id {
+            @Test
+            @DisplayName("상태코드 403 Forbidden 를 응답한다.")
+            void it_responds_status_code_403() throws Exception {
+                mockMvc.perform(patch("/users/{id}", notExistingId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                        .content(objectMapper.writeValueAsString(validUserModificationData)))
+                        .andExpect(status().isForbidden());
+            }
+        }
+        
         @Nested
         @DisplayName("액세스 토큰이 유효 하지 않다면")
         class Context_with_invalid_access_token {
