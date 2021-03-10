@@ -36,6 +36,12 @@ public class User {
         name = source.name;
     }
 
+    /**
+     * 패스워드를 인코딩하고 저장합니다.
+     *
+     * @param password        변경할 패스워드
+     * @param passwordEncoder 패스워드 인코더
+     */
     public void changePassword(String password, PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(password);
     }
@@ -44,6 +50,13 @@ public class User {
         deleted = true;
     }
 
+    /**
+     * 로그인할 수 있는지 확인합니다.
+     *
+     * @param password 검증할 패스워드
+     * @param passwordEncoder 패스워드 인코더
+     * @return 검증 여부
+     */
     public boolean authenticate(String password, PasswordEncoder passwordEncoder) {
         return !deleted && passwordEncoder.matches(password, this.password);
     }
