@@ -28,11 +28,13 @@ class UserTest {
     @BeforeEach
     void setUp() {
         passwordEncoder = new BCryptPasswordEncoder();
+        String encodedPassword = passwordEncoder.encode(SETUP_PASSWORD);
 
         user = User.builder()
                 .id(SETUP_ID)
                 .name(SETUP_NAME)
                 .email(SETUP_EMAIL)
+                .password(encodedPassword)
                 .build();
     }
 
@@ -59,7 +61,7 @@ class UserTest {
             private final String givenName = UPDATE_NAME;
 
             @Test
-            @DisplayName("주어진 비밀번호로 해당 사용자의 이름을 수정한다")
+            @DisplayName("주어진 이름으로 해당 사용자의 이름을 수정한다")
             void itUpdatesPassword() {
                 assertThat(user.getName()).isEqualTo(SETUP_NAME);
 
@@ -76,22 +78,21 @@ class UserTest {
         @Nested
         @DisplayName("만약 비밀번호가 주어진다면")
         class Context_WithPassword {
-            private final String givenPassword = SETUP_PASSWORD;
+            private final String givenPassword = UPDATE_PASSWORD;
             private String encodedPassword;
 
             @BeforeEach
             void setUp() {
-                encodedPassword = passwordEncoder.encode(givenPassword);
+                encodedPassword = passwordEncoder.encode(SETUP_PASSWORD);
             }
 
             @Test
             @DisplayName("주어진 비밀번호로 해당 사용자의 비밀번호를 암호화한다")
-            void itUpdatesName() {
-                assertThat(user.getPassword()).isEqualTo(SETUP_NAME);
-
+            void itUpdatesPassword() {
                 user.updatePassword(givenPassword, passwordEncoder);
 
-                assertThat(user.getPassword()).isEqualTo(encodedPassword);
+                assertThat(user.getPassword()).isNotEmpty();
+                assertThat(user.getPassword()).isNotEqualTo(encodedPassword);
             }
         }
     }
@@ -133,11 +134,13 @@ class UserTest {
 
             @BeforeEach
             void setUp() {
+                String encodedPassword = passwordEncoder.encode(givenPassword);
+
                 deletedUser = User.builder()
                         .id(SETUP_ID)
                         .name(SETUP_NAME)
                         .email(SETUP_EMAIL)
-                        .password(SETUP_PASSWORD)
+                        .password(encodedPassword)
                         .deleted(true)
                         .build();
             }
@@ -150,96 +153,4 @@ class UserTest {
             }
         }
     }
-
-//    @Test
-//    void authenticate() {
-//        User user = User.builder()
-//                .password("test")
-//                .build();
-//
-//        assertThat(user.authenticate("test")).isTrue();
-//        assertThat(user.authenticate("xxx")).isFalse();
-//    }
-
-//    @Test
-//    void authenticateWithDeletedUser() {
-//        User user = User.builder()
-//                .password("test")
-//                .deleted(true)
-//                .build();
-//
-//        assertThat(user.authenticate("test")).isFalse();
-//        assertThat(user.authenticate("xxx")).isFalse();
-//    }
 }
-
-//package com.codesoom.assignment.domain;
-//
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//
-//import static org.assertj.core.api.Assertions.assertThat;
-//
-//class UserTest {
-//    private PasswordEncoder passwordEncoder;
-//
-//    @BeforeEach
-//    void setUp() {
-//        passwordEncoder = new BCryptPasswordEncoder();
-//    }
-//
-//    @Test
-//    void changeWith() {
-//        User user = User.builder().build();
-//
-//        user.updateName(User.builder()
-//                .name("TEST")
-//                .build());
-//
-//        assertThat(user.getName()).isEqualTo("TEST");
-//    }
-//
-//    @Test
-//    void changePassword() {
-//        User user = User.builder().build();
-//
-//        user.updatePassword("TEST", passwordEncoder);
-//
-//        assertThat(user.getPassword()).isNotEmpty();
-//        assertThat(user.getPassword()).isNotEqualTo("TEST");
-//    }
-//
-//    @Test
-//    void destroy() {
-//        User user = User.builder().build();
-//
-//        assertThat(user.isDeleted()).isFalse();
-//
-//        user.delete();
-//
-//        assertThat(user.isDeleted()).isTrue();
-//    }
-//
-//    @Test
-//    void authenticate() {
-//        User user = User.builder()
-//                .password("test")
-//                .build();
-//
-//        assertThat(user.authenticate("test", passwordEncoder)).isTrue();
-//        assertThat(user.authenticate("xxx", passwordEncoder)).isFalse();
-//    }
-//
-//    @Test
-//    void authenticateWithDeletedUser() {
-//        User user = User.builder()
-//                .password("test")
-//                .deleted(true)
-//                .build();
-//
-//        assertThat(user.authenticate("test", passwordEncoder)).isFalse();
-//        assertThat(user.authenticate("xxx", passwordEncoder)).isFalse();
-//    }
-//}
