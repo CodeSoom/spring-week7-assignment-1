@@ -36,6 +36,7 @@ class AuthenticationServiceTest {
                 userRepository, jwtUtil);
 
         User user = User.builder()
+                .id(1L)
                 .password("test")
                 .build();
 
