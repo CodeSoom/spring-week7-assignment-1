@@ -2,8 +2,11 @@ package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.errors.InvalidTokenException;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.codesoom.assignment.security.UserAuthentication;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -12,8 +15,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * Jwt 인증 필터.
+ */
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
-    @Autowired
     private final AuthenticationService authenticationService;
 
     // authenticationManager : Spring Security의 필터들이 인증을 수행하는 방법에 대한 명세를 정의해 놓은 인터페이스
@@ -30,40 +35,17 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                                     FilterChain chain)
             throws IOException, ServletException {
 
-        if (filterWithPathAndMethod(request)) {
-            return;
-        }
-
         String authorization = request.getHeader("Authorization");
 
-        // TODO : Exception으로 그대로 처리하자!
-        if (authorization == null) {
-            throw new InvalidTokenException("");
+        if (authorization != null) {
+            String accessToken = authorization.substring("Bearer ".length());
+            Long userId = authenticationService.parseToken(accessToken);
+            Authentication authentication = new UserAuthentication(userId);
+
+            // SecurityContextHolder : Spring Security의 인메모리 세션저장소
+            SecurityContext context = SecurityContextHolder.getContext();
+            context.setAuthentication(authentication);
         }
-
-        String accessToken = authorization.substring("Bearer ".length());
-
-        authenticationService.parseToken(accessToken);
-
         chain.doFilter(request, response);
     }
-
-        private boolean filterWithPathAndMethod(HttpServletRequest request) {
-            String path = request.getRequestURI();
-            if (!path.startsWith("/products")) {
-                return true;
-            }
-
-            String method = request.getMethod();
-            if (method.equals("GET")) {
-                return true;
-            }
-
-            if (method.equals("OPTIONS")) {
-                return true;
-            }
-
-            return false;
-        }
-
 }
