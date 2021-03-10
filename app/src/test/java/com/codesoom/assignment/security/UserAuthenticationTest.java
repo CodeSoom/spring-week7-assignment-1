@@ -14,5 +14,6 @@ class UserAuthenticationTest {
 
         assertThat(userAuthentication.getPrincipal()).isEqualTo(1L);
         assertThat(userAuthentication.getAuthorities()).isNotEmpty();
+        assertThat(userAuthentication.getCredentials()).isNull();
     }
 }
