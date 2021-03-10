@@ -44,4 +44,8 @@ public class User {
     public boolean authenticate(String password) {
         return !deleted && password.equals(this.password);
     }
+
+    public boolean checkMatchId(Long id) {
+        return this.id.equals(id);
+    }
 }
