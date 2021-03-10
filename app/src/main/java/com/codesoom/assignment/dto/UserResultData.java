@@ -1,6 +1,7 @@
 package com.codesoom.assignment.dto;
 
 import com.codesoom.assignment.domain.User;
+import com.github.dozermapper.core.Mapping;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -13,14 +14,19 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 public class UserResultData {
+    @Mapping("id")
     private Long id;
 
+    @Mapping("name")
     private String name;
 
+    @Mapping("email")
     private String email;
 
+    @Mapping("password")
     private String password;
 
+    @Mapping("deleted")
     private boolean deleted;
 
     @Builder
@@ -47,6 +53,16 @@ public class UserResultData {
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
+                .build();
+    }
+
+    public static UserResultData ofAll(User user) {
+        return UserResultData.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .deleted(user.isDeleted())
                 .build();
     }
 }

@@ -55,7 +55,7 @@ public class UserService {
         User user = userRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
-        return UserResultData.of(user);
+        return UserResultData.ofAll(user);
     }
 
     /**

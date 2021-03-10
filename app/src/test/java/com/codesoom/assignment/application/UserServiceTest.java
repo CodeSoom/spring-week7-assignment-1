@@ -37,10 +37,12 @@ class UserServiceTest {
     private static final String SETUP_USER_NAME = "setUpName";
     private static final String EXISTED_USER_EMAIL = "setUpEmail";
     private static final String SETUP_USER_PASSWORD = "setUpPassword";
+    private String setUpEncodedPassword;
 
     private static final String CREATE_USER_NAME = "createdName";
     private static final String CREATE_USER_EMAIL = "createdEmail";
     private static final String CREATE_USER_PASSWORD = "createdPassword";
+    private String createEncodedPassword;
 
     private static final String UPDATE_USER_NAME = "updatedName";
     private static final String UPDATE_USER_PASSWORD = "updatedPassword";
@@ -64,19 +66,21 @@ class UserServiceTest {
         userRepository = mock(UserRepository.class);
         passwordEncoder = new BCryptPasswordEncoder();
         userService = new UserService(mapper, userRepository, passwordEncoder);
+        setUpEncodedPassword = passwordEncoder.encode(SETUP_USER_PASSWORD);
+        createEncodedPassword = passwordEncoder.encode(CREATE_USER_PASSWORD);
 
         setUpUser = User.builder()
                 .id(EXISTED_ID)
                 .name(SETUP_USER_NAME)
                 .email(EXISTED_USER_EMAIL)
-                .password(SETUP_USER_PASSWORD)
+                .password(setUpEncodedPassword)
                 .build();
 
         createUser = User.builder()
                 .id(CREATE_ID)
                 .name(CREATE_USER_NAME)
                 .email(CREATE_USER_EMAIL)
-                .password(CREATE_USER_PASSWORD)
+                .password(createEncodedPassword)
                 .build();
 
         users = Arrays.asList(setUpUser, createUser);
@@ -188,7 +192,6 @@ class UserServiceTest {
                 assertThat(createdUser.getId()).isEqualTo(createUser.getId());
                 assertThat(createdUser.getName()).isEqualTo(userCreateData.getName());
                 assertThat(createdUser.getEmail()).isEqualTo(userCreateData.getEmail());
-                assertThat(createdUser.getPassword()).isEqualTo(userCreateData.getPassword());
 
                 verify(userRepository).save(any(User.class));
             }
@@ -250,7 +253,6 @@ class UserServiceTest {
                 assertThat(updatedUser.getId()).isEqualTo(givenExistedId);
                 assertThat(updatedUser.getName()).isEqualTo(userUpdateData.getName());
                 assertThat(updatedUser.getEmail()).isEqualTo(EXISTED_USER_EMAIL);
-                assertThat(updatedUser.getPassword()).isEqualTo(userUpdateData.getPassword());
 
                 verify(userRepository).findByIdAndDeletedIsFalse(givenExistedId);
             }
@@ -327,9 +329,11 @@ class UserServiceTest {
                 given(userRepository.findByIdAndDeletedIsFalse(givenExistedId)).willReturn(Optional.of(setUpUser));
 
                 UserResultData userResultData = userService.deleteUser(givenExistedId);
+                User deletedUser = userResultData.toEntity();
+                deletedUser.delete();
 
-                assertThat(userResultData.getId()).isEqualTo(setUpUser.getId());
-                assertThat(userResultData.isDeleted()).isTrue();
+                assertThat(deletedUser.getId()).isEqualTo(setUpUser.getId());
+                assertThat(deletedUser.isDeleted()).isTrue();
 
                 verify(userRepository).findByIdAndDeletedIsFalse(givenExistedId);
             }
