@@ -1,7 +1,12 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.dto.ErrorResponse;
-import com.codesoom.assignment.errors.*;
+import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.errors.LoginFailException;
+import com.codesoom.assignment.errors.ProductNotFoundException;
+import com.codesoom.assignment.errors.UserEmailDuplicationException;
+import com.codesoom.assignment.errors.UserIdNotMatchException;
+import com.codesoom.assignment.errors.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -62,5 +67,11 @@ public class ControllerErrorAdvice {
             messageTemplate = violation.getMessageTemplate();
         }
         return messageTemplate;
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(UserIdNotMatchException.class)
+    public ErrorResponse handleUserIdNotMatchnException() {
+        return new ErrorResponse("User Not matched");
     }
 }

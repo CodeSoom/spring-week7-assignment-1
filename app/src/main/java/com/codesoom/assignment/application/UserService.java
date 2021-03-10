@@ -5,8 +5,10 @@ import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
+import com.codesoom.assignment.errors.UserIdNotMatchException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.Mapper;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,8 +42,13 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(Long id, UserModificationData modificationData) {
+    public User updateUser(Authentication authentication, Long id, UserModificationData modificationData) {
         final User user = findUser(id);
+        Long userDetailId = (Long) authentication.getPrincipal();
+
+        if (!user.checkMatchId(userDetailId)) {
+            throw new UserIdNotMatchException(userDetailId);
+        }
         final String encodedPassword = passwordEncoder.encode(modificationData.getPassword());
         final User source = User.of(modificationData.getName(), encodedPassword);
 
