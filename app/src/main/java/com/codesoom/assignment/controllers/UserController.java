@@ -5,7 +5,6 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
-import com.codesoom.assignment.errors.UserAuthenticationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -39,15 +38,12 @@ public class UserController {
     }
 
     @PatchMapping("{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and #id == authentication.principal")
     UserResultData update(
             @PathVariable Long id,
             @RequestBody @Valid UserModificationData modificationData,
             Authentication authentication
     ) {
-        if (!authentication.getPrincipal().equals(id)) {
-            throw new UserAuthenticationException("자신의 계정만 접근 할 수 있습니다.");
-        }
         User user = userService.updateUser(id, modificationData);
         return getUserResultData(user);
     }
