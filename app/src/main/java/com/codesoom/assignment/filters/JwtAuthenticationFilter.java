@@ -1,5 +1,7 @@
 package com.codesoom.assignment.filters;
 
+import com.codesoom.assignment.application.AuthenticationService;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -10,8 +12,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+    private final AuthenticationService authenticationService;
+
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager,
+                                   AuthenticationService authenticationService) {
         super(authenticationManager);
+        this.authenticationService = authenticationService;
     }
 
     @Override
@@ -19,7 +25,16 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws IOException, ServletException {
-        // TODO: authentication
+        String authorization = request.getHeader("Authorization");
+
+        if (authorization == null) {
+            // TODO: exception으로 변경
+            response.sendError(HttpStatus.UNAUTHORIZED.value());
+            return;
+        }
+
+        String accessToken = authorization.substring("Bearer ".length());
+        authenticationService.parseToken(accessToken);
 
         chain.doFilter(request, response);
     }
