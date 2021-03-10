@@ -8,7 +8,10 @@ import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -17,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/products")
 @CrossOrigin
+@Slf4j
 public class ProductController {
     private final ProductService productService;
 
@@ -40,16 +44,19 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     public Product create(
-            @RequestAttribute Long userId,
+            Authentication authentication,
             @RequestBody @Valid ProductData productData
     ) {
+        log.info("authentication 확인 *********************** : " + authentication);
         return productService.createProduct(productData);
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     public Product update(
-            @RequestAttribute Long userId,
+            Authentication authentication,
             @PathVariable Long id,
             @RequestBody @Valid ProductData productData
     ) {
@@ -57,9 +64,10 @@ public class ProductController {
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void destroy(
-            @RequestAttribute Long userId,
+            Authentication authentication,
             @PathVariable Long id
     ) {
         productService.deleteProduct(id);
