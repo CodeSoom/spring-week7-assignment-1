@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import static java.util.function.Predicate.not;
 
+/**
+ * 사용자 인증을 처리한다.
+ */
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
@@ -25,7 +28,15 @@ public class AuthenticationService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public String login(String email, String password) {
+    /**
+     * 회원의 로그인을 처리하고, 인증 토큰을 리턴합니다.
+     *
+     * @param email 회원 이메일
+     * @param password 회원 비밀번호
+     * @return 인증 토큰
+     * @throws LoginFailException 로그인 실패한 경우
+     */
+    public String login(String email, String password) throws LoginFailException {
         final User user = userRepository.findByEmail(email)
                 .filter(not(User::isDeleted))
                 .orElseThrow(() -> new LoginFailException(email));
@@ -37,6 +48,11 @@ public class AuthenticationService {
         return jwtUtil.encode(user.getId());
     }
 
+    /**
+     * 토큰을 파싱하여 사용자 식별자를 리턴한다.
+     * @param accessToken 인증 토큰
+     * @return 사용자 식별자
+     */
     public Long parseToken(String accessToken) {
         Claims claims = jwtUtil.decode(accessToken);
         return claims.get("userId", Long.class);

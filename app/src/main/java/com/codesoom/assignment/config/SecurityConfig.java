@@ -15,6 +15,9 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 import javax.servlet.Filter;
 
+/**
+ * Spring Security 설정.
+ */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
@@ -28,7 +31,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         Filter authenticationErrorFilter = new AuthenticationErrorFilter();
 
         http
-                .csrf().disable()
+                .csrf()
+                .disable()
                 .addFilter(authenticationFilter)
                 .addFilterBefore(authenticationErrorFilter,
                         JwtAuthenticationFilter.class)
