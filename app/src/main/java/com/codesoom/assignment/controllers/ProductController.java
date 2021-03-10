@@ -42,7 +42,7 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     public Product create(
             @RequestAttribute Long userId,
             @RequestBody @Valid ProductData productData,
@@ -52,6 +52,7 @@ public class ProductController {
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     public Product update(
             @RequestAttribute Long userId,
             @PathVariable Long id,
@@ -62,6 +63,7 @@ public class ProductController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("isAuthenticated()")
     public void destroy(
             @RequestAttribute Long userId,
             @PathVariable Long id
