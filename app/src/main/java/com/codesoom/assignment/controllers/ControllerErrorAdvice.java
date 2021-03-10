@@ -69,6 +69,7 @@ public class ControllerErrorAdvice {
         return messageTemplate;
     }
 
+    @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(AccessDeniedException.class)
     public ErrorResponse handleUserIdNotMatchException() {

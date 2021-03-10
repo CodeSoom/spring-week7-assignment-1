@@ -5,6 +5,7 @@ import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.AccessDeniedException;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,8 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
-    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9." +
+            "ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
 
@@ -69,11 +70,13 @@ class UserControllerTest {
                 .name("TEST")
                 .build();
 
-        given(userService.updateUser(any(Authentication.class), eq(1L), any(UserModificationData.class)))
+        given(userService.updateUser(
+                any(Authentication.class), eq(1L), any(UserModificationData.class)))
                 .willReturn(user);
 
 
-        given(userService.updateUser(any(Authentication.class), eq(100L), any(UserModificationData.class)))
+        given(userService.updateUser(
+                any(Authentication.class), eq(100L), any(UserModificationData.class)))
                 .willThrow(new UserNotFoundException(100L));
 
         given(userService.deleteUser(100L))
@@ -81,10 +84,15 @@ class UserControllerTest {
 
         SecurityContextHolder.setContext(securityContext);
 
-        given(authenticationService.parseToken(VALID_TOKEN)).willReturn(1L);
+        given(authenticationService.parseToken(VALID_TOKEN))
+                .willReturn(1L);
 
         given(authenticationService.parseToken(INVALID_TOKEN))
                 .willThrow(new InvalidTokenException(INVALID_TOKEN));
+
+        given(userService.updateUser(
+                any(Authentication.class), eq(999L), any(UserModificationData.class)))
+                .willThrow(new AccessDeniedException(999L));
     }
 
     @Test
@@ -145,6 +153,17 @@ class UserControllerTest {
                         .header("Authorization", "Bearer " + INVALID_TOKEN)
         )
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void updateUserWithAccessDeniedToken() throws Exception {
+        mockMvc.perform(
+                patch("/users/999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+        )
+                .andExpect(status().isForbidden());
     }
 
     @Test
