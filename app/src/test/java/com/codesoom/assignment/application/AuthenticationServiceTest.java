@@ -63,12 +63,15 @@ class AuthenticationServiceTest {
             private final String givenExistedEmail = EXISTED_EMAIL;
             private final String givenExistedPassword = EXISTED_PASSWORD;
             private User user;
+            private String encodedPassword;
 
             @BeforeEach
             void setUp() {
+                encodedPassword = passwordEncoder.encode(givenExistedPassword);
+
                 user = User.builder()
                         .email(EXISTED_EMAIL)
-                        .password(EXISTED_PASSWORD)
+                        .password(encodedPassword)
                         .build();
             }
 
@@ -80,7 +83,6 @@ class AuthenticationServiceTest {
                 UserResultData userResultData = authenticationService.authenticateUser(givenExistedEmail, givenExistedPassword);
 
                 assertThat(userResultData.getEmail()).isEqualTo(user.getEmail());
-                assertThat(userResultData.getPassword()).isEqualTo(user.getPassword());
             }
         }
 
@@ -137,10 +139,13 @@ class AuthenticationServiceTest {
         class Context_WithExistedUser {
             private AuthenticationCreateData givenUser;
             private SessionResultData sessionResultData;
+            private String encodedPassword;
             private User user;
 
             @BeforeEach
             void setUp() {
+                encodedPassword = passwordEncoder.encode(EXISTED_PASSWORD);
+
                 givenUser = AuthenticationCreateData.builder()
                         .email(EXISTED_EMAIL)
                         .password(EXISTED_PASSWORD)
@@ -148,7 +153,7 @@ class AuthenticationServiceTest {
 
                 user = User.builder()
                         .email(EXISTED_EMAIL)
-                        .password(EXISTED_PASSWORD)
+                        .password(encodedPassword)
                         .build();
 
                 sessionResultData = SessionResultData.from(EXISTED_TOKEN);
