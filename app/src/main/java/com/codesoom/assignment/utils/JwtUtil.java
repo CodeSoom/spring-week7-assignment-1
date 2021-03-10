@@ -1,4 +1,4 @@
-package com.codesoom.assignment.util;
+package com.codesoom.assignment.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

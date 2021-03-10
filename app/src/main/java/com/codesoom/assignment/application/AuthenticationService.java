@@ -7,6 +7,7 @@ import com.codesoom.assignment.dto.SessionResultData;
 import com.codesoom.assignment.dto.UserResultData;
 import com.codesoom.assignment.errors.AuthenticationBadRequestException;
 import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.security.SignatureException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,11 +16,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
-    private final com.codesoom.assignment.util.JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 
     public AuthenticationService(UserRepository userRepository,
-                                 com.codesoom.assignment.util.JwtUtil jwtUtil,
+                                 JwtUtil jwtUtil,
                                  PasswordEncoder passwordEncoder
                                  ) {
         this.userRepository = userRepository;
