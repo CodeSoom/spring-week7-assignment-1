@@ -11,7 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import javax.servlet.Filter;
 
 /**
- * Spring Security에 대한 설정
+ * Spring Security 설정.
  */
 @Configuration
 public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
