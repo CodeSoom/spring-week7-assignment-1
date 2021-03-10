@@ -170,6 +170,8 @@ class UserServiceTest {
 
     @Test
     void updateUserWithDeletedId() {
+        given(authentication.getPrincipal()).willReturn(DELETED_USER_ID);
+
         UserModificationData modificationData = UserModificationData.builder()
                 .name(MODIFIED_NAME)
                 .password(MODIFIED_PASSWORD)

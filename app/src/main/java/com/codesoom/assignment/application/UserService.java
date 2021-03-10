@@ -43,12 +43,12 @@ public class UserService {
     }
 
     public User updateUser(Authentication authentication, Long id, UserModificationData modificationData) {
-        final User user = findUser(id);
         Long userDetailId = (Long) authentication.getPrincipal();
-
-        if (!user.checkMatchId(userDetailId)) {
+        if (!id.equals(userDetailId)) {
             throw new AccessDeniedException(userDetailId);
         }
+        final User user = findUser(id);
+
         final String encodedPassword = passwordEncoder.encode(modificationData.getPassword());
         final User source = User.of(modificationData.getName(), encodedPassword);
 
