@@ -4,8 +4,8 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.AccessDeniedException;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
-import com.codesoom.assignment.errors.UserIdNotMatchException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
@@ -151,7 +151,7 @@ class UserServiceTest {
                 .build();
 
         assertThatThrownBy(() -> userService.updateUser(authentication, USER2_ID, modificationData))
-                .isInstanceOf(UserIdNotMatchException.class);
+                .isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
