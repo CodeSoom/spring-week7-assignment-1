@@ -43,10 +43,7 @@ public class UserService {
     public User updateUser(Long id, UserModificationData modificationData) {
         final User user = findUser(id);
         final String encodedPassword = passwordEncoder.encode(modificationData.getPassword());
-        final User source = User.builder()
-                .name(modificationData.getName())
-                .password(encodedPassword)
-                .build();
+        final User source = User.of(modificationData.getName(), encodedPassword);
 
         user.changeWith(source);
 

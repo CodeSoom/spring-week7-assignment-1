@@ -32,6 +32,14 @@ public class User {
     @Builder.Default
     private boolean deleted = false;
 
+    public static User of(String name, String password) {
+        return User.builder()
+                .name(name)
+                .password(password)
+                .deleted(false)
+                .build();
+    }
+
     public void changeWith(User source) {
         name = source.name;
         password = source.password;

@@ -9,10 +9,7 @@ class UserTest {
     void changeWith() {
         User user = User.builder().build();
 
-        user.changeWith(User.builder()
-                .name("TEST")
-                .password("TEST")
-                .build());
+        user.changeWith(User.of("TEST", "TEST"));
 
         assertThat(user.getName()).isEqualTo("TEST");
         assertThat(user.getPassword()).isEqualTo("TEST");
