@@ -11,7 +11,8 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 /**
- * data를 가져와 가공한다.
+ * controller에서 데이터를 가져와 사용자 입력에 따라
+ * data를 가공한다.
  */
 @Service
 @Transactional

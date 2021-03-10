@@ -8,7 +8,6 @@ import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Service;
 
 /**
- *
  * 사용자 인증을 담당한다.
  */
 @Service
@@ -23,13 +22,12 @@ public class AuthenticationService {
     }
 
     /**
-     * 주어진 회원의 email과 password를 처리하고
-     * 토큰을 리턴합니다.
+     * 회원의 로그인을 처리하고, 엑세스 토큰 문자열을 리턴합니다.
      *
      * @param email
      * @param password
      * @return accessToken
-     * @throws LoginFailException Email이 등록되지 않은 email일때
+     * @throws LoginFailException 로그인에 실패했을 경우
      */
     public String login(String email, String password) {
         User user = userRepository.findByEmail(email)
