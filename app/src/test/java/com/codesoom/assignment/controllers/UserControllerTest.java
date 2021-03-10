@@ -135,7 +135,7 @@ class UserControllerTest {
 
             @Test
             @DisplayName("에러메시지와 상태코드 400 Bad Request 를 응답한다.")
-            void it_responds_the_error_message_and_status_code_409() throws Exception {
+            void it_responds_the_error_message_and_status_code_400() throws Exception {
                 mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -174,13 +174,13 @@ class UserControllerTest {
                         .andExpect(status().isOk());
             }
         }
-
+        
         @Nested
         @DisplayName("올바르지 않은 회원 수정 정보가 주어진다면")
         class Context_with_an_invalid_user_modification_data {
             @Test
             @DisplayName("상태코드 400 Bad Request 를 응답한다.")
-            void it_responds_the_error_message_and_status_code_404() throws Exception {
+            void it_responds_the_error_message_and_status_code_400() throws Exception {
                 mockMvc.perform(patch("/users/{id}", existingId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -195,7 +195,7 @@ class UserControllerTest {
         class Context_with_invalid_access_token {
             @Test
             @DisplayName("상태코드 403 Forbidden 를 응답한다.")
-            void it_responds_status_code_401() throws Exception {
+            void it_responds_status_code_403() throws Exception {
                 mockMvc.perform(patch("/users/{id}", existingId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
