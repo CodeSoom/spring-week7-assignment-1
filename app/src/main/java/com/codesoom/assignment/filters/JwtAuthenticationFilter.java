@@ -18,6 +18,9 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     private final AuthenticationService authenticationService;
 
+    private static final String TOKEN_KEY = "Authorization";
+    private static final String PREFIX = "Bearer ";
+
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager,
                                    AuthenticationService authenticationService) {
         super(authenticationManager);
@@ -29,10 +32,10 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws IOException, ServletException {
-        String authorization = request.getHeader("Authorization");
-        
+        String authorization = request.getHeader(TOKEN_KEY);
+
         if (authorization != null) {
-            String accessToken = authorization.substring("Bearer ".length());
+            String accessToken = authorization.substring(PREFIX.length());
             Long userId = authenticationService.parseToken(accessToken);
             Authentication authentication = new UserAuthentication(userId);
 
