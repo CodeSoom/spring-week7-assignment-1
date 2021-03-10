@@ -33,9 +33,8 @@ public class ProductService {
      * @return 저장되어 있는 전체 상품 목록
      */
     public List<ProductResultData> getProducts() {
-        List<Product> products = productRepository.findAll();
-
-        return products.stream()
+        return productRepository.findAll()
+                .stream()
                 .map(ProductResultData::of)
                 .collect(Collectors.toList());
     }
@@ -49,10 +48,9 @@ public class ProductService {
      *         주어진 {@code id}에 해당되는 상품이 저장되어 있지 않은 경우
      */
     public ProductResultData getProduct(Long id) {
-        Product product =  productRepository.findById(id)
+        return  productRepository.findById(id)
+                .map(ProductResultData::of)
                 .orElseThrow(() -> new ProductNotFoundException(id));
-
-        return ProductResultData.of(product);
     }
 
     /**

@@ -36,9 +36,8 @@ public class UserService {
      * @return 저장되어 있는 전체 사용자 목록
      */
     public List<UserResultData> getUsers() {
-        List<User> users =  userRepository.findAll();
-
-        return users.stream()
+        return userRepository.findAll()
+                .stream()
                 .map(UserResultData::of)
                 .collect(Collectors.toList());
     }
@@ -49,13 +48,12 @@ public class UserService {
      * @param id - 조회하려는 사용자의 식별자
      * @return 주어진 {@code id}에 해당하는 사용자
      * @throws UserNotFoundException 만약
-     *         {@code id}에 해당되는 사용자가 저장되어 있지 않은 경우
+     *         주어진 {@code id}에 해당되는 사용자가 저장되어 있지 않은 경우
      */
     public UserResultData getUser(Long id) {
-        User user = userRepository.findByIdAndDeletedIsFalse(id)
+        return userRepository.findByIdAndDeletedIsFalse(id)
+                .map(UserResultData::ofAll)
                 .orElseThrow(() -> new UserNotFoundException(id));
-
-        return UserResultData.ofAll(user);
     }
 
     /**
@@ -86,13 +84,13 @@ public class UserService {
      * @param userUpdateData - 수정 할 새로운 사용자
      * @return 수정 된 사용자
      * @throws UserNotFoundException 만약
-     *         {@code id}에 해당되는 사용자가 저장되어 있지 않은 경우
+     *         주어진 {@code id}에 해당되는 사용자가 저장되어 있지 않은 경우
      */
     public UserResultData updateUser(Long id, UserUpdateData userUpdateData) {
         UserResultData userResultData = getUser(id);
 
         User updatedUser = mapper.map(userResultData, User.class);
-        updatedUser.updateName(userResultData.getName());
+        updatedUser.updateName(userUpdateData.getName());
         updatedUser.updatePassword(userUpdateData.getPassword(), passwordEncoder);
 
         return UserResultData.of(updatedUser);
@@ -109,9 +107,10 @@ public class UserService {
     public UserResultData deleteUser(Long id) {
         UserResultData userResultData = getUser(id);
 
-        User deleteUser = userResultData.toEntity();
+        User deleteUser = mapper.map(userResultData, User.class);
         deleteUser.delete();
 
-        return UserResultData.of(deleteUser);
+
+        return UserResultData.ofAll(deleteUser);
     }
 }
