@@ -49,4 +49,16 @@ class UserTest {
         assertThat(user.authenticate("test")).isFalse();
         assertThat(user.authenticate("xxx")).isFalse();
     }
+
+    @Test
+    void checkIdMatch() {
+        User user = User.builder()
+                .id(1L)
+                .build();
+        Long givenId = 1L;
+        Long wrongId = 2L;
+
+        assertThat(user.checkMatchId(givenId)).isTrue();
+        assertThat(user.checkMatchId(wrongId)).isFalse();
+    }
 }
