@@ -234,8 +234,9 @@ class ProductControllerTest {
                         .header("Authorization", "Bearer " + EXISTED_TOKEN)
                         .content("{\"name\":\"\" , \"maker\":\"createdMaker\", \"price\":200, \"imageUrl\":\"createdImage\"}"))
                         .andDo(print())
-                        .andExpect(status().isBadRequest())
-                        .andExpect(content().string(containsString("name 값은 필수입니다")));
+//                        .andExpect(content().string(containsString("Product bad request")))
+                        .andExpect(status().isBadRequest());
+
             }
         }
 
@@ -253,8 +254,9 @@ class ProductControllerTest {
                         .header("Authorization", "Bearer " + EXISTED_TOKEN)
                         .content("{\"name\":\"createdName\" , \"maker\":\"\", \"price\":200, \"imageUrl\":\"createdImage\"}"))
                         .andDo(print())
-                        .andExpect(status().isBadRequest())
-                        .andExpect(content().string(containsString("maker 값은 필수입니다")));
+//                        .andExpect(content().string(containsString("Product bad request")))
+                        .andExpect(status().isBadRequest());
+
             }
         }
 
@@ -269,10 +271,10 @@ class ProductControllerTest {
 
                 mockMvc.perform(post("/products")
                         .contentType(MediaType.APPLICATION_JSON)
-                        //.header("Authorization", "Bearer " + EXISTED_TOKEN)
+                        .header("Authorization", "Bearer " + EXISTED_TOKEN)
                         .content("{\"name\":\"createdName\" , \"maker\":\"createdMaker\", \"price\": null, \"imageUrl\":\"createdImage\"}"))
                         .andDo(print())
-                        //.andExpect(content().string(containsString("price 값은 필수입니다")))
+//                        .andExpect(content().string(containsString("Product bad request")))
                         .andExpect(status().isBadRequest());
 
             }
@@ -294,7 +296,7 @@ class ProductControllerTest {
                         .header("Authorization", "Bearer " + givenNotExistedToken)
                         .content("{\"name\":\"createdName\" , \"maker\":\"createdMaker\", \"price\":200, \"imageUrl\":\"createdImage\"}"))
                         .andDo(print())
-                        //.andExpect(content().string(containsString("Invalid token")))
+//                        .andExpect(content().string(containsString("Invalid token")))
                         .andExpect(status().isUnauthorized());
 
             }
@@ -394,8 +396,9 @@ class ProductControllerTest {
                         .header("Authorization", "Bearer " + EXISTED_TOKEN)
                         .content("{\"name\":\"\" , \"maker\":\"updatedMaker\", \"price\":300, \"imageUrl\":\"updatedImage\"}"))
                         .andDo(print())
-                        .andExpect(status().isBadRequest())
-                        .andExpect(content().string(containsString("name 값은 필수입니다")));
+//                        .andExpect(content().string(containsString("Product bad request")))
+                        .andExpect(status().isBadRequest());
+
             }
         }
 
@@ -415,8 +418,9 @@ class ProductControllerTest {
                         .header("Authorization", "Bearer " + EXISTED_TOKEN)
                         .content("{\"name\":\"updatedName\" , \"maker\":\"\", \"price\":300, \"imageUrl\":\"updatedImage\"}"))
                         .andDo(print())
-                        .andExpect(status().isBadRequest())
-                        .andExpect(content().string(containsString("maker 값은 필수입니다")));
+//                        .andExpect(content().string(containsString("Product bad request")))
+                        .andExpect(status().isBadRequest());
+
             }
         }
 
@@ -436,8 +440,9 @@ class ProductControllerTest {
                         .header("Authorization", "Bearer " + EXISTED_TOKEN)
                         .content("{\"name\":\"updatedName\" , \"maker\":\"updatedMaker\", \"price\": null, \"imageUrl\":\"updatedImage\"}"))
                         .andDo(print())
-                        .andExpect(status().isBadRequest())
-                        .andExpect(content().string(containsString("price 값은 필수입니다")));
+//                        .andExpect(content().string(containsString("Product bad request")))
+                        .andExpect(status().isBadRequest());
+
             }
         }
 
@@ -458,7 +463,7 @@ class ProductControllerTest {
                         .header("Authorization", "Bearer " + givenNotExistedToken)
                         .content("{\"name\":\"updatedName\" , \"maker\":\"updatedMaker\", \"price\":300, \"imageUrl\":\"updatedImage\"}"))
                         .andDo(print())
-                        //.andExpect(content().string(containsString("Invalid token")))
+//                        .andExpect(content().string(containsString("Invalid token")))
                         .andExpect(status().isUnauthorized());
             }
         }
@@ -499,20 +504,6 @@ class ProductControllerTest {
             }
         }
 
-        @Test
-        void destroyWithNotExistedProduct() throws Exception {
-            given(productService.deleteProduct(1000L))
-                    .willThrow(new ProductNotFoundException(1000L));
-
-            mockMvc.perform(
-                    delete("/products/1000")
-                            .header("Authorization", "Bearer " + EXISTED_TOKEN)
-            )
-                    .andExpect(status().isNotFound());
-
-            verify(productService).deleteProduct(1000L);
-        }
-
         @Nested
         @DisplayName("만약 저장되어 있지 않은 상품의 아이디가 주어진다면")
         class Context_WithNotExistedId {
@@ -527,12 +518,13 @@ class ProductControllerTest {
             @Test
             @DisplayName("상품을 찾을 수 없다는 예외를 던지고 NOT_FOUND를 리턴한다")
             void itThrowsProductNotFoundMessageAndReturnsNOT_FOUNDHttpStatus() throws Exception {
-//                given(authenticationService.parseToken(EXISTED_TOKEN)).willReturn()
+                given(productService.deleteProduct(givenNotExistedId))
+                        .willThrow(new ProductNotFoundException(givenNotExistedId));
 
                 mockMvc.perform(delete("/products/" + givenNotExistedId)
                         .header("Authorization", "Bearer " + EXISTED_TOKEN))
                         .andDo(print())
-                        .andExpect(content().string(containsString("Product not found")))
+//                        .andExpect(content().string(containsString("Product not found")))
                         .andExpect(status().isNotFound());
 
                 verify(productService).deleteProduct(givenNotExistedId);
