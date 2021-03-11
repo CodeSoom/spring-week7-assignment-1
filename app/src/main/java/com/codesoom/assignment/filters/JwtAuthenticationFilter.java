@@ -1,7 +1,7 @@
 package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
-import org.springframework.http.HttpStatus;
+import com.codesoom.assignment.errors.InvalidTokenException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -25,17 +25,35 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws IOException, ServletException {
-        String authorization = request.getHeader("Authorization");
-
-        if (authorization == null) {
-            // TODO: exception으로 변경
-            response.sendError(HttpStatus.UNAUTHORIZED.value());
+        if (filterWithPathAndMethod(request)) {
+            chain.doFilter(request, response);
             return;
         }
 
+        String authorization = request.getHeader("Authorization");
+
+        if (authorization == null) {
+            throw new InvalidTokenException("");
+        }
+
         String accessToken = authorization.substring("Bearer ".length());
+
         authenticationService.parseToken(accessToken);
 
         chain.doFilter(request, response);
+    }
+
+    private boolean filterWithPathAndMethod(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        if (!path.startsWith("/products")) {
+            return true;
+        }
+
+        String method = request.getMethod();
+        if (method.equals("GET")) {
+            return true;
+        }
+
+        return false;
     }
 }
