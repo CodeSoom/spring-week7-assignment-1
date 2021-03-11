@@ -169,7 +169,6 @@ public class ProductControllerTest {
     void createWithInvalidAttributes() throws Exception {
         mockMvc.perform(
                 post("/products")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidAttributes))
                         .header("Authorization", "Bearer " + VALID_TOKEN)
@@ -210,7 +209,6 @@ public class ProductControllerTest {
     void createWithoutAccessToken() throws Exception {
         mockMvc.perform(
                 post("/products")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(product))
         )
@@ -221,7 +219,6 @@ public class ProductControllerTest {
     void updateWithExistedProduct() throws Exception {
         mockMvc.perform(
                 patch("/products/1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updated))
                         .header("Authorization", "Bearer " + VALID_TOKEN)
@@ -239,7 +236,6 @@ public class ProductControllerTest {
     void updateWithNotExistedProduct() throws Exception {
         mockMvc.perform(
                 patch("/products/100")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updated))
                         .header("Authorization", "Bearer " + VALID_TOKEN)
@@ -253,7 +249,6 @@ public class ProductControllerTest {
     void updateWithInvalidAttributes() throws Exception {
         mockMvc.perform(
                 patch("/products/1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidAttributes))
                         .header("Authorization", "Bearer " + VALID_TOKEN)
@@ -265,7 +260,6 @@ public class ProductControllerTest {
     void updateWithInvalidAccessToken() throws Exception {
         mockMvc.perform(
                 patch("/products/1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updated))
                         .header("Authorization", "Bearer " + INVALID_TOKEN)
@@ -277,7 +271,6 @@ public class ProductControllerTest {
     void updateWithoutAccessToken() throws Exception {
         mockMvc.perform(
                 patch("/products/1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updated))
         )
@@ -308,7 +301,6 @@ public class ProductControllerTest {
     void deleteWithInvalidAccessToken() throws Exception {
         mockMvc.perform(
                 delete("/products/1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + INVALID_TOKEN)
         )
@@ -319,7 +311,6 @@ public class ProductControllerTest {
     void deleteWithoutAccessToken() throws Exception {
         mockMvc.perform(
                 delete("/products/1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isUnauthorized());
