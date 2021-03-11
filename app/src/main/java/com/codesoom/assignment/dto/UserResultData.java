@@ -48,15 +48,15 @@ public class UserResultData {
             .build();
     }
 
-    public static UserResultData of(User user) {
+    public static UserResultData from(Long id, String name, String email) {
         return UserResultData.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
+                .id(id)
+                .name(name)
+                .email(email)
                 .build();
     }
 
-    public static UserResultData ofAll(User user) {
+    public static UserResultData of(User user) {
         return UserResultData.builder()
                 .id(user.getId())
                 .name(user.getName())

@@ -31,7 +31,7 @@ public class AuthenticationService {
      *
      * @param email - 조회하고자 하는 사용자 이메일
      * @param password - 조회하고자 하는 사용자 비밀번호
-     * @return 주어진 {@code email}에 해당하는 사용자
+     * @return 주어진 {@code email}, {@code password}에 해당하는 사용자
      * @throws AuthenticationBadRequestException 만약
      *         {@code email}에 해당되는 사용자가 저장되어 있지 않은 경우
      *         {@code email}에 해당하는 사용자가 저장되어 있지만 {@code password}이 다른 경우
@@ -40,7 +40,7 @@ public class AuthenticationService {
     public UserResultData authenticateUser(String email, String password) {
         return userRepository.findByEmail(email)
                 .filter(u -> u.authenticate(password, passwordEncoder))
-                .map(UserResultData::ofAll)
+                .map(UserResultData::of)
                 .orElseThrow(AuthenticationBadRequestException::new);
     }
 
