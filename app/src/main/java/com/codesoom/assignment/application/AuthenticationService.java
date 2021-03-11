@@ -57,7 +57,7 @@ public class AuthenticationService {
 
         String accessToken = jwtUtil.encode(userResultData.getEmail());
 
-        return SessionResultData.from(accessToken);
+        return SessionResultData.of(accessToken);
     }
 
     /**

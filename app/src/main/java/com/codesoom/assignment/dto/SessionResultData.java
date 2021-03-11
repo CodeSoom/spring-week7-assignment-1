@@ -19,7 +19,7 @@ public class SessionResultData {
         this.accessToken = accessToken;
     }
 
-    public static SessionResultData from(String accessToken) {
+    public static SessionResultData of(String accessToken) {
         return SessionResultData.builder()
                 .accessToken(accessToken)
                 .build();
