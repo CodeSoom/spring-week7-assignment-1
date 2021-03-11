@@ -6,7 +6,6 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,7 +61,7 @@ public class UserController {
      */
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PostAuthorize("isAuthenticated() and #id == authentication.principal")
+    @PreAuthorize("isAuthenticated()")
     void destroy(@PathVariable Long id) {
         userService.deleteUser(id);
     }

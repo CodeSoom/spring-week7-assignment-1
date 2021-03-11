@@ -167,11 +167,11 @@ class UserControllerTest {
     }
 
     @Test
-    void destroyWithAnotherUserId() throws Exception {
+    void destroyWithInvalidAccessToken() throws Exception {
         mockMvc.perform(
                 delete("/users/101")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                        .header("Authorization", "Bearer " + INVALID_TOKEN)
         )
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 }
