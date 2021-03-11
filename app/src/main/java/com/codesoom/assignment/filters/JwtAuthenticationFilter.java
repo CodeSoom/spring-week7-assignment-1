@@ -33,51 +33,19 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws IOException, ServletException {
-        if (filterWithPathAndMethod(request)) {
-            chain.doFilter(request, response);
-            return;
-        }
-
         String authorization = request.getHeader("Authorization");
 
-        if (authorization == null) {
-            throw new InvalidTokenException("");
+        if (authorization != null) {
+            String accessToken = authorization.substring("Bearer ".length());
+            Long userId = authenticationService.parseToken(accessToken);
+            Authentication authentication = new UserAuthentication(userId);
+
+            SecurityContext context = SecurityContextHolder.getContext();
+            context.setAuthentication(authentication);
+
+            request.setAttribute("userId", userId);
         }
-
-        String accessToken = authorization.substring("Bearer ".length());
-
-        Long userId = authenticationService.parseToken(accessToken);
-
-        Authentication authentication = new UserAuthentication(userId);
-        SecurityContext context = SecurityContextHolder.getContext();
-        context.setAuthentication(authentication);
-
-        request.setAttribute("userId", userId);
 
         chain.doFilter(request, response);
-    }
-
-    /**
-     * 경로와 http method를 기준으로 필터한다.
-     *
-     * @param request
-     * @return boolean 필터 후 참/거짓 값
-     */
-    private boolean filterWithPathAndMethod(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        if (!path.startsWith("/products")) {
-            return true;
-        }
-
-        String method = request.getMethod();
-        if (method.equals("GET")) {
-            return true;
-        }
-
-        if (method.equals("OPTIONS")) {
-            return true;
-        }
-
-        return false;
     }
 }
