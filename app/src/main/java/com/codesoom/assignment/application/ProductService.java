@@ -11,8 +11,8 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 /**
- * controller에서 데이터를 가져와 사용자 입력에 따라
- * data를 가공한다.
+ * 상품 데이터의 조회와 변경 작업을 담당합니다.
+ *
  */
 @Service
 @Transactional

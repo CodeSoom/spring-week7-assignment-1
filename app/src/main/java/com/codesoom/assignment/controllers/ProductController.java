@@ -15,7 +15,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
- * 사용자의 요청에 따라 데이터를 전달해준다.
+ * 상품과 관련된 HTTP 요청을 처리합니다.
  *
  */
 @RestController
