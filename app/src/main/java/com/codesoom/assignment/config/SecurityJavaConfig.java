@@ -26,6 +26,7 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 authenticationManager(), authenticationService);
 
         Filter authenticationErrorFilter = new AuthenticationErrorFilter();
+
         http
                 .csrf().disable()
                 .addFilter(authenticationFilter)
@@ -37,5 +38,7 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling()
                 .authenticationEntryPoint(
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+
+        http.headers().frameOptions().disable();
     }
 }
