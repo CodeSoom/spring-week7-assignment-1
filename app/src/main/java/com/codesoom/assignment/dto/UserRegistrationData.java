@@ -15,6 +15,7 @@ import javax.validation.constraints.Size;
 @Getter
 @Builder
 @NoArgsConstructor
+@EqualsAndHashCode
 @AllArgsConstructor
 public class UserRegistrationData {
     @NotBlank

@@ -5,8 +5,10 @@ import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
-import jdk.jfr.ContentType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest {
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String INVALID_TOKEN_POST_FIX = "Invalid";
+    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk" + INVALID_TOKEN_POST_FIX;
+    private static final String EXISTED_EMAIL_ADDRESS = "existed@example.com";
+    private static final UserRegistrationData EXISTED_USER = UserRegistrationData
+            .builder()
+            .email(EXISTED_EMAIL_ADDRESS)
+            .name("Tester")
+            .password("test")
+            .build();
 
     @Autowired
     private MockMvc mockMvc;
@@ -37,6 +49,9 @@ class UserControllerTest {
 
     @MockBean
     private AuthenticationService authenticationService;
+
+    @Autowired
+    ObjectMapper mapper;
 
     @BeforeEach
     void setUp() {
@@ -71,6 +86,11 @@ class UserControllerTest {
 
         given(authenticationService.parseToken(VALID_TOKEN))
                 .willReturn(1L);
+        given(authenticationService.parseToken(INVALID_TOKEN))
+                .willThrow(new InvalidTokenException(INVALID_TOKEN));
+
+        given(userService.registerUser(EXISTED_USER))
+                .willThrow(new UserEmailDuplicationException(EXISTED_EMAIL_ADDRESS));
     }
 
     @Test
@@ -101,6 +121,16 @@ class UserControllerTest {
                 post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}")
+        )
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void registerUserWithDuplicatedEmail() throws Exception {
+        mockMvc.perform(
+                post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(EXISTED_USER))
         )
                 .andExpect(status().isBadRequest());
     }
