@@ -43,6 +43,7 @@ public class UserAuthentication extends AbstractAuthenticationToken {
 
     private static List<GrantedAuthority> authorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
+        // userId에 따른 다른 권한 부여 가능
         authorities.add(new SimpleGrantedAuthority("USER"));
         return authorities;
     }
