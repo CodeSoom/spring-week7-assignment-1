@@ -51,19 +51,21 @@ public class ProductController {
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     public Product update(
-            @RequestAttribute Long userId,
             @PathVariable Long id,
-            @RequestBody @Valid ProductData productData
+            @RequestBody @Valid ProductData productData,
+            Authentication authentication
     ) {
         return productService.updateProduct(id, productData);
     }
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("isAuthenticated()")
     public void destroy(
-            @RequestAttribute Long userId,
-            @PathVariable Long id
+            @PathVariable Long id,
+            Authentication authentication
     ) {
         productService.deleteProduct(id);
     }
