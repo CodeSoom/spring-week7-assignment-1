@@ -24,7 +24,8 @@ public class ProductResultData {
     private String imageUrl;
 
     @Builder
-    public ProductResultData(Long id, String name, String maker, Integer price, String imageUrl) {
+    public ProductResultData(Long id, String name, String maker,
+                             Integer price, String imageUrl) {
         this.id = id;
         this.name = name;
         this.maker = maker;

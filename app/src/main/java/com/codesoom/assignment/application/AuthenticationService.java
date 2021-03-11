@@ -2,13 +2,11 @@ package com.codesoom.assignment.application;
 
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.AuthenticationCreateData;
-import com.codesoom.assignment.dto.AuthenticationResultData;
 import com.codesoom.assignment.dto.SessionResultData;
 import com.codesoom.assignment.dto.UserResultData;
 import com.codesoom.assignment.errors.AuthenticationBadRequestException;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.utils.JwtUtil;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.security.SignatureException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -65,19 +63,18 @@ public class AuthenticationService {
     /**
      * 주어진 토큰을 해석하여 사용자 정보를 리턴한다.
      *
-     * @param token - 파싱하고자 하는 토큰 문자열
-     * @return 주어진 {@code accessToken}의 사용자 정보
+     * @param token - 해석하고자 하는 토큰
+     * @return 주어진 {@code token} 안에 있는 이메일
      * @throws InvalidTokenException 만약
      *         {@code token}이 비어있는 경우, 공백인 경우, 서명이 실패한 경우
      */
-    public AuthenticationResultData parseToken(String token) {
+    public String parseToken(String token) {
         if(token == null || token.isBlank()) {
             throw new InvalidTokenException(token);
         }
 
         try {
-            Claims claims = jwtUtil.decode(token);
-            return AuthenticationResultData.of(claims);
+            return jwtUtil.decode(token).getSubject();
         } catch(SignatureException e) {
             throw new InvalidTokenException(token);
         }

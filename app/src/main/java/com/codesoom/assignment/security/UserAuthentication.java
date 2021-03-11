@@ -1,6 +1,5 @@
 package com.codesoom.assignment.security;
 
-import com.codesoom.assignment.dto.AuthenticationResultData;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -9,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserAuthentication extends AbstractAuthenticationToken {
-    private final AuthenticationResultData authenticationResultData;
+    private final String email;
 
-    public UserAuthentication(AuthenticationResultData authenticationResultData) {
+    public UserAuthentication(String email) {
         super(authorities());
-        this.authenticationResultData = authenticationResultData;
+        this.email = email;
     }
 
     @Override
@@ -23,7 +22,7 @@ public class UserAuthentication extends AbstractAuthenticationToken {
 
     @Override
     public Object getPrincipal() {
-        return authenticationResultData.getEmail();
+        return this.email;
     }
 
     @Override
@@ -34,7 +33,7 @@ public class UserAuthentication extends AbstractAuthenticationToken {
     @Override
     public String toString() {
         return "UserAuthentication{" +
-                "authenticationResultData=" + authenticationResultData +
+                "email='" + email + '\'' +
                 '}';
     }
 

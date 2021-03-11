@@ -3,7 +3,6 @@ package com.codesoom.assignment.application;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.AuthenticationCreateData;
-import com.codesoom.assignment.dto.AuthenticationResultData;
 import com.codesoom.assignment.dto.SessionResultData;
 import com.codesoom.assignment.dto.UserResultData;
 import com.codesoom.assignment.errors.AuthenticationBadRequestException;
@@ -251,9 +250,9 @@ class AuthenticationServiceTest {
             @Test
             @DisplayName("주어진 토큰을 해석하여 안에 담긴 내용을 리턴한다")
             void itParsesTokenAndReturnsUser() {
-                AuthenticationResultData authenticationResultData = authenticationService.parseToken(givenValidToken);
+                String email = authenticationService.parseToken(givenValidToken);
 
-                assertThat(authenticationResultData.getEmail()).isEqualTo(EXISTED_EMAIL);
+                assertThat(email).isEqualTo(EXISTED_EMAIL);
             }
         }
 

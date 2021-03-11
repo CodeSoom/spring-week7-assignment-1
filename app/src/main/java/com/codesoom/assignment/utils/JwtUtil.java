@@ -18,10 +18,10 @@ public class JwtUtil {
     }
 
     /**
-     * 주어진 이메일과 비밀번호로 토큰 문자열을 생성하고 리턴한다.
+     * 주어진 이메일과 비밀번호로 토큰을 생성하고 리턴한다.
      *
-     * @param email - 토큰 문자열 생성을 위한 이메일
-     * @return - 주어진 {@code email}를 이용하여 생성된 토큰 문자열
+     * @param email - 토큰 생성을 위한 이메일
+     * @return - 주어진 {@code email}를 이용하여 생성된 토큰
      */
     public String encode(String email) {
         return Jwts.builder()
@@ -31,9 +31,9 @@ public class JwtUtil {
     }
 
     /**
-     * 주어진 토큰 문자열을 파싱하여 사용자 정보를 리턴한다.
+     * 주어진 토큰을 해석하여 사용자 정보를 리턴한다.
      *
-     * @param token - 파싱하고자 하는 토큰 문자열
+     * @param token - 해석하고자 하는 토큰
      * @return 주어진 {@code token}의 사용자 정보
      */
     public Claims decode(String token) {
