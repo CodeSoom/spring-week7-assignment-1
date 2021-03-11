@@ -48,9 +48,10 @@ class AuthenticationServiceTest {
         User user = User.builder()
                 .id(ID)
                 .email(EMAIL)
-                .password(PASSWORD)
                 .build();
 
+        user.changePassword(PASSWORD, passwordEncoder);
+        
         given(userRepository.findByEmail(EMAIL)).willReturn(Optional.of(user));
     }
 
