@@ -32,7 +32,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         if(authorization != null) {
             String accessToken = authorization.substring("Bearer ".length());
             String email = authenticationService.parseToken(accessToken);
-            System.out.println(email+"***");
             UserAuthentication authentication = new UserAuthentication(email);
 
             SecurityContext context = SecurityContextHolder.getContext();

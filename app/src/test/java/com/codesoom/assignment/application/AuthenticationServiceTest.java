@@ -156,7 +156,7 @@ class AuthenticationServiceTest {
                         .password(encodedPassword)
                         .build();
 
-                sessionResultData = SessionResultData.from(EXISTED_TOKEN);
+                sessionResultData = SessionResultData.of(EXISTED_TOKEN);
             }
 
             @Test

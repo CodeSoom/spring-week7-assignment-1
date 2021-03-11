@@ -6,6 +6,7 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserCreateData;
 import com.codesoom.assignment.dto.UserResultData;
 import com.codesoom.assignment.dto.UserUpdateData;
+import com.codesoom.assignment.errors.UserBadRequestException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
@@ -42,20 +43,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @WebMvcTest(UserController.class)
 @DisplayName("UserController 테스트")
 class UserControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
-    private UserService userService;
-
-    private Mapper mapper;
-
-    @MockBean
-    private AuthenticationService authenticationService;
-
-    @Autowired
-    private WebApplicationContext wac;
-
     private static final String SETUP_USER_NAME = "setUpName";
     private static final String SETUP_USER_EMAIL = "setUpdEmail";
     private static final String SETUP_USER_PASSWORD = "setUpPassword";
@@ -72,6 +59,20 @@ class UserControllerTest {
     private static final Long DELETE_ID = 1L;
     private static final Long NOT_EXISTED_ID = 100L;
 
+    @Autowired
+    private WebApplicationContext wac;
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    private Mapper mapper;
+
+    @MockBean
+    private AuthenticationService authenticationService;
+
+    @MockBean
+    private UserService userService;
+
     private List<User> users;
     private User setUpUser;
     private User createUser;
@@ -79,16 +80,6 @@ class UserControllerTest {
     private List<UserResultData> resultUsers;
     private UserResultData setupUserResult;
     private UserResultData createUserResult;
-
-    public UserResultData getUserResultData(User user) {
-        return UserResultData.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .password(user.getPassword())
-                .deleted(user.isDeleted())
-                .build();
-    }
 
     @BeforeEach
     void setUp() {
@@ -115,8 +106,8 @@ class UserControllerTest {
 
         users = List.of(setUpUser, createUser);
 
-        setupUserResult = getUserResultData(setUpUser);
-        createUserResult = getUserResultData(createUser);
+        setupUserResult = UserResultData.of(setUpUser);
+        createUserResult = UserResultData.of(createUser);
         resultUsers = List.of(setupUserResult, createUserResult);
     }
 
@@ -128,10 +119,12 @@ class UserControllerTest {
         void itReturnsListOfUsersAndOKHttpStatus() throws Exception {
             given(userService.getUsers()).willReturn(resultUsers);
 
-            mockMvc.perform(get("/users"))
+            mockMvc.perform(
+                    get("/users")
+            )
                     .andDo(print())
-                    .andExpect(content().string(containsString("\"id\":1")))
-                    .andExpect(content().string(containsString("\"id\":2")))
+                    .andExpect(content().string(containsString("\"id\":" + EXISTED_ID)))
+                    .andExpect(content().string(containsString("\"id\":" + CREATED_ID)))
                     .andExpect(status().isOk());
 
             verify(userService).getUsers();
@@ -151,10 +144,14 @@ class UserControllerTest {
             void itReturnsUserAndOkHttpStatus() throws Exception {
                 given(userService.getUser(givenExistedId)).willReturn(setupUserResult);
 
-                mockMvc.perform(get("/users/"+givenExistedId))
+                mockMvc.perform(
+                        get("/users/"+givenExistedId)
+                )
                         .andDo(print())
-                        .andExpect(content().string(containsString("{\"id\":1")))
+                        .andExpect(content().string(containsString("{\"id\":" + EXISTED_ID)))
                         .andExpect(status().isOk());
+
+                verify(userService).getUser(givenExistedId);
             }
         }
 
@@ -169,7 +166,9 @@ class UserControllerTest {
                 given(userService.getUser(givenNotExistedId))
                         .willThrow(new UserNotFoundException(givenNotExistedId));
 
-                mockMvc.perform(get("/users/"+givenNotExistedId))
+                mockMvc.perform(
+                        get("/users/"+givenNotExistedId)
+                )
                         .andExpect(content().string(containsString("User not found")))
                         .andExpect(status().isNotFound());
 
@@ -184,18 +183,6 @@ class UserControllerTest {
         @Nested
         @DisplayName("만약 사용자가 주어진다면")
         class Context_WithUser {
-            private UserResultData userResultData;
-
-            @BeforeEach
-            void setUp() {
-                userResultData = UserResultData.builder()
-                        .id(CREATED_ID)
-                        .name(CREATE_USER_NAME)
-                        .email(CREATE_USER_EMAIL)
-                        .password(CREATE_USER_PASSWORD)
-                        .build();
-            }
-
             @Test
             @DisplayName("사용자를 저장하고 저장된 사용자와 CREATED를 리턴한다")
             void itSavesUserAndReturnsUser() throws Exception {
@@ -210,13 +197,15 @@ class UserControllerTest {
                                     .build();
                         });
 
-                mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"createdName\",\"email\":\"createdEmail\",\"password\":\"createdPassword\"}"))
-                        .andExpect(content().string(containsString("\"id\":" + userResultData.getId())))
-                        .andExpect(jsonPath("name").value(userResultData.getName()))
-                        .andExpect(jsonPath("email").value(userResultData.getEmail()))
-                        .andExpect(jsonPath("password").value(userResultData.getPassword()))
+                mockMvc.perform(
+                        post("/users")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"name\":\"createdName\",\"email\":\"createdEmail\",\"password\":\"createdPassword\"}")
+                )
+                        .andExpect(jsonPath("id").value(createUserResult.getId()))
+                        .andExpect(jsonPath("name").value(createUserResult.getName()))
+                        .andExpect(jsonPath("email").value(createUserResult.getEmail()))
+                        .andExpect(jsonPath("password").value(createUserResult.getPassword()))
                         .andExpect(status().isCreated());
 
                 verify(userService).createUser(any(UserCreateData.class));
@@ -229,9 +218,11 @@ class UserControllerTest {
             @Test
             @DisplayName("사용자 요청이 잘못 되었다는 예외를 던지고 BAD_REQUEST를 리턴한다")
             void itThrowsUserBadRequestExceptionAndReturnsBAD_REQUESTHttpStatus() throws Exception {
-                mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                mockMvc.perform(
+                        post("/users")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{}")
+                )
                         .andDo(print())
                         .andExpect(status().isBadRequest());
             }
@@ -271,9 +262,11 @@ class UserControllerTest {
                                     .build();
                         });
 
-                mockMvc.perform(patch("/users/" + givenExistedId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"updatedName\",\"password\":\"updatedPassword\"}"))
+                mockMvc.perform(
+                        patch("/users/" + givenExistedId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"name\":\"updatedName\",\"password\":\"updatedPassword\"}")
+                )
                         .andDo(print())
                         .andExpect(jsonPath("name").value(userUpdateData.getName()))
                         .andExpect(jsonPath("password").value(userUpdateData.getPassword()))
@@ -294,9 +287,11 @@ class UserControllerTest {
                 given(userService.updateUser(eq(givenNotExistedId), any(UserUpdateData.class)))
                         .willThrow(new UserNotFoundException(givenNotExistedId));
 
-                mockMvc.perform(patch("/users/"+givenNotExistedId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"createdUser\" , \"password\":\"createdPassword\"}"))
+                mockMvc.perform(
+                        patch("/users/"+givenNotExistedId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"name\":\"createdUser\",\"password\":\"createdPassword\"}")
+                )
                         .andDo(print())
                         .andExpect(content().string(containsString("User not found")))
                         .andExpect(status().isNotFound());
@@ -313,9 +308,14 @@ class UserControllerTest {
             @Test
             @DisplayName("사용자 요청이 잘못 되었다는 예외를 던지고 BAD_REQUEST를 리턴한다")
             void itThrowsUserBadRequestExceptionAndReturnsBAD_REQUESTHttpStatus() throws Exception {
-                mockMvc.perform(patch("/users/" + givenExistedId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                given(userService.updateUser(eq(givenExistedId), any(UserUpdateData.class)))
+                        .willThrow(new UserBadRequestException());
+
+                mockMvc.perform(
+                        patch("/users/" + givenExistedId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{}")
+                )
                         .andDo(print())
                         .andExpect(status().isBadRequest());
             }
@@ -334,7 +334,7 @@ class UserControllerTest {
             @BeforeEach
             void setUp() {
                 setUpUser.delete();
-                userResultData = getUserResultData(setUpUser);
+                userResultData = UserResultData.of(setUpUser);
             }
 
             @Test
@@ -342,8 +342,9 @@ class UserControllerTest {
             void itDeletesUserAndReturnsDeletedUserAndNO_CONTENTHttpStatus() throws Exception {
                 given(userService.deleteUser(eq(givenExistedId))).willReturn(userResultData);
 
-                mockMvc.perform(delete("/users/" + givenExistedId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                mockMvc.perform(
+                        delete("/users/" + givenExistedId)
+                )
                         .andDo(print())
                         .andExpect(content().string(containsString("\"deleted\":true")))
                         .andExpect(status().isNoContent());
@@ -361,8 +362,10 @@ class UserControllerTest {
                 given(userService.deleteUser(givenNotExistedId))
                         .willThrow(new UserNotFoundException(givenNotExistedId));
 
-                mockMvc.perform(delete("/users/"+givenNotExistedId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                mockMvc.perform(
+                        delete("/users/"+givenNotExistedId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                )
                         .andExpect(content().string(containsString("User not found")))
                         .andExpect(status().isNotFound());
 
@@ -386,8 +389,10 @@ class UserControllerTest {
                 given(userService.deleteUser(givenDeletedId))
                         .willThrow(new UserNotFoundException(givenDeletedId));
 
-                mockMvc.perform(delete("/users/"+DELETE_ID)
-                        .contentType(MediaType.APPLICATION_JSON))
+                mockMvc.perform(
+                        delete("/users/"+DELETE_ID)
+                            .contentType(MediaType.APPLICATION_JSON)
+                )
                         .andExpect(content().string(containsString("User not found")))
                         .andExpect(status().isNotFound());
 

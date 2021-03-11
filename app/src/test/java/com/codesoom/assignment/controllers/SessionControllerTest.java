@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -56,9 +57,11 @@ class SessionControllerTest {
             void itCreatesTokenAndReturnsTokenAndCREATEDHttpStatus() throws Exception {
                 given(authenticationService.createToken(any(AuthenticationCreateData.class))).willReturn(sessionResultData);
 
-                mockMvc.perform(post("/session")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"existedEmail\",\"password\":\"existedPassword\"}"))
+                mockMvc.perform(
+                        post("/session")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"email\":\"existedEmail\",\"password\":\"existedPassword\"}")
+                )
                         .andDo(print())
                         .andExpect(status().isCreated());
             }
@@ -73,12 +76,16 @@ class SessionControllerTest {
                 given(authenticationService.createToken(any(AuthenticationCreateData.class)))
                         .willThrow(new UserBadRequestException());
 
-                mockMvc.perform(post("/session")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"notExistedEmail\",\"password\":\"notExistedPassword\"}"))
+                mockMvc.perform(
+                        post("/session")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"email\":\"notExistedEmail\",\"password\":\"notExistedPassword\"}")
+                )
                         .andDo(print())
                         .andExpect(content().string(containsString("User bad request")))
                         .andExpect(status().isBadRequest());
+
+                verify(authenticationService).createToken(any(AuthenticationCreateData.class));
             }
         }
     }

@@ -10,13 +10,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("JwtUtil 테스트")
 class JwtUtilTest {
-    private JwtUtil jwtUtil;
-
     private static final String SECRET = "12345678901234567890123456789010";
-    private static final String EXISTED_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGlzdGVkRW1haWwifQ." +
-            "UQodS3elf3Cu4g0PDFHqVloFbcKHHmTTnk0jGmiwPXY";
-
+    private static final String EXISTED_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJzdWIiOiJleGlzdGVkRW1haWwifQ.UQodS3elf3Cu4g0PDFHqVloFbcKHHmTTnk0jGmiwPXY";
     private static final String EXISTED_EMAIL = "existedEmail";
+
+    private JwtUtil jwtUtil;
 
     @BeforeEach
     void setUp() {
