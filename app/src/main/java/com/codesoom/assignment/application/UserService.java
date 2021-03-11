@@ -53,12 +53,12 @@ public class UserService {
      */
     public UserResultData getUser(Long id) {
         return userRepository.findByIdAndDeletedIsFalse(id)
-                .map(UserResultData::ofAll)
+                .map(UserResultData::of)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     /**
-     * 주어진 사용자 저장하고 저장된 사용자를 리턴한다.
+     * 주어진 사용자를 저장하고 해당 사용자를 리턴한다.
      *
      * @param userCreateData - 새로 저장하고자 하는 사용자
      * @return 저장 된 사용자
@@ -79,7 +79,7 @@ public class UserService {
     }
 
     /**
-     * 주어진 식별자에 해당하는 서용자를 수정하고 수정된 사용자를 리턴한다.
+     * 주어진 식별자에 해당하는 서용자를 수정하고 해당 사용자를 리턴한다.
      *
      * @param id - 수정하고자 하는 사용자의 식별자
      * @param userUpdateData - 수정 할 새로운 사용자
@@ -98,7 +98,7 @@ public class UserService {
     }
 
     /**
-     * 주어진 식별자에 해당하는 사용자를 삭제하고 삭제된 사용자를 리턴한다.
+     * 주어진 식별자에 해당하는 사용자를 삭제하고 해당 사용자를 리턴한다.
      *
      * @param id - 삭제하고자 하는 사용자의 식별자
      * @return 삭제 된 사용자
@@ -111,7 +111,6 @@ public class UserService {
         User deleteUser = mapper.map(userResultData, User.class);
         deleteUser.delete();
 
-
-        return UserResultData.ofAll(deleteUser);
+        return UserResultData.of(deleteUser);
     }
 }
