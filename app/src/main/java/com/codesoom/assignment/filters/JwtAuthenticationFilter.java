@@ -1,24 +1,23 @@
 package com.codesoom.assignment.filters;
 
-import java.io.IOException;
+import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.security.UserAuthentication;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.GenericFilterBean;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
-import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.errors.InvalidTokenException;
-import com.codesoom.assignment.security.UserAuthentication;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.web.filter.GenericFilterBean;
-
+/**
+ * JWT 인증 전처리기.
+ */
 public class JwtAuthenticationFilter extends GenericFilterBean {
     private final AuthenticationService authenticationService;
 
@@ -33,9 +32,18 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        doAuthentication((HttpServletRequest)request, (HttpServletResponse)response, chain);
+        doAuthentication((HttpServletRequest) request, (HttpServletResponse) response, chain);
     }
 
+    /**
+     * 주어진 요청으로 유저 인증을 수행한다.
+     *
+     * @param request  요청 정보
+     * @param response 응답 정보
+     * @param chain    필터 페인
+     * @throws IOException
+     * @throws ServletException
+     */
     private void doAuthentication(HttpServletRequest request,
                                   HttpServletResponse response,
                                   FilterChain chain)

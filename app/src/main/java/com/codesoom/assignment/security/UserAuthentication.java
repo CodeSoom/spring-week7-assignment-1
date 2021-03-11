@@ -5,6 +5,9 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.util.List;
 
+/**
+ * 유저 인증 정보.
+ */
 public class UserAuthentication extends AbstractAuthenticationToken {
 
     private final Long userId;

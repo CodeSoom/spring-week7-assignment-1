@@ -12,6 +12,9 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.util.Set;
 
+/**
+ * 전역 HTTP 요청 에러 핸들러.
+ */
 @ResponseBody
 @ControllerAdvice
 public class ControllerErrorAdvice {
