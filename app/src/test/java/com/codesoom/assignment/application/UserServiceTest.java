@@ -70,12 +70,12 @@ class UserServiceTest {
     void createTest(User user) {
         assertThat(user.getName()).isEqualTo(NAME);
         assertThat(user.getEmail()).isEqualTo(EMAIL);
-        assertThat(user.getPassword()).isEqualTo(PASSWORD);
+        assertThat(user.getPassword()).isNotEqualTo(PASSWORD);
     }
 
     void updateTest(User user) {
         assertThat(user.getEmail()).isEqualTo(UPDATE_EMAIL);
-        assertThat(user.getPassword()).isEqualTo(UPDATE_PASSWORD);
+        assertThat(user.getPassword()).isNotEqualTo(UPDATE_PASSWORD);
     }
 
     @Nested

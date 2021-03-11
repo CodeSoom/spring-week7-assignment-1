@@ -38,12 +38,17 @@ class UserTest {
     void updateWith() {
         user.updateWith(User.builder()
                 .email(UPDATE_EMAIL)
-                .password(UPDATE_PASSWORD)
-                .build()
-        );
+                .build());
 
         assertThat(user.getEmail()).isEqualTo(UPDATE_EMAIL);
-        assertThat(user.getPassword()).isEqualTo(UPDATE_PASSWORD);
+    }
+
+    @Test
+    void changePassword() {
+        user.changePassword(PASSWORD);
+
+        assertThat(user.getPassword()).isNotEmpty();
+        assertThat(user.getPassword()).isNotEqualTo(PASSWORD);
     }
 
     @Test

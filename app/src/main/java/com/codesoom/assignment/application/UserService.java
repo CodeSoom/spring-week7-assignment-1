@@ -44,9 +44,12 @@ public class UserService {
             throw new UserEmailDuplicationException(email);
         }
 
-        User user = mapper.map(createRequest, User.class);
+        User user = userRepository.save(
+                mapper.map(createRequest, User.class));
 
-        return userRepository.save(user);
+        user.changePassword(createRequest.getPassword());
+
+        return user;
     }
 
     /**
@@ -60,6 +63,8 @@ public class UserService {
         User user = findUser(id);
 
         user.updateWith(mapper.map(updateRequest, User.class));
+
+        user.changePassword(updateRequest.getPassword());
 
         return user;
     }
