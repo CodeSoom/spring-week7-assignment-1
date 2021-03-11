@@ -39,21 +39,22 @@ class UserServiceTest {
 
         given(userRepository.save(any(User.class))).will(invocation -> {
             User source = invocation.getArgument(0);
-            return User.builder()
-                    .id(13L)
-                    .email(source.getEmail())
-                    .name(source.getName())
-                    .build();
+            return new User(
+                13L,
+                source.getEmail(),
+                source.getName(),
+                ""
+            );
         });
 
         given(userRepository.findByIdAndDeletedIsFalse(1L))
-                .willReturn(Optional.of(
-                        User.builder()
-                                .id(1L)
-                                .email(EXISTED_EMAIL_ADDRESS)
-                                .name("Tester")
-                                .password("test")
-                                .build()));
+            .willReturn(Optional.of(
+                new User(
+                    1L,
+                    EXISTED_EMAIL_ADDRESS,
+                    "Tester",
+                    "test")
+            ));
 
         given(userRepository.findByIdAndDeletedIsFalse(100L))
                 .willReturn(Optional.empty());
@@ -143,7 +144,7 @@ class UserServiceTest {
         User user = userService.deleteUser(1L);
 
         assertThat(user.getId()).isEqualTo(1L);
-        assertThat(user.isDeleted()).isTrue();
+        assertThat(user.isDestroyed()).isTrue();
 
         verify(userRepository).findByIdAndDeletedIsFalse(1L);
     }

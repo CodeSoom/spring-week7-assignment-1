@@ -28,7 +28,11 @@ public class UserService {
             throw new UserEmailDuplicationException(email);
         }
 
-        User user = mapper.map(registrationData, User.class);
+        User user = new User(
+            null,
+            email,
+            registrationData.getName(),
+            registrationData.getPassword());
         return userRepository.save(user);
     }
 

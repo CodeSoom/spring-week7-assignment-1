@@ -39,11 +39,12 @@ class UserControllerTest {
         given(userService.registerUser(any(UserRegistrationData.class)))
                 .will(invocation -> {
                     UserRegistrationData registrationData = invocation.getArgument(0);
-                    return User.builder()
-                            .id(13L)
-                            .email(registrationData.getEmail())
-                            .name(registrationData.getName())
-                            .build();
+                    return new User(
+                        13L,
+                        registrationData.getEmail(),
+                        registrationData.getName(),
+                        ""
+                    );
                 });
 
 
@@ -52,11 +53,12 @@ class UserControllerTest {
                     Long id = invocation.getArgument(0);
                     UserModificationData modificationData =
                             invocation.getArgument(1);
-                    return User.builder()
-                            .id(id)
-                            .email("tester@example.com")
-                            .name(modificationData.getName())
-                            .build();
+                    return new User(
+                        id,
+                        "tester@example.com",
+                        modificationData.getName(),
+                        ""
+                    );
                 });
 
         given(userService.updateUser(eq(100L), any(UserModificationData.class)))

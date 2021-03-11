@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class UserTest {
     @Test
     void changeWith() {
-        User user = User.builder().build();
+        User user = new User(1L, "test user", "aaa@bbb.ccc", "test");
 
         user.changeWith("TEST", "TEST");
 
@@ -17,20 +17,18 @@ class UserTest {
 
     @Test
     void destroy() {
-        User user = User.builder().build();
+        User user = new User(1L, "test user", "aaa@bbb.ccc", "test");
 
-        assertThat(user.isDeleted()).isFalse();
+        assertThat(user.isDestroyed()).isFalse();
 
         user.destroy();
 
-        assertThat(user.isDeleted()).isTrue();
+        assertThat(user.isDestroyed()).isTrue();
     }
 
     @Test
     void authenticate() {
-        User user = User.builder()
-                .password("test")
-                .build();
+        User user = new User(1L, "aaa@bbb.ccc", "test user", "test");
 
         assertThat(user.authenticate("test")).isTrue();
         assertThat(user.authenticate("xxx")).isFalse();
@@ -38,10 +36,8 @@ class UserTest {
 
     @Test
     void authenticateWithDeletedUser() {
-        User user = User.builder()
-                .password("test")
-                .deleted(true)
-                .build();
+        User user = new User(1L, "aaa@bbb.ccc", "test user", "test password");
+        user.destroy();
 
         assertThat(user.authenticate("test")).isFalse();
         assertThat(user.authenticate("xxx")).isFalse();
