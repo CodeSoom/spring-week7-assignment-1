@@ -25,6 +25,8 @@ public class User {
         this.password = password;
     }
 
+    public User() {}
+
     public void changeWith(String name, String password) {
         this.name = name;
         this.password = password;
