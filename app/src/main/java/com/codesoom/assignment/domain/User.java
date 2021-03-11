@@ -28,9 +28,9 @@ public class User {
     @Builder.Default
     private boolean deleted = false;
 
-    public void changeWith(User source) {
-        name = source.name;
-        password = source.password;
+    public void changeWith(String name, String password) {
+        this.name = name;
+        this.password = password;
     }
 
     public void destroy() {
