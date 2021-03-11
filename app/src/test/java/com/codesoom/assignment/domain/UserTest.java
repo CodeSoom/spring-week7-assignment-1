@@ -1,27 +1,53 @@
 package com.codesoom.assignment.domain;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UserTest {
+    private static final String NAME = "양효주";
+    private static final String EMAIL = "yhyojoo@codesoom.com";
+    private static final String PASSWORD = "112233!!";
+
+    private static final String UPDATE_EMAIL = "joo@codesoom.com";
+    private static final String UPDATE_PASSWORD = "123!";
+
+    private User user;
+
+    @BeforeEach
+    void setUp() {
+        user = User.builder()
+                .name(NAME)
+                .email(EMAIL)
+                .password(PASSWORD)
+                .build();
+    }
+
     @Test
-    void changeWith() {
-        User user = User.builder().build();
+    @DisplayName("새로운 사용자를 등록한다")
+    void creationWithBuilder() {
+        assertThat(user.getName()).isEqualTo(NAME);
+        assertThat(user.getEmail()).isEqualTo(EMAIL);
+        assertThat(user.getPassword()).isEqualTo(PASSWORD);
+    }
 
-        user.changeWith(User.builder()
-                .name("TEST")
-                .password("TEST")
-                .build());
+    @Test
+    @DisplayName("사용자 정보를 수정하고 반환한다")
+    void updateWith() {
+        user.updateWith(User.builder()
+                .email(UPDATE_EMAIL)
+                .password(UPDATE_PASSWORD)
+                .build()
+        );
 
-        assertThat(user.getName()).isEqualTo("TEST");
-        assertThat(user.getPassword()).isEqualTo("TEST");
+        assertThat(user.getEmail()).isEqualTo(UPDATE_EMAIL);
+        assertThat(user.getPassword()).isEqualTo(UPDATE_PASSWORD);
     }
 
     @Test
     void destroy() {
-        User user = User.builder().build();
-
         assertThat(user.isDeleted()).isFalse();
 
         user.destroy();
@@ -32,21 +58,19 @@ class UserTest {
     @Test
     void authenticate() {
         User user = User.builder()
-                .password("test")
+                .password(PASSWORD)
                 .build();
-
-        assertThat(user.authenticate("test")).isTrue();
+        assertThat(user.authenticate(PASSWORD)).isTrue();
         assertThat(user.authenticate("xxx")).isFalse();
     }
 
     @Test
     void authenticateWithDeletedUser() {
         User user = User.builder()
-                .password("test")
+                .password(PASSWORD)
                 .deleted(true)
                 .build();
-
-        assertThat(user.authenticate("test")).isFalse();
+        assertThat(user.authenticate(PASSWORD)).isFalse();
         assertThat(user.authenticate("xxx")).isFalse();
     }
 }
