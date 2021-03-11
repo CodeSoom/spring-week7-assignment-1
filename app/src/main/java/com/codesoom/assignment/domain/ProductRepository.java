@@ -3,9 +3,7 @@ package com.codesoom.assignment.domain;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * 상품을 처리하는 저장소이다.
- */
+/** 상품을 처리하는 저장소이다. */
 public interface ProductRepository {
     /** 전체 상품을 조회한다. */
     List<Product> findAll();

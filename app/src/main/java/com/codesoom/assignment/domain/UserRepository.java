@@ -3,9 +3,7 @@ package com.codesoom.assignment.domain;
 import java.util.List;
 import java.util.Optional;
 
-/**
- *  사용자를 처리하는 저장소이다.
- */
+/** 사용자를 처리하는 저장소이다. */
 public interface UserRepository {
     /** 모든 사용자 목록을 리턴한다. */
     List<User> findAll();

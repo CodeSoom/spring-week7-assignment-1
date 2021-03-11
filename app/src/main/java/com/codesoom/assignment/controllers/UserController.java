@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.List;
 
-/** 사용자에 대한 요청한다. */
+/** 사용자에 대해 요청한다. */
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -39,10 +39,10 @@ public class UserController {
     }
 
     /**
-     * 주어진 아이디에 햐덩허눈 사용자르 리턴한다.
+     * 주어진 아이디에 해당하는 사용자를 리턴한다.
      *
      * @param id - 조회하고자 하는 사용자의 식별자
-     * @return 저장되어 있는 사용자
+     * @return 주어진 {@code id}에 해당하는 사용자
      */
     @GetMapping("/{id}")
     public UserResultData detail(@PathVariable Long id) {
@@ -50,9 +50,9 @@ public class UserController {
     }
 
     /**
-     * 주어진 사용자를 저장하고 저장된 사용자를 리턴한다.
+     * 주어진 사용자를 저장하고 해당 사용자를 리턴한다.
      *
-     * @param userCreateData - 새로 저장하고자 하는 사용자
+     * @param userCreateData - 저장하고자 하는 새로운 사용자
      * @return 저장 된 사용자
      */
     @PostMapping
@@ -62,10 +62,10 @@ public class UserController {
     }
 
     /**
-     * 주어진 식별자에 해당하는 사용자를 수정하고 수정된 사용자를 리턴한다.
+     * 주어진 식별자에 해당하는 사용자를 수정하고 해당 사용자를 리턴한다.
      *
      * @param id - 수정하고자 하는 사용자의 식별자
-     * @param userUpdateData - 수정 할 새로운 사용자
+     * @param userUpdateData - 수정하고자 하는 새로운 사용자
      * @return 수정 된 사용자
      */
     @PatchMapping("/{id}")
@@ -77,7 +77,7 @@ public class UserController {
     }
 
     /**
-     * 주어진 식별자에 해당하는 사용자를 삭제하고 삭제된 사용자를 리턴한다.
+     * 주어진 식별자에 해당하는 사용자를 삭제하고 해당 사용자를 리턴한다.
      *
      * @param id - 삭제하고자 하는 사용자의 식별자
      * @return 삭제 된 사용자

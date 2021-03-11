@@ -49,7 +49,7 @@ public class ProductController {
      * 주어진 식별자에 해당하는 상품을 리턴한다.
      *
      * @param id - 조회하고자 하는 상품의 식별자
-     * @return 주어진 식별자에 해당하는 상품
+     * @return 주어진 {@code id}에 해당하는 상품
      */
     @GetMapping("/{id}")
     public ProductResultData detail(@PathVariable Long id) {
@@ -57,9 +57,9 @@ public class ProductController {
     }
 
     /**
-     * 주어진 상품을 저장하고 저장된 상품을 리턴한다.
+     * 주어진 상품을 저장하고 해당 상품을 리턴한다.
      *
-     * @param productCreateData - 저장하고자 하는 상품
+     * @param productCreateData - 저장하고자 하는 새로운 상품
      * @return 저장 된 상품
      */
     @PostMapping
@@ -70,10 +70,10 @@ public class ProductController {
     }
 
     /**
-     * 주어진 식별자에 해당하는 상품을 수정하고 수정된 상품을 리턴한다.
+     * 주어진 식별자에 해당하는 상품을 수정하고 해당 상품을 리턴한다.
      *
      * @param id - 수정하고자 하는 상품의 식별자
-     * @param productUpdateData - 수정할 새로운 상품
+     * @param productUpdateData - 수정하고자 하는 새로운 상품
      * @return 수정 된 상품
      */
     @PatchMapping("{id}")

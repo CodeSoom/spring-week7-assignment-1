@@ -24,7 +24,7 @@ public class SessionController {
      * 주어진 사용자를 인증하고 토큰을 생성하여 로그인한다.
      *
      * @param authenticationCreateData - 토큰을 만들고자 하는 사용자
-     * @return - 생성된 토큰
+     * @return - 생성 된 토큰
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

@@ -44,9 +44,9 @@ public class ProductService {
      * 주어진 식별자에 해당하는 상품을 리턴한다.
      *
      * @param id - 조회하고자 하는 상품의 식별자
-     * @return 주어진 식별자에 해당하는 상품
+     * @return 주어진 {@code id}에 해당하는 상품
      * @throws ProductNotFoundException 만약
-     *         주어진 {@code id}에 해당되는 상품이 저장되어 있지 않은 경우
+     *         주어진 {@code id}에 해당하는 상품이 저장되어 있지 않은 경우
      */
     public ProductResultData getProduct(Long id) {
         return  productRepository.findById(id)
@@ -57,7 +57,7 @@ public class ProductService {
     /**
      * 주어진 상품을 저장하고 저장된 상품을 리턴한다.
      *
-     * @param productCreateData - 새로 저장하고자 하는 상품
+     * @param productCreateData - 저장하고자 하는 새로운 상품
      * @return 저장 된 상품
      */
     public ProductResultData createProduct(ProductCreateData productCreateData) {
@@ -71,10 +71,10 @@ public class ProductService {
      * 주어진 식별자에 해당하는 상품을 수정하고 수정된 상품을 리턴한다.
      *
      * @param id - 수정하고자 하는 상품의 식별자
-     * @param productUpdateData - 수정 할 새로운 상품
+     * @param productUpdateData - 수정하고자 하는 새로운 상품
      * @return 수정 된 상품
      * @throws ProductNotFoundException 만약
-     *         주어진  {@code id}에 해당되는 상품이 저장되어 있지 않은 경우
+     *         주어진  {@code id}에 해당하는 상품이 저장되어 있지 않은 경우
      */
     public ProductResultData updateProduct(Long id, ProductUpdateData productUpdateData) {
         ProductResultData productResultData = getProduct(id);
@@ -90,7 +90,7 @@ public class ProductService {
      * @param id - 삭제하고자 하는 상품의 식별자
      * @return 삭제 된 상품
      * @throws ProductNotFoundException 만약
-     *         주어진  {@code id}에 해당되는 상품이 저장되어 있지 않은 경우
+     *         주어진  {@code id}에 해당하는 상품이 저장되어 있지 않은 경우
      */
     public ProductResultData deleteProduct(Long id) {
         ProductResultData productResultData = getProduct(id);

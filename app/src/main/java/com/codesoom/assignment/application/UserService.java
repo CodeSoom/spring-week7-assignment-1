@@ -46,10 +46,10 @@ public class UserService {
     /**
      * 주어진 식별자에 해당하는 사용자를 리턴한다.
      *
-     * @param id - 조회하려는 사용자의 식별자
+     * @param id - 조회하고자 하는 사용자의 식별자
      * @return 주어진 {@code id}에 해당하는 사용자
      * @throws UserNotFoundException 만약
-     *         주어진 {@code id}에 해당되는 사용자가 저장되어 있지 않은 경우
+     *         주어진 {@code id}에 해당하는 사용자가 저장되어 있지 않은 경우
      */
     public UserResultData getUser(Long id) {
         return userRepository.findByIdAndDeletedIsFalse(id)
@@ -60,7 +60,7 @@ public class UserService {
     /**
      * 주어진 사용자를 저장하고 해당 사용자를 리턴한다.
      *
-     * @param userCreateData - 새로 저장하고자 하는 사용자
+     * @param userCreateData - 저장하고자 하는 새로운 사용자
      * @return 저장 된 사용자
      * @throws UserEmailDuplicatedException 만약
      *         주어진 이메일이 이미 존재하는 경우
@@ -82,10 +82,10 @@ public class UserService {
      * 주어진 식별자에 해당하는 서용자를 수정하고 해당 사용자를 리턴한다.
      *
      * @param id - 수정하고자 하는 사용자의 식별자
-     * @param userUpdateData - 수정 할 새로운 사용자
+     * @param userUpdateData - 수정하고자 하는 새로운 사용자
      * @return 수정 된 사용자
      * @throws UserNotFoundException 만약
-     *         주어진 {@code id}에 해당되는 사용자가 저장되어 있지 않은 경우
+     *         주어진 {@code id}에 해당하는 사용자가 저장되어 있지 않은 경우
      */
     public UserResultData updateUser(Long id, UserUpdateData userUpdateData) {
         UserResultData userResultData = getUser(id);
@@ -103,7 +103,7 @@ public class UserService {
      * @param id - 삭제하고자 하는 사용자의 식별자
      * @return 삭제 된 사용자
      * @throws UserNotFoundException 만약
-     *          주어진 {@code id}에 해당되는 사용자가 저장되어 있지 않은 경우
+     *          주어진 {@code id}에 해당하는 사용자가 저장되어 있지 않은 경우
      */
     public UserResultData deleteUser(Long id) {
         UserResultData userResultData = getUser(id);
