@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.List;
 
+/** 상품에 대해 요청한다. */
 @RestController
 @RequestMapping("/products")
 @CrossOrigin

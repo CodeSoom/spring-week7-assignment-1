@@ -18,9 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * 사용자에 대한 요청을 한다.
- */
+/** 사용자에 대한 요청한다. */
 @RestController
 @RequestMapping("/users")
 public class UserController {

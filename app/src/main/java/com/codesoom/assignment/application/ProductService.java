@@ -13,6 +13,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/** 상룸에 대한 요청을 수행한다. */
 @Service
 @Transactional
 public class ProductService {

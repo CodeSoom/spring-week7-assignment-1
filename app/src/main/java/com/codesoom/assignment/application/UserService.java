@@ -15,6 +15,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/** 사용자에 대한 요청을 수행한다. */
 @Service
 @Transactional
 public class UserService {

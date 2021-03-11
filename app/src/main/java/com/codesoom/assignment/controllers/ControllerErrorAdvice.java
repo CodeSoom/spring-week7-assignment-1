@@ -20,6 +20,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.util.Set;
 
+/** 예외가 발생한 경우 확인하여 메세지를 리턴한다. */
 @RestControllerAdvice
 public class ControllerErrorAdvice {
     /** 상품을 찾을 수 없다는 메세지를 리턴한다. */

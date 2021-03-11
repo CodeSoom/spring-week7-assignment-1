@@ -11,6 +11,7 @@ import io.jsonwebtoken.security.SignatureException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/** 인증에 대한 요청을 수행한다. */
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
