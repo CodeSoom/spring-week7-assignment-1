@@ -40,5 +40,6 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
 
+      http.headers().frameOptions().disable();
     }
 }
