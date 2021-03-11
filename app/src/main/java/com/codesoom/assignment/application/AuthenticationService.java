@@ -8,20 +8,28 @@ import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.security.SignatureException;
-import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class AuthenticationService {
-    private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
+
+    public AuthenticationService(UserRepository userRepository,
+                                 JwtUtil jwtUtil,
+                                 PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public String login(SessionRequestData userLoginData) {
         User user = userRepository.findByEmail(userLoginData.getEmail())
                 .orElseThrow(() -> new LoginFailException(userLoginData.getEmail()));
 
-        if (!user.authenticate(userLoginData.getPassword())) {
+        if (!user.authenticate(userLoginData.getPassword(), passwordEncoder)) {
             throw new LoginFailException(userLoginData.getEmail());
         }
 

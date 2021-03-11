@@ -7,7 +7,7 @@ import com.codesoom.assignment.dto.UserUpdateRequestDto;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.Mapper;
-import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -17,10 +17,17 @@ import javax.transaction.Transactional;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class UserService {
     private final Mapper mapper;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(Mapper mapper, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.mapper = mapper;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
 
     /**
      * 주어진 id에 해당하는 사용자를 반환합니다.
@@ -47,7 +54,7 @@ public class UserService {
         User user = userRepository.save(
                 mapper.map(createRequest, User.class));
 
-        user.changePassword(createRequest.getPassword());
+        user.changePassword(createRequest.getPassword(), passwordEncoder);
 
         return user;
     }
@@ -64,7 +71,7 @@ public class UserService {
 
         user.updateWith(mapper.map(updateRequest, User.class));
 
-        user.changePassword(updateRequest.getPassword());
+        user.changePassword(updateRequest.getPassword(), passwordEncoder);
 
         return user;
     }

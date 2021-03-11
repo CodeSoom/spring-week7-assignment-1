@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -39,7 +41,9 @@ class AuthenticationServiceTest {
     void setUp() {
         JwtUtil jwtUtil = new JwtUtil(SECRET);
 
-        authenticationService = new AuthenticationService(jwtUtil, userRepository);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+        authenticationService = new AuthenticationService(userRepository, jwtUtil, passwordEncoder);
 
         User user = User.builder()
                 .id(ID)

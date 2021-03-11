@@ -13,6 +13,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -48,7 +50,10 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(dozerMapper, userRepository);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+        userService = new UserService(
+                dozerMapper, userRepository, passwordEncoder);
 
         user = User.builder()
                 .name(NAME)
