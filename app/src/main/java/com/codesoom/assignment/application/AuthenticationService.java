@@ -42,7 +42,7 @@ public class AuthenticationService {
     public UserResultData authenticateUser(String email, String password) {
         return userRepository.findByEmail(email)
                 .filter(u -> u.authenticate(password, passwordEncoder))
-                .map(UserResultData::of)
+                .map(UserResultData::ofAll)
                 .orElseThrow(AuthenticationBadRequestException::new);
     }
 
