@@ -3,6 +3,8 @@ package com.codesoom.assignment.filters;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -15,26 +17,23 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.web.filter.GenericFilterBean;
 
-public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
+public class JwtAuthenticationFilter extends GenericFilterBean {
     private final AuthenticationService authenticationService;
 
     private static final String AUTH_HEADER = "Authorization";
     private static final String BEARER_TOKEN_PREFIX = "Bearer ";
 
     public JwtAuthenticationFilter(
-            AuthenticationManager authenticationManager,
             AuthenticationService authenticationService) {
-        super(authenticationManager);
+        //super(authenticationManager);
         this.authenticationService = authenticationService;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain chain)
-            throws IOException, ServletException {
-        doAuthentication(request, response, chain);
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        doAuthentication((HttpServletRequest)request, (HttpServletResponse)response, chain);
     }
 
     private void doAuthentication(HttpServletRequest request,
