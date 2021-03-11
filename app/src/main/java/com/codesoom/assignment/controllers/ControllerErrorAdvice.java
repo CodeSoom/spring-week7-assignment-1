@@ -11,10 +11,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import java.util.Set;
-
 /**
  * 전역 HTTP 요청 에러 핸들러.
  */
@@ -43,24 +39,5 @@ public class ControllerErrorAdvice {
     @ExceptionHandler(LoginFailException.class)
     public ErrorResponse handleLoginFailException() {
         return new ErrorResponse("Log-in failed");
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ErrorResponse handleConstraintValidateError(
-            ConstraintViolationException exception
-    ) {
-        String messageTemplate = getViolatedMessage(exception);
-        return new ErrorResponse(messageTemplate);
-    }
-
-    private String getViolatedMessage(ConstraintViolationException exception) {
-        String messageTemplate = null;
-        Set<ConstraintViolation<?>> violations = exception.getConstraintViolations();
-        for (ConstraintViolation<?> violation : violations) {
-            messageTemplate = violation.getMessageTemplate();
-        }
-        return messageTemplate;
     }
 }
