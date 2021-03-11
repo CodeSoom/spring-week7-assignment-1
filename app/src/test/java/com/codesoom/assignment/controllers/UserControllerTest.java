@@ -35,8 +35,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest {
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9." +
             "ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String USER1_VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9." +
+            "ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+    private static final Long USER2 = 2L;
 
     @Autowired
     private MockMvc mockMvc;
@@ -91,8 +94,8 @@ class UserControllerTest {
                 .willThrow(new InvalidTokenException(INVALID_TOKEN));
 
         given(userService.updateUser(
-                any(Authentication.class), eq(999L), any(UserModificationData.class)))
-                .willThrow(new AccessDeniedException(999L));
+                any(Authentication.class), eq(USER2), any(UserModificationData.class)))
+                .willThrow(new AccessDeniedException(USER2));
     }
 
     @Test
@@ -169,10 +172,10 @@ class UserControllerTest {
     @Test
     void updateUserWithAccessDeniedToken() throws Exception {
         mockMvc.perform(
-                patch("/users/999")
+                patch("/users/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                        .header("Authorization", "Bearer " + USER1_VALID_TOKEN)
         )
                 .andExpect(status().isForbidden());
     }
