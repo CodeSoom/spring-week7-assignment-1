@@ -36,6 +36,9 @@ class UserControllerTest {
     @MockBean
     private AuthenticationService authenticationService;
 
+    @MockBean
+    private Authentication authentication;
+
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
@@ -53,26 +56,24 @@ class UserControllerTest {
                             .build();
                 });
 
+        User user = User.builder()
+                .id(1L)
+                .email("tester@example.com")
+                .name("TEST")
+                .build();
 
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
-                .will(invocation -> {
-                    Long id = invocation.getArgument(0);
-                    UserModificationData modificationData =
-                            invocation.getArgument(1);
-                    return User.builder()
-                            .id(id)
-                            .email("tester@example.com")
-                            .name(modificationData.getName())
-                            .build();
-                });
 
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
+        given(userService.updateUser(
+                any(Authentication.class), eq(1L), any(UserModificationData.class)))
+                .willReturn(user);
+
+        given(userService.updateUser(any(Authentication.class), eq(100L), any(UserModificationData.class)))
                 .willThrow(new UserNotFoundException(100L));
 
         given(userService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
 
-        given(userService.updateUser(eq(9999L), any(UserModificationData.class)))
+        given(userService.updateUser(any(Authentication.class), eq(9999L), any(UserModificationData.class)))
                 .willThrow(new AccessDeniedException("9999L"));
     }
 
@@ -123,8 +124,6 @@ class UserControllerTest {
                 .andExpect(content().string(
                         containsString("\"name\":\"TEST\"")
                 ));
-
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
     }
 
     @Test
@@ -149,7 +148,7 @@ class UserControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
+                .updateUser(any(Authentication.class), eq(100L), any(UserModificationData.class));
     }
 
     @Test

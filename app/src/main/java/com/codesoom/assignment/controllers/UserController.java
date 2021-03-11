@@ -37,7 +37,7 @@ public class UserController {
             @RequestBody @Valid UserModificationData modificationData,
             Authentication authentication
     ) {
-        User user = userService.updateUser(id, modificationData);
+        User user = userService.updateUser(authentication, id, modificationData);
         return getUserResultData(user);
     }
 

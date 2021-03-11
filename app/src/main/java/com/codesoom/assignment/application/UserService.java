@@ -7,9 +7,11 @@ import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.Mapper;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import com.codesoom.assignment.errors.AccessDeniedException;
 
 @Service
 @Transactional
@@ -32,13 +34,19 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(Long id, UserModificationData modificationData) {
-        User user = findUser(id);
+    public User updateUser(Authentication authentication, Long id, UserModificationData modificationData) {
+        Long authenticatedId = (Long) authentication.getPrincipal();
 
+        if(!id.equals(authenticatedId)) {
+            throw new AccessDeniedException(authenticatedId);
+        }
+
+        final User user = findUser(id);
         User source = mapper.map(modificationData, User.class);
         user.changeWith(source);
 
         return user;
+
     }
 
     public User deleteUser(Long id) {

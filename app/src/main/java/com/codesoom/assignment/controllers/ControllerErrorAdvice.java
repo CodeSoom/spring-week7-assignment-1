@@ -39,6 +39,12 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Log-in failed");
     }
 
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ErrorResponse handleUserIdNotMatchException() {
+        return new ErrorResponse("Access denied");
+    }
+
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
