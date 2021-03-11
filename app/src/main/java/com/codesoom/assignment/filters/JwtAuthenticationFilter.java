@@ -2,6 +2,7 @@ package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.security.UserAuthentication;
+import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -36,8 +37,9 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
         if (authorization != null) {
             String accessToken = authorization.substring(PREFIX.length());
-            Long userId = authenticationService.parseToken(accessToken);
-            Authentication authentication = new UserAuthentication(userId);
+            Claims claims = authenticationService.parseToken(accessToken);
+            Authentication authentication = new UserAuthentication(
+                    claims.get("userId", Long.class), claims.get("role"));
 
             SecurityContext context = SecurityContextHolder.getContext();
             context.setAuthentication(authentication);

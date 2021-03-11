@@ -29,11 +29,11 @@ public class AuthenticationService {
             throw new LoginFailException(email);
         }
 
-        return jwtUtil.encode(user.getId());
+        return jwtUtil.encode(user);
     }
 
-    public Long parseToken(String accessToken) {
+    public Claims parseToken(String accessToken) {
         Claims claims = jwtUtil.decode(accessToken);
-        return claims.get("userId", Long.class);
+        return claims;
     }
 }

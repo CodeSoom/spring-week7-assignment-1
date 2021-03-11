@@ -3,9 +3,12 @@ package com.codesoom.assignment.controllers;
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.domain.Product;
+import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.dto.ProductData;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.ProductNotFoundException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +34,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ProductController.class)
 class ProductControllerTest {
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+            "eyJ1c2VySWQiOjEsInJvbGUiOiJST0xFX1VTRVIifQ." +
+            "SgLtYfTVUdvPF-gIP006U-_B7-wWMSUcJD3eoSOxHsE";
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+            "eyJ1c2VySWQiOjEsInJvbGUiOiJST0xFX1VTRVIifQ." +
+            "SgLtYfTVUdvPF-gIP006U-_B7-wWMSUcJD3eoSOxHsE_INVALID";
 
     @Autowired
     private MockMvc mockMvc;
@@ -43,6 +48,8 @@ class ProductControllerTest {
 
     @MockBean
     private AuthenticationService authenticationService;
+
+    private Claims validClaims;
 
     @BeforeEach
     void setUp() {
@@ -80,8 +87,12 @@ class ProductControllerTest {
         given(productService.deleteProduct(1000L))
                 .willThrow(new ProductNotFoundException(1000L));
 
-        given(authenticationService.parseToken(VALID_TOKEN)).willReturn(1L);
+        validClaims = Jwts.claims();
+        validClaims.put("userId", 1L);
+        validClaims.put("role", Role.ROLE_USER);
 
+        given(authenticationService.parseToken(VALID_TOKEN))
+                .willReturn(validClaims);
         given(authenticationService.parseToken(INVALID_TOKEN))
                 .willThrow(new InvalidTokenException(INVALID_TOKEN));
     }

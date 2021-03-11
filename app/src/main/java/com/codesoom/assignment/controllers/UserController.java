@@ -38,7 +38,7 @@ public class UserController {
     }
 
     @PatchMapping("{id}")
-    @PreAuthorize("isAuthenticated() and #id == authentication.principal")
+    @PreAuthorize("(isAuthenticated() and #id == authentication.principal) or hasAuthority('ROLE_ADMIN')")
     UserResultData update(
             @PathVariable Long id,
             @RequestBody @Valid UserModificationData modificationData,

@@ -30,6 +30,9 @@ public class User {
     private String password = "";
 
     @Builder.Default
+    private Role role = Role.ROLE_USER;
+
+    @Builder.Default
     private boolean deleted = false;
 
     public void changeWith(User source) {
@@ -49,5 +52,5 @@ public class User {
                                 PasswordEncoder passwordEncoder) {
         return !deleted && passwordEncoder.matches(password, this.password);
     }
-    
+
 }

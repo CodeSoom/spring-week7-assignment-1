@@ -2,12 +2,15 @@ package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
+import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,11 +33,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("UserController 클래스")
 @WebMvcTest(UserController.class)
 class UserControllerTest {
-    private static final Long parsedUserId = 1L;
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+            "eyJ1c2VySWQiOjEsInJvbGUiOiJST0xFX1VTRVIifQ." +
+            "SgLtYfTVUdvPF-gIP006U-_B7-wWMSUcJD3eoSOxHsE";
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+            "eyJ1c2VySWQiOjEsInJvbGUiOiJST0xFX1VTRVIifQ." +
+            "SgLtYfTVUdvPF-gIP006U-_B7-wWMSUcJD3eoSOxHsE_INVALID";
+    private static final String ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjEsInJvbGUiOiJST0xFX0FETUlOIn0." +
+            "gY_MzvqqZP5DbHVXGKn-ZGIyZAd3PpOdAleeJvp23tg";
 
     @Autowired
     private MockMvc mockMvc;
@@ -60,6 +67,10 @@ class UserControllerTest {
 
     private User user;
 
+    private Claims validClaims;
+    private Claims invalidClaims;
+    private Claims adminClaims;
+
     @BeforeEach
     void setUp() {
         validUserRegistrationData = createUserRegistrationData("valid@test.com");
@@ -76,11 +87,26 @@ class UserControllerTest {
                 .password("12345678")
                 .build();
 
+        validClaims = Jwts.claims();
+        validClaims.put("userId", user.getId());
+        validClaims.put("role", user.getRole());
+
+        invalidClaims = Jwts.claims();
+        invalidClaims.put("userId", user.getId() + 1000L);
+        invalidClaims.put("role", user.getRole());
+
+        adminClaims = Jwts.claims();
+        adminClaims.put("userId", 9999L);
+        adminClaims.put("role", Role.ROLE_ADMIN);
+
         given(authenticationService.parseToken(VALID_TOKEN))
-                .willReturn(parsedUserId);
+                .willReturn(validClaims);
 
         given(authenticationService.parseToken(INVALID_TOKEN))
-                .willReturn(parsedUserId + 1000);
+                .willReturn(invalidClaims);
+
+        given(authenticationService.parseToken(ADMIN_TOKEN))
+                .willReturn(adminClaims);
     }
 
     @Nested
@@ -204,7 +230,7 @@ class UserControllerTest {
                         .andExpect(status().isForbidden());
             }
         }
-        
+
         @Nested
         @DisplayName("액세스 토큰이 유효 하지 않다면")
         class Context_with_invalid_access_token {
@@ -231,6 +257,54 @@ class UserControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validUserModificationData)))
                         .andExpect(status().isUnauthorized());
+            }
+        }
+
+        @Nested
+        @DisplayName("관리자가 존재하는 회원을 수정한다면")
+        class Context_when_admin_edits_existing_user {
+            @BeforeEach
+            void setUp() {
+                given(userService.updateUser(eq(existingId), any(UserModificationData.class)))
+                        .willReturn(user);
+            }
+
+            @Test
+            @DisplayName("수정된 회원과 상태코드 200 OK 를 응답한다.")
+            void it_responds_the_updated_user_and_status_code_200() throws Exception {
+                mockMvc.perform(patch("/users/{id}", existingId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + ADMIN_TOKEN)
+                        .content(objectMapper.writeValueAsString(validUserModificationData)))
+                        .andExpect(jsonPath("id").exists())
+                        .andExpect(jsonPath("name").exists())
+                        .andExpect(jsonPath("email").exists())
+                        .andExpect(jsonPath("password").doesNotExist())
+                        .andExpect(status().isOk());
+            }
+        }
+
+        @Nested
+        @DisplayName("관리자가 존재하지 않는 회원을 수정한다면")
+        class Context_when_admin_edits_not_existing_user {
+            @BeforeEach
+            void setUp() {
+                given(userService.updateUser(eq(notExistingId), any(UserModificationData.class)))
+                        .willThrow(new UserNotFoundException(notExistingId));
+            }
+
+            @Test
+            @DisplayName("에러메시지와 상태코드 404 Not Found 를 응답한다.")
+            void it_responds_the_error_message_and_status_code_404() throws Exception {
+                mockMvc.perform(patch("/users/{id}", notExistingId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + ADMIN_TOKEN)
+                        .content(objectMapper.writeValueAsString(validUserModificationData)))
+                        .andExpect(jsonPath("name").doesNotExist())
+                        .andExpect(jsonPath("message").exists())
+                        .andExpect(status().isNotFound());
             }
         }
     }
@@ -271,6 +345,7 @@ class UserControllerTest {
                         .andExpect(status().isNotFound());
             }
         }
+
     }
 
     private UserModificationData createUserModificationData(String name) {

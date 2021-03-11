@@ -1,5 +1,6 @@
 package com.codesoom.assignment.utils;
 
+import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -18,9 +19,13 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String encode(Long userId) {
+    public String encode(User user) {
+        Claims claims = Jwts.claims();
+        claims.put("userId", user.getId());
+        claims.put("role", user.getRole());
+
         return Jwts.builder()
-                .claim("userId", userId)
+                .setClaims(claims)
                 .signWith(key)
                 .compact();
     }
