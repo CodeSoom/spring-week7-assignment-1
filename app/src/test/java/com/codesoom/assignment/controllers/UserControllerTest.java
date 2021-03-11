@@ -1,5 +1,6 @@
 package com.codesoom.assignment.controllers;
 
+import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserCreateData;
@@ -48,6 +49,9 @@ class UserControllerTest {
     private UserService userService;
 
     private Mapper mapper;
+
+    @MockBean
+    private AuthenticationService authenticationService;
 
     @Autowired
     private WebApplicationContext wac;
@@ -180,18 +184,16 @@ class UserControllerTest {
         @Nested
         @DisplayName("만약 사용자가 주어진다면")
         class Context_WithUser {
-            private UserCreateData userCreateData;
             private UserResultData userResultData;
 
             @BeforeEach
             void setUp() {
-                userCreateData = UserCreateData.builder()
+                userResultData = UserResultData.builder()
+                        .id(CREATED_ID)
                         .name(CREATE_USER_NAME)
                         .email(CREATE_USER_EMAIL)
                         .password(CREATE_USER_PASSWORD)
                         .build();
-
-                userResultData = mapper.map(userCreateData, UserResultData.class);
             }
 
             @Test
@@ -201,7 +203,7 @@ class UserControllerTest {
                         .will(invocation -> {
                             UserCreateData userCreateData = invocation.getArgument(0);
                             return UserResultData.builder()
-                                    .id(EXISTED_ID)
+                                    .id(CREATED_ID)
                                     .name(userCreateData.getName())
                                     .email(userCreateData.getEmail())
                                     .password(userCreateData.getPassword())
@@ -211,7 +213,7 @@ class UserControllerTest {
                 mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"createdName\",\"email\":\"createdEmail\",\"password\":\"createdPassword\"}"))
-                        .andExpect(content().string(containsString("\"id\":" + EXISTED_ID)))
+                        .andExpect(content().string(containsString("\"id\":" + userResultData.getId())))
                         .andExpect(jsonPath("name").value(userResultData.getName()))
                         .andExpect(jsonPath("email").value(userResultData.getEmail()))
                         .andExpect(jsonPath("password").value(userResultData.getPassword()))
