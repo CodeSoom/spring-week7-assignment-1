@@ -5,9 +5,11 @@ import com.codesoom.assignment.filters.AuthenticationErrorFilter;
 import com.codesoom.assignment.filters.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 import javax.servlet.Filter;
 
@@ -28,6 +30,10 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .addFilter(authenticationFilter)
                 .addFilterBefore(authenticationErrorFilter,
-                        JwtAuthenticationFilter.class);
+                        JwtAuthenticationFilter.class)
+                .exceptionHandling()
+                .authenticationEntryPoint(
+                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
+                );
     }
 }
