@@ -4,11 +4,9 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
-import com.codesoom.assignment.errors.AccessDeniedException;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.Mapper;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,11 +40,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(Authentication authentication, Long id, UserModificationData modificationData) {
-        Long userDetailId = (Long) authentication.getPrincipal();
-        if (!id.equals(userDetailId)) {
-            throw new AccessDeniedException(userDetailId);
-        }
+    public User updateUser(Long id, UserModificationData modificationData) {
         final User user = findUser(id);
 
         final String encodedPassword = passwordEncoder.encode(modificationData.getPassword());

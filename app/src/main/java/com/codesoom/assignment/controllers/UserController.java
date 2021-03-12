@@ -6,7 +6,6 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -39,10 +38,9 @@ public class UserController {
     @PatchMapping("{id}")
     UserResultData update(
             @PathVariable Long id,
-            @RequestBody @Valid UserModificationData modificationData,
-            Authentication authentication
+            @RequestBody @Valid UserModificationData modificationData
     ) {
-        User user = userService.updateUser(authentication, id, modificationData);
+        User user = userService.updateUser(id, modificationData);
         return getUserResultData(user);
     }
 

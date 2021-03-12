@@ -4,7 +4,6 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
-import com.codesoom.assignment.errors.AccessDeniedException;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
@@ -134,24 +133,13 @@ class UserServiceTest {
                 .password(MODIFIED_PASSWORD)
                 .build();
 
-        User user = userService.updateUser(authentication, USER1_ID, modificationData);
+        User user = userService.updateUser(USER1_ID, modificationData);
 
         assertThat(user.getId()).isEqualTo(USER1_ID);
         assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
         assertThat(user.getName()).isEqualTo(MODIFIED_NAME);
 
         verify(userRepository).findByIdAndDeletedIsFalse(USER1_ID);
-    }
-
-    @Test
-    void updateUserWithDifferentAuthentication() {
-        UserModificationData modificationData = UserModificationData.builder()
-                .name(MODIFIED_NAME)
-                .password(MODIFIED_PASSWORD)
-                .build();
-
-        assertThatThrownBy(() -> userService.updateUser(authentication, USER2_ID, modificationData))
-                .isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
@@ -164,7 +152,7 @@ class UserServiceTest {
                 .password(MODIFIED_PASSWORD)
                 .build();
 
-        assertThatThrownBy(() -> userService.updateUser(authentication, NOT_EXIST_USER_ID, modificationData))
+        assertThatThrownBy(() -> userService.updateUser(NOT_EXIST_USER_ID, modificationData))
                 .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(NOT_EXIST_USER_ID);
@@ -181,7 +169,7 @@ class UserServiceTest {
                 .build();
 
         assertThatThrownBy(
-                () -> userService.updateUser(authentication, DELETED_USER_ID, modificationData)
+                () -> userService.updateUser(DELETED_USER_ID, modificationData)
         )
                 .isInstanceOf(UserNotFoundException.class);
 

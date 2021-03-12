@@ -6,6 +6,7 @@ import com.codesoom.assignment.filters.CharacterFilter;
 import com.codesoom.assignment.filters.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -37,11 +38,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(characterFilter.getFilter(), CsrfFilter.class)
                 .csrf()
                 .disable()
+                .formLogin()
+                .disable()
                 .addFilter(authenticationFilter)
                 .addFilterBefore(authenticationErrorFilter,
                         JwtAuthenticationFilter.class)
-                .formLogin()
-                .disable()
+                .authorizeRequests()
+                .antMatchers(HttpMethod.PATCH, "/users/{id}")
+                .access("@guard.checkIdMatch(authentication,#id)")
+                .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()

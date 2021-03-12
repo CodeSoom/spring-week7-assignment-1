@@ -1,7 +1,6 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.dto.ErrorResponse;
-import com.codesoom.assignment.errors.AccessDeniedException;
 import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.errors.ProductNotFoundException;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
@@ -39,9 +38,4 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Log-in failed");
     }
 
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler(AccessDeniedException.class)
-    public ErrorResponse handleUserIdNotMatchException() {
-        return new ErrorResponse("Access denied");
-    }
 }

@@ -1,6 +1,7 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.application.Guard;
 import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
@@ -40,6 +41,7 @@ class UserControllerTest {
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
     private static final Long USER2 = 2L;
+    public static final long USER1_ID = 1L;
 
     @Autowired
     private MockMvc mockMvc;
@@ -55,6 +57,9 @@ class UserControllerTest {
 
     @MockBean
     private SecurityContext securityContext;
+
+    @MockBean(name = "guard")
+    private Guard guard;
 
     @BeforeEach
     void setUp() {
@@ -75,11 +80,11 @@ class UserControllerTest {
                 .build();
 
         given(userService.updateUser(
-                any(Authentication.class), eq(1L), any(UserModificationData.class)))
+                eq(1L), any(UserModificationData.class)))
                 .willReturn(user);
 
         given(userService.updateUser(
-                any(Authentication.class), eq(100L), any(UserModificationData.class)))
+                eq(100L), any(UserModificationData.class)))
                 .willThrow(new UserNotFoundException(100L));
 
         given(userService.deleteUser(100L))
@@ -94,7 +99,7 @@ class UserControllerTest {
                 .willThrow(new InvalidTokenException(INVALID_TOKEN));
 
         given(userService.updateUser(
-                any(Authentication.class), eq(USER2), any(UserModificationData.class)))
+                eq(USER2), any(UserModificationData.class)))
                 .willThrow(new AccessDeniedException(USER2));
     }
 
@@ -132,6 +137,9 @@ class UserControllerTest {
 
     @Test
     void updateUserWithValidAttributes() throws Exception {
+        given(guard.checkIdMatch(any(Authentication.class), eq(USER1_ID)))
+                .willReturn(true);
+
         mockMvc.perform(
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -149,6 +157,9 @@ class UserControllerTest {
 
     @Test
     void updateUserWithInValidAttributes() throws Exception {
+        given(guard.checkIdMatch(any(Authentication.class), eq(USER1_ID)))
+                .willReturn(true);
+
         mockMvc.perform(
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -182,23 +193,17 @@ class UserControllerTest {
 
     @Test
     void updateUserWithInvalidAttributes() throws Exception {
+        given(guard.checkIdMatch(any(Authentication.class), eq(USER1_ID)))
+                .willReturn(true);
+
         mockMvc.perform(
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
+                        .header("Authorization", "Bearer " + USER1_VALID_TOKEN)
+
         )
                 .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void updateUserWithNotExsitedId() throws Exception {
-        mockMvc.perform(
-                patch("/users/100")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
-        )
-                .andExpect(status().isNotFound());
     }
 
     @Test
