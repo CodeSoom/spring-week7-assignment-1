@@ -1,7 +1,7 @@
 package com.codesoom.assignment.controllers;
 
+import com.codesoom.assignment.application.AuthenticationGuard;
 import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.application.Guard;
 import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
@@ -58,8 +58,8 @@ class UserControllerTest {
     @MockBean
     private SecurityContext securityContext;
 
-    @MockBean(name = "guard")
-    private Guard guard;
+    @MockBean(name = "authenticationGuard")
+    private AuthenticationGuard authenticationGuard;
 
     @BeforeEach
     void setUp() {
@@ -137,7 +137,7 @@ class UserControllerTest {
 
     @Test
     void updateUserWithValidAttributes() throws Exception {
-        given(guard.checkIdMatch(any(Authentication.class), eq(USER1_ID)))
+        given(authenticationGuard.checkIdMatch(any(Authentication.class), eq(USER1_ID)))
                 .willReturn(true);
 
         mockMvc.perform(
@@ -157,7 +157,7 @@ class UserControllerTest {
 
     @Test
     void updateUserWithInValidAttributes() throws Exception {
-        given(guard.checkIdMatch(any(Authentication.class), eq(USER1_ID)))
+        given(authenticationGuard.checkIdMatch(any(Authentication.class), eq(USER1_ID)))
                 .willReturn(true);
 
         mockMvc.perform(
@@ -193,7 +193,7 @@ class UserControllerTest {
 
     @Test
     void updateUserWithInvalidAttributes() throws Exception {
-        given(guard.checkIdMatch(any(Authentication.class), eq(USER1_ID)))
+        given(authenticationGuard.checkIdMatch(any(Authentication.class), eq(USER1_ID)))
                 .willReturn(true);
 
         mockMvc.perform(

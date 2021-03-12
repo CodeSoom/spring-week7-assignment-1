@@ -7,7 +7,7 @@ import org.springframework.security.core.Authentication;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GuardTest {
+class AuthenticationGuardTest {
 
     @DisplayName("인증객체의 사용자 id와 주어진 사용자 id 동일 여부를 비교한다")
     @Test
@@ -16,9 +16,9 @@ class GuardTest {
         Long userId2 = 2L;
 
         Authentication authentication = new UserAuthentication(userId1);
-        Guard guard = new Guard();
+        AuthenticationGuard authenticationGuard = new AuthenticationGuard();
 
-        assertThat(guard.checkIdMatch(authentication, userId2)).isFalse();
-        assertThat(guard.checkIdMatch(null, userId2)).isFalse();
+        assertThat(authenticationGuard.checkIdMatch(authentication, userId2)).isFalse();
+        assertThat(authenticationGuard.checkIdMatch(null, userId2)).isFalse();
     }
 }

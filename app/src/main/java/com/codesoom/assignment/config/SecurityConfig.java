@@ -45,7 +45,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         JwtAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers(HttpMethod.PATCH, "/users/{id}")
-                .access("@guard.checkIdMatch(authentication,#id)")
+                .access("@authenticationGuard.checkIdMatch(authentication,#id)")
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

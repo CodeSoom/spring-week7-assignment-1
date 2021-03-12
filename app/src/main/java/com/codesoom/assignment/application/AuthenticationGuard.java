@@ -4,7 +4,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
-public class Guard {
+public class AuthenticationGuard {
 
     public boolean checkIdMatch(Authentication authentication, Long id) {
         if (authentication == null) {
