@@ -41,8 +41,6 @@ public class ProductController {
     }
 
     @PostMapping
-    // 누가 이걸 하는 거지? => authentication
-    // 이건 로그인해야 해! => authorization
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
     public Product create(
@@ -57,8 +55,7 @@ public class ProductController {
     }
 
     @PatchMapping("{id}")
-    // 누가 이걸 하는 거지? => authentication
-    // 이건 로그인해야 해! => authorization
+    @PreAuthorize("isAuthenticated()")
     public Product update(
             @RequestAttribute Long userId,
             @PathVariable Long id,
@@ -68,8 +65,7 @@ public class ProductController {
     }
 
     @DeleteMapping("{id}")
-    // 누가 이걸 하는 거지? => authentication
-    // 이건 로그인해야 해! => authorization
+    @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void destroy(
             @RequestAttribute Long userId,
