@@ -8,6 +8,7 @@ import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,15 +40,23 @@ public class ProductController {
     }
 
     @PostMapping
+    // 누가 이걸 하는 거지? => authentication
+    // 이건 로그인해야 해! => authorization
     @ResponseStatus(HttpStatus.CREATED)
     public Product create(
             @RequestAttribute Long userId,
-            @RequestBody @Valid ProductData productData
+            @RequestBody @Valid ProductData productData,
+            Authentication authentication
     ) {
+        System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+        System.out.println(authentication);
+        System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
         return productService.createProduct(productData);
     }
 
     @PatchMapping("{id}")
+    // 누가 이걸 하는 거지? => authentication
+    // 이건 로그인해야 해! => authorization
     public Product update(
             @RequestAttribute Long userId,
             @PathVariable Long id,
@@ -57,6 +66,8 @@ public class ProductController {
     }
 
     @DeleteMapping("{id}")
+    // 누가 이걸 하는 거지? => authentication
+    // 이건 로그인해야 해! => authorization
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void destroy(
             @RequestAttribute Long userId,

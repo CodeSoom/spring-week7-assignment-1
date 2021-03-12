@@ -3,6 +3,9 @@ package com.codesoom.assignment.filters;
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -25,6 +28,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws IOException, ServletException {
+        // TODO: 이 부분을 지우고 싶다.
         if (filterWithPathAndMethod(request)) {
             chain.doFilter(request, response);
             return;
@@ -39,6 +43,11 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         String accessToken = authorization.substring("Bearer ".length());
 
         authenticationService.parseToken(accessToken);
+        // TODO: userId를 넘겨주자 => authentication
+
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = null;
+        context.setAuthentication(authentication);
 
         chain.doFilter(request, response);
     }

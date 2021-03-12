@@ -28,6 +28,8 @@ public class UserController {
     }
 
     @PatchMapping("{id}")
+    // 누가 이걸 하는 거지? => authentication
+    // 이건 로그인해야 해! => authorization
     UserResultData update(
             @PathVariable Long id,
             @RequestBody @Valid UserModificationData modificationData
@@ -37,6 +39,8 @@ public class UserController {
     }
 
     @DeleteMapping("{id}")
+    // 누가 이걸 하는 거지? => authentication
+    // 이건 로그인해야 해! => authorization
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void destroy(@PathVariable Long id) {
         userService.deleteUser(id);
