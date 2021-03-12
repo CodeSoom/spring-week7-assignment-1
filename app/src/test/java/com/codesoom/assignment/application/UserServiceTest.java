@@ -9,8 +9,10 @@ import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,6 +36,8 @@ class UserServiceTest {
 
     private Authentication authentication = mock(Authentication.class);
 
+    private Mapper mapper;
+
     private static final String USER2_EMAIL_ADDRESS = "test2@test.com";
     private static final Long NOT_EXIST_USER_ID = 100L;
     private static final Long USER1_ID = 1L;
@@ -47,7 +51,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        Mapper mapper = DozerBeanMapperBuilder.buildDefault();
+        mapper = DozerBeanMapperBuilder.buildDefault();
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -92,6 +96,15 @@ class UserServiceTest {
 
         given(authentication.getPrincipal()).willReturn(USER1_ID);
     }
+
+    @AfterEach
+    void after() {
+        Mockito.reset(mapper);
+        Mockito.reset(userService);
+        Mockito.reset(userRepository);
+        Mockito.reset(authentication);
+    }
+
 
     @Test
     void registerUser() {
