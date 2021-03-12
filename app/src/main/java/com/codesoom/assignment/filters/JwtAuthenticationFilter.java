@@ -28,11 +28,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws IOException, ServletException {
-        // TODO: 이 부분을 지우고 싶다.
-        if (filterWithPathAndMethod(request)) {
-            chain.doFilter(request, response);
-            return;
-        }
 
         String authorization = request.getHeader("Authorization");
 
@@ -46,19 +41,5 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         }
 
         chain.doFilter(request, response);
-    }
-
-    private boolean filterWithPathAndMethod(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        if (!path.startsWith("/products")) {
-            return true;
-        }
-
-        String method = request.getMethod();
-        if (method.equals("GET")) {
-            return true;
-        }
-
-        return false;
     }
 }

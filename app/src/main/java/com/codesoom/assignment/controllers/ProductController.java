@@ -10,6 +10,7 @@ import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -43,6 +44,7 @@ public class ProductController {
     // 누가 이걸 하는 거지? => authentication
     // 이건 로그인해야 해! => authorization
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("isAuthenticated()")
     public Product create(
             @RequestAttribute Long userId,
             @RequestBody @Valid ProductData productData,
