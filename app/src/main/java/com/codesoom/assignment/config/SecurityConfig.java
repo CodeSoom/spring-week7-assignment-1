@@ -36,7 +36,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         Filter authenticationFilter = new JwtAuthenticationFilter(authenticationService);
         Filter authenticationErrorFilter = new AuthenticationErrorFilter();
-        Filter encodingFilter = new EncodingFilter();
 
         http
                 .csrf().disable()
