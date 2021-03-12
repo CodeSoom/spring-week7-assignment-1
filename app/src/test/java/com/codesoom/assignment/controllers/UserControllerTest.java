@@ -201,4 +201,13 @@ class UserControllerTest {
         mockMvc.perform(delete("/users/1"))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void destroyWithInvalidAccessToken() throws Exception {
+        mockMvc.perform(
+                delete("/users/100")
+                        .header("Authorization", "Bearer " + invalidToken)
+        )
+                .andExpect(status().isUnauthorized());
+    }
 }
