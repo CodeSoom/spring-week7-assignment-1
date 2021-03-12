@@ -5,6 +5,8 @@ import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,6 +77,9 @@ class UserControllerTest {
 
         given(userService.updateUser(any(Authentication.class), eq(9999L), any(UserModificationData.class)))
                 .willThrow(new AccessDeniedException("9999L"));
+
+        given(authenticationService.parseToken(INVALID_TOKEN))
+                .willThrow(new InvalidTokenException(INVALID_TOKEN));
     }
 
     @Test
@@ -110,6 +115,19 @@ class UserControllerTest {
     }
 
     @Test
+    void registerUserWithExistedEmail() throws Exception {
+        given(userService.registerUser(any(UserRegistrationData.class)))
+                .willThrow(new UserEmailDuplicationException("tester@example.com"));
+
+        mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"tester@example.com\"," +
+                        "\"name\":\"Tester\",\"password\":\"test\"}")
+        )
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void updateUserWithValidAttributes() throws Exception {
         mockMvc.perform(
                 patch("/users/1")
@@ -131,8 +149,8 @@ class UserControllerTest {
         mockMvc.perform(
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"password\":\"\"}")
-                        .header("Authorization", "Bearer " + INVALID_TOKEN)
+                        .content("{}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isBadRequest());
     }
@@ -160,6 +178,17 @@ class UserControllerTest {
                         .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateUserWithInvalidToken() throws Exception {
+        mockMvc.perform(
+                patch("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + INVALID_TOKEN)
+        )
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
