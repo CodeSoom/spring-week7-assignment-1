@@ -25,6 +25,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
+    private final String validToken = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -104,6 +107,7 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + validToken)
         )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -122,16 +126,18 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
+                        .header("Authorization", "Bearer " + validToken)
         )
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void updateUserWithNotExsitedId() throws Exception {
+    void updateUserWithNotExistedId() throws Exception {
         mockMvc.perform(
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                        .header("Authorization", "Bearer " + validToken)
         )
                 .andExpect(status().isNotFound());
 
@@ -147,8 +153,6 @@ class UserControllerTest {
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
         )
                 .andExpect(status().isUnauthorized());
-
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
     }
 
     @Test
