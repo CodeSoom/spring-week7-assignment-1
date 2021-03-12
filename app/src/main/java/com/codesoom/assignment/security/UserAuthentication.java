@@ -16,6 +16,7 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         this.userId = userId;
     }
 
+    @lombok.Generated
     @Override
     public Object getCredentials() {
         return null;

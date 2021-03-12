@@ -39,6 +39,7 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Log-in failed");
     }
 
+    @lombok.Generated
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(AccessDeniedException.class)
     public ErrorResponse handleUserIdNotMatchException() {
