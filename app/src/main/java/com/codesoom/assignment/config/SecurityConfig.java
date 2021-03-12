@@ -13,7 +13,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.web.filter.CorsFilter;
 
 import javax.servlet.Filter;
 
@@ -25,6 +27,7 @@ import javax.servlet.Filter;
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final AuthenticationService authenticationService;
+    private final CorsFilter corsFilter;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -35,18 +38,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
                 .addFilterBefore(characterFilter.getFilter(), CsrfFilter.class)
-
                 .csrf()
                 .disable()
                 .formLogin()
                 .disable()
                 .addFilter(authenticationFilter)
+                .addFilterBefore(corsFilter,
+                        UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(authenticationErrorFilter,
                         JwtAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers(HttpMethod.PATCH, "/users/{id}")
                 .access("@authenticationGuard.checkIdMatch(authentication,#id)")
-
                 // enable h2-console
                 .and()
                 .headers()
