@@ -2,7 +2,6 @@ package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
-import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
@@ -87,15 +86,15 @@ class UserControllerTest {
 
         validClaims = Jwts.claims();
         validClaims.put("userId", user.getId());
-        validClaims.put("role", user.getRole());
+        validClaims.put("role", user.getRole().getName());
 
         invalidClaims = Jwts.claims();
         invalidClaims.put("userId", user.getId() + 1000L);
-        invalidClaims.put("role", user.getRole());
+        invalidClaims.put("role", user.getRole().getName());
 
         adminClaims = Jwts.claims();
         adminClaims.put("userId", 9999L);
-        adminClaims.put("role", Role.ROLE_ADMIN);
+        adminClaims.put("role", "ROLE_ADMIN");
 
         given(authenticationService.parseToken(VALID_TOKEN))
                 .willReturn(validClaims);

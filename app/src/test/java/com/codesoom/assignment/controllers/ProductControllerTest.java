@@ -48,6 +48,7 @@ class ProductControllerTest {
     private AuthenticationService authenticationService;
 
     private Claims validClaims;
+    private Role role;
 
     @BeforeEach
     void setUp() {
@@ -87,7 +88,7 @@ class ProductControllerTest {
 
         validClaims = Jwts.claims();
         validClaims.put("userId", 1L);
-        validClaims.put("role", Role.ROLE_USER);
+        validClaims.put("role", "ROLE_USER");
 
         given(authenticationService.parseToken(VALID_TOKEN))
                 .willReturn(validClaims);

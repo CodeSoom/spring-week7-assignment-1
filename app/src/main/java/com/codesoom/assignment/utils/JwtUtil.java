@@ -22,7 +22,7 @@ public class JwtUtil {
     public String encode(User user) {
         Claims claims = Jwts.claims();
         claims.put("userId", user.getId());
-        claims.put("role", user.getRole());
+        claims.put("role", user.getRole().getName());
 
         return Jwts.builder()
                 .setClaims(claims)

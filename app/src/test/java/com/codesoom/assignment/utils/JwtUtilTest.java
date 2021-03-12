@@ -1,6 +1,5 @@
 package com.codesoom.assignment.utils;
 
-import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import io.jsonwebtoken.Claims;
@@ -30,7 +29,6 @@ class JwtUtilTest {
                 .id(1L)
                 .name("name")
                 .password("12345678")
-                .role(Role.ROLE_USER)
                 .build();
     }
 
@@ -46,7 +44,7 @@ class JwtUtilTest {
         Claims claims = jwtUtil.decode(VALID_TOKEN);
 
         assertThat(claims.get("userId", Long.class)).isEqualTo(user.getId());
-        assertThat(claims.get("role")).isEqualTo(user.getRole().name());
+        assertThat(claims.get("role")).isEqualTo(user.getRole().getName());
     }
 
     @Test

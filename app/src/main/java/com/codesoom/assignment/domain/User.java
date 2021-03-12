@@ -7,8 +7,11 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Entity
 @Getter
@@ -29,11 +32,19 @@ public class User {
     @Builder.Default
     private String password = "";
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id")
     @Builder.Default
-    private Role role = Role.ROLE_USER;
+    private Role role = Role.builder()
+            .name("ROLE_USER")
+            .build();
 
     @Builder.Default
     private boolean deleted = false;
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 
     public void changeWith(User source) {
         name = source.name;

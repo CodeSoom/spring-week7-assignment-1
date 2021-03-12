@@ -1,5 +1,7 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.Role;
+import com.codesoom.assignment.domain.RoleRepository;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
@@ -17,11 +19,16 @@ import javax.transaction.Transactional;
 public class UserService {
     private final Mapper mapper;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(Mapper dozerMapper, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(Mapper dozerMapper,
+                       UserRepository userRepository,
+                       RoleRepository roleRepository,
+                       PasswordEncoder passwordEncoder) {
         this.mapper = dozerMapper;
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -33,10 +40,16 @@ public class UserService {
 
         User user = mapper.map(registrationData, User.class);
 
+        Role role = user.getRole();
+        Role foundRole = roleRepository.findByName(role.getName())
+                .orElseGet(() -> roleRepository.save(role));
+
+        user.setRole(foundRole);
         user.changePassword(registrationData.getPassword(), passwordEncoder);
 
         return userRepository.save(user);
     }
+
 
     public User updateUser(Long id, UserModificationData modificationData) {
         User user = findUser(id);

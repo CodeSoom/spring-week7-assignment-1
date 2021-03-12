@@ -1,6 +1,5 @@
 package com.codesoom.assignment.application;
 
-import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.errors.InvalidTokenException;
@@ -82,7 +81,7 @@ class AuthenticationServiceTest {
         Claims claims = authenticationService.parseToken(VALID_TOKEN);
 
         assertThat(claims.get("userId", Long.class)).isEqualTo(1L);
-        assertThat(claims.get("role")).isEqualTo(Role.ROLE_USER.name());
+        assertThat(claims.get("role")).isEqualTo("ROLE_USER");
     }
 
     @Test
