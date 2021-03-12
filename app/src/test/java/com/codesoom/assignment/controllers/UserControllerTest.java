@@ -5,6 +5,7 @@ import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,6 +70,11 @@ class UserControllerTest {
 
         given(userService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
+
+        given(authenticationService.parseToken(validToken)).willReturn(1L);
+
+        given(authenticationService.parseToken(invalidToken))
+                .willThrow(new InvalidTokenException(invalidToken));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.codesoom.assignment.controllers;
 
+import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
@@ -18,8 +19,12 @@ import javax.validation.Valid;
 public class UserController {
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    private final AuthenticationService authenticationService;
+
+    public UserController(UserService userService,
+                          AuthenticationService authenticationService) {
         this.userService = userService;
+        this.authenticationService = authenticationService;
     }
 
     @PostMapping
