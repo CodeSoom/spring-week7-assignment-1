@@ -41,7 +41,7 @@ class UserControllerTest {
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
     private static final Long USER2 = 2L;
-    public static final long USER1_ID = 1L;
+    public static final Long USER1 = 1L;
 
     @Autowired
     private MockMvc mockMvc;
@@ -137,11 +137,11 @@ class UserControllerTest {
 
     @Test
     void updateUserWithValidAttributes() throws Exception {
-        given(authenticationGuard.checkIdMatch(any(Authentication.class), eq(USER1_ID)))
+        given(authenticationGuard.checkIdMatch(any(Authentication.class), eq(USER1)))
                 .willReturn(true);
 
         mockMvc.perform(
-                patch("/users/1")
+                patch("/users/" + USER1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
                         .header("Authorization", "Bearer " + VALID_TOKEN)
@@ -157,11 +157,11 @@ class UserControllerTest {
 
     @Test
     void updateUserWithInValidAttributes() throws Exception {
-        given(authenticationGuard.checkIdMatch(any(Authentication.class), eq(USER1_ID)))
+        given(authenticationGuard.checkIdMatch(any(Authentication.class), eq(USER1)))
                 .willReturn(true);
 
         mockMvc.perform(
-                patch("/users/1")
+                patch("/users/" + USER1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"1\"}")
                         .header("Authorization", "Bearer " + VALID_TOKEN)
@@ -172,7 +172,7 @@ class UserControllerTest {
     @Test
     void updateUserWithInvalidToken() throws Exception {
         mockMvc.perform(
-                patch("/users/1")
+                patch("/users/" + USER1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
                         .header("Authorization", "Bearer " + INVALID_TOKEN)
@@ -183,7 +183,7 @@ class UserControllerTest {
     @Test
     void updateUserWithAccessDeniedToken() throws Exception {
         mockMvc.perform(
-                patch("/users/2")
+                patch("/users/" + USER2)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
                         .header("Authorization", "Bearer " + USER1_VALID_TOKEN)
@@ -193,11 +193,11 @@ class UserControllerTest {
 
     @Test
     void updateUserWithInvalidAttributes() throws Exception {
-        given(authenticationGuard.checkIdMatch(any(Authentication.class), eq(USER1_ID)))
+        given(authenticationGuard.checkIdMatch(any(Authentication.class), eq(USER1)))
                 .willReturn(true);
 
         mockMvc.perform(
-                patch("/users/1")
+                patch("/users/" + USER1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
                         .header("Authorization", "Bearer " + USER1_VALID_TOKEN)
@@ -208,7 +208,7 @@ class UserControllerTest {
 
     @Test
     void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
+        mockMvc.perform(delete("/users/" + USER1))
                 .andExpect(status().isNoContent());
 
         verify(userService).deleteUser(1L);
