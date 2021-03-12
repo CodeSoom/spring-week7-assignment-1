@@ -1,19 +1,18 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.config.AppConfig;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
-import com.github.dozermapper.core.DozerBeanMapperBuilder;
-import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -47,12 +46,15 @@ class UserServiceTest {
 
     private SecurityContext securityContext = mock(SecurityContext.class);
 
+    @Autowired
+    private AppConfig appConfig;
+
     @BeforeEach
     void setUp() {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        Mapper mapper = DozerBeanMapperBuilder.buildDefault();
+        appConfig = new AppConfig();
+        PasswordEncoder passwordEncoder = appConfig.passwordEncoder();
 
-        userService = new UserService(mapper, userRepository, passwordEncoder);
+        userService = new UserService(userRepository, passwordEncoder);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
                 .willReturn(true);
