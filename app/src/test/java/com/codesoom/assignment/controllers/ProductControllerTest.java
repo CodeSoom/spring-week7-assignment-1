@@ -7,7 +7,6 @@ import com.codesoom.assignment.dto.ProductCreateData;
 import com.codesoom.assignment.dto.ProductResultData;
 import com.codesoom.assignment.dto.ProductUpdateData;
 import com.codesoom.assignment.errors.InvalidTokenException;
-import com.codesoom.assignment.errors.ProductBadRequestException;
 import com.codesoom.assignment.errors.ProductNotFoundException;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
@@ -68,9 +67,6 @@ class ProductControllerTest {
     private static final Long CREATED_ID = 2L;
     private static final Long NOT_EXISTED_ID = 100L;
 
-//    @Autowired
-//    private WebApplicationContext wac;
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -92,11 +88,6 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() {
-//        mockMvc = webAppContextSetup(wac).addFilter(((request, response, chain) -> {
-//            response.setCharacterEncoding("UTF-8");
-//            chain.doFilter(request, response);
-//        })).build();
-
         this.mapper = DozerBeanMapperBuilder.buildDefault();
 
         setupProductOne = Product.builder()
@@ -232,9 +223,6 @@ class ProductControllerTest {
             @Test
             @DisplayName("요청이 잘못 되었다는 예외를 던지고 BAD_REQUEST를 리턴한다")
             void itThrowsProductBadRequestExceptionAndReturnsBAD_REQUESTHttpStatus() throws Exception {
-                given(productService.createProduct(any(ProductCreateData.class)))
-                        .willThrow(new ProductBadRequestException("name"));
-
                 mockMvc.perform(
                         post("/products")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -242,7 +230,6 @@ class ProductControllerTest {
                             .content("{\"name\":\"\" , \"maker\":\"createdMaker\", \"price\":200, \"imageUrl\":\"createdImage\"}")
                 )
                         .andDo(print())
-//                        .andExpect(content().string(containsString("Product bad request")))
                         .andExpect(status().isBadRequest());
             }
         }
@@ -253,9 +240,6 @@ class ProductControllerTest {
             @Test
             @DisplayName("요청이 잘못 되었다는 예외를 던지고 BAD_REQUEST를 리턴한다")
             void itThrowsProductBadRequestExceptionAndReturnsBAD_REQUESTHttpStatus() throws Exception {
-                given(productService.createProduct(any(ProductCreateData.class)))
-                        .willThrow(new ProductBadRequestException("maker"));
-
                 mockMvc.perform(
                         post("/products")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -263,7 +247,6 @@ class ProductControllerTest {
                             .content("{\"name\":\"createdName\" , \"maker\":\"\", \"price\":200, \"imageUrl\":\"createdImage\"}")
                 )
                         .andDo(print())
-//                        .andExpect(content().string(containsString("Product bad request")))
                         .andExpect(status().isBadRequest());
             }
         }
@@ -274,9 +257,6 @@ class ProductControllerTest {
             @Test
             @DisplayName("요청이 잘못 되었다는 예외를 던지고 BAD_REQUEST를 리턴한다")
             void itThrowsProductBadRequestExceptionAndReturnsBAD_REQUESTHttpStatus() throws Exception {
-                given(productService.createProduct(any(ProductCreateData.class)))
-                        .willThrow(new ProductBadRequestException("price"));
-
                 mockMvc.perform(
                         post("/products")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -284,7 +264,6 @@ class ProductControllerTest {
                             .content("{\"name\":\"createdName\" , \"maker\":\"createdMaker\", \"price\": null, \"imageUrl\":\"createdImage\"}")
                 )
                         .andDo(print())
-//                        .andExpect(content().string(containsString("Product bad request")))
                         .andExpect(status().isBadRequest());
             }
         }
@@ -307,7 +286,6 @@ class ProductControllerTest {
                             .content("{\"name\":\"createdName\" , \"maker\":\"createdMaker\", \"price\":200, \"imageUrl\":\"createdImage\"}")
                 )
                         .andDo(print())
-//                        .andExpect(content().string(containsString("Invalid token")))
                         .andExpect(status().isUnauthorized());
             }
         }
@@ -401,16 +379,12 @@ class ProductControllerTest {
             @Test
             @DisplayName("요청이 잘못 되었다는 메세지와 BAD_REQUEST를 응답한다")
             void itThrowsProductBadRequestExceptionAndReturnsBAD_REQUESTHttpStatus() throws Exception {
-                given(productService.updateProduct(eq(givenExistedId), any(ProductUpdateData.class)))
-                        .willThrow(new ProductBadRequestException("name"));
-
                 mockMvc.perform(
                         patch("/products/" + givenExistedId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + EXISTED_TOKEN)
                         .content("{\"name\":\"\" , \"maker\":\"updatedMaker\", \"price\":300, \"imageUrl\":\"updatedImage\"}"))
                         .andDo(print())
-//                        .andExpect(content().string(containsString("Product bad request")))
                         .andExpect(status().isBadRequest());
 
             }
@@ -424,9 +398,6 @@ class ProductControllerTest {
             @Test
             @DisplayName("요청이 잘못 되었다는 메세지와 BAD_REQUEST를 응답한다")
             void itThrowsProductBadRequestExceptionAndReturnsBAD_REQUESTHttpStatus() throws Exception {
-                given(productService.updateProduct(eq(givenExistedId), any(ProductUpdateData.class)))
-                        .willThrow(new ProductBadRequestException("maker"));
-
                 mockMvc.perform(
                         patch("/products/" + givenExistedId)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -434,7 +405,6 @@ class ProductControllerTest {
                             .content("{\"name\":\"updatedName\" , \"maker\":\"\", \"price\":300, \"imageUrl\":\"updatedImage\"}")
                 )
                         .andDo(print())
-//                        .andExpect(content().string(containsString("Product bad request")))
                         .andExpect(status().isBadRequest());
             }
         }
@@ -447,9 +417,6 @@ class ProductControllerTest {
             @Test
             @DisplayName("요청이 잘못 되었다는 메세지와 BAD_REQUEST를 응답한다")
             void itThrowsProductBadRequestExceptionAndReturnsBAD_REQUESTHttpStatus() throws Exception {
-                given(productService.updateProduct(eq(givenExistedId), any(ProductUpdateData.class)))
-                        .willThrow(new ProductBadRequestException("price"));
-
                 mockMvc.perform(
                         patch("/products/" + givenExistedId)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -457,7 +424,6 @@ class ProductControllerTest {
                             .content("{\"name\":\"updatedName\" , \"maker\":\"updatedMaker\", \"price\": null, \"imageUrl\":\"updatedImage\"}")
                 )
                         .andDo(print())
-//                        .andExpect(content().string(containsString("Product bad request")))
                         .andExpect(status().isBadRequest());
             }
         }
@@ -481,7 +447,6 @@ class ProductControllerTest {
                             .content("{\"name\":\"updatedName\" , \"maker\":\"updatedMaker\", \"price\":300, \"imageUrl\":\"updatedImage\"}")
                 )
                         .andDo(print())
-//                        .andExpect(content().string(containsString("Invalid token")))
                         .andExpect(status().isUnauthorized());
             }
         }
@@ -540,7 +505,6 @@ class ProductControllerTest {
                             .header("Authorization", "Bearer " + EXISTED_TOKEN)
                 )
                         .andDo(print())
-//                        .andExpect(content().string(containsString("Product not found")))
                         .andExpect(status().isNotFound());
 
                 verify(productService).deleteProduct(givenNotExistedId);
@@ -564,7 +528,6 @@ class ProductControllerTest {
                             .header("Authorization", "Bearer " + givenNotExistedToken)
                 )
                         .andDo(print())
-                        //.andExpect(content().string(containsString("Invalid token")))
                         .andExpect(status().isUnauthorized());
             }
         }
