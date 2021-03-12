@@ -189,4 +189,10 @@ class UserControllerTest {
 
         verify(userService).deleteUser(100L);
     }
+
+    @Test
+    void destroyWithoutAccessToken() throws Exception {
+        mockMvc.perform(delete("/users/1"))
+                .andExpect(status().isUnauthorized());
+    }
 }
