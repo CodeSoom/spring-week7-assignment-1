@@ -99,10 +99,7 @@ class UserServiceTest {
 
     @AfterEach
     void after() {
-        Mockito.reset(mapper);
-        Mockito.reset(userService);
         Mockito.reset(userRepository);
-        Mockito.reset(authentication);
     }
 
 

@@ -87,10 +87,7 @@ class UserControllerTest {
 
     @AfterEach
     void after() {
-        Mockito.reset(mockMvc);
         Mockito.reset(userService);
-        Mockito.reset(authenticationService);
-        Mockito.reset(authentication);
     }
 
     @Test
