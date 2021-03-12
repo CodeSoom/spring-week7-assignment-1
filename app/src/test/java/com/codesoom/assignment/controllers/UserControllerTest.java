@@ -33,15 +33,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("UserController 클래스")
 @WebMvcTest(UserController.class)
 class UserControllerTest {
-    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjEsInJvbGUiOiJST0xFX1VTRVIifQ." +
-            "SgLtYfTVUdvPF-gIP006U-_B7-wWMSUcJD3eoSOxHsE";
-    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjEsInJvbGUiOiJST0xFX1VTRVIifQ." +
-            "SgLtYfTVUdvPF-gIP006U-_B7-wWMSUcJD3eoSOxHsE_INVALID";
     private static final String ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjEsInJvbGUiOiJST0xFX0FETUlOIn0." +
             "gY_MzvqqZP5DbHVXGKn-ZGIyZAd3PpOdAleeJvp23tg";
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjEsInJvbGUiOiJST0xFX1VTRVIifQ." +
+            "SgLtYfTVUdvPF-gIP006U-_B7-wWMSUcJD3eoSOxHsE";
+    private static final String INVALID_TOKEN = VALID_TOKEN + "WRONG";
 
     @Autowired
     private MockMvc mockMvc;

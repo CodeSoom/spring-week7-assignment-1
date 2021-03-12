@@ -16,8 +16,7 @@ class JwtUtilTest {
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjEsInJvbGUiOiJST0xFX1VTRVIifQ." +
             "SgLtYfTVUdvPF-gIP006U-_B7-wWMSUcJD3eoSOxHsE";
-    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+    private static final String INVALID_TOKEN = VALID_TOKEN + "WRONG";
 
     private JwtUtil jwtUtil;
 
