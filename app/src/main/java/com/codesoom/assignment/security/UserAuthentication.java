@@ -28,6 +28,11 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         return "Authentication{" + userId + "}";
     }
 
+    @Override
+    public boolean isAuthenticated() {
+        return true;
+    }
+
     private static List<GrantedAuthority> authorities() {
         return null;
     }
