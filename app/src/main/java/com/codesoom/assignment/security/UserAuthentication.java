@@ -20,7 +20,12 @@ public class UserAuthentication extends AbstractAuthenticationToken {
 
     @Override
     public Object getPrincipal() {
-        return null;
+        return userId;
+    }
+
+    @Override
+    public String toString() {
+        return "Authentication{" + userId + "}";
     }
 
     private static List<GrantedAuthority> authorities() {
