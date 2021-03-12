@@ -8,8 +8,6 @@ import com.codesoom.assignment.dto.UserResultData;
 import com.codesoom.assignment.dto.UserUpdateData;
 import com.codesoom.assignment.errors.UserBadRequestException;
 import com.codesoom.assignment.errors.UserNotFoundException;
-import com.github.dozermapper.core.DozerBeanMapperBuilder;
-import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -65,8 +63,6 @@ class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private Mapper mapper;
-
     @MockBean
     private AuthenticationService authenticationService;
 
@@ -87,8 +83,6 @@ class UserControllerTest {
             response.setCharacterEncoding("UTF-8");
             chain.doFilter(request, response);
         })).build();
-
-        mapper = DozerBeanMapperBuilder.buildDefault();
 
         setUpUser = User.builder()
                 .id(EXISTED_ID)
@@ -244,8 +238,6 @@ class UserControllerTest {
                         .name(UPDATE_USER_NAME)
                         .password(UPDATE_USER_PASSWORD)
                         .build();
-
-                userUpdateData = mapper.map(userUpdateData, UserUpdateData.class);
             }
 
             @Test

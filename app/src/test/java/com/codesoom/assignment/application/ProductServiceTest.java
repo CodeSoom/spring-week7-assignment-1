@@ -6,8 +6,6 @@ import com.codesoom.assignment.dto.ProductCreateData;
 import com.codesoom.assignment.dto.ProductResultData;
 import com.codesoom.assignment.dto.ProductUpdateData;
 import com.codesoom.assignment.errors.ProductNotFoundException;
-import com.github.dozermapper.core.DozerBeanMapperBuilder;
-import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -26,7 +24,6 @@ import static org.mockito.Mockito.verify;
 
 @DisplayName("ProductService 테스트")
 class ProductServiceTest {
-    private Mapper dozerMapper;
     private ProductRepository productRepository;
     private ProductService productService;
 
@@ -59,9 +56,8 @@ class ProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        dozerMapper = DozerBeanMapperBuilder.buildDefault();
         productRepository = mock(ProductRepository.class);
-        productService = new ProductService(dozerMapper, productRepository);
+        productService = new ProductService(productRepository);
 
         setupProduct = Product.builder()
                 .id(EXISTED_ID)

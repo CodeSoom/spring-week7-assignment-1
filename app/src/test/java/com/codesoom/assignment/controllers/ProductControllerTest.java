@@ -8,8 +8,6 @@ import com.codesoom.assignment.dto.ProductResultData;
 import com.codesoom.assignment.dto.ProductUpdateData;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.ProductNotFoundException;
-import com.github.dozermapper.core.DozerBeanMapperBuilder;
-import com.github.dozermapper.core.Mapper;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -76,8 +74,6 @@ class ProductControllerTest {
     @MockBean
     private AuthenticationService authenticationService;
 
-    private Mapper mapper;
-
     private List<Product> products;
     private Product setupProductOne;
     private Product setupProductTwo;
@@ -88,8 +84,6 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() {
-        this.mapper = DozerBeanMapperBuilder.buildDefault();
-
         setupProductOne = Product.builder()
                 .id(EXISTED_ID)
                 .name(SETUP_PRODUCT_NAME)
@@ -298,19 +292,16 @@ class ProductControllerTest {
         @DisplayName("만약 저장되어 있는 상품의 아이디와 수정 할 상품이 주어진다면")
         class Context_WithExistedIdAndProduct {
             private final Long givenExistedId = EXISTED_ID;
-            private ProductUpdateData productUpdateData;
             private ProductResultData productResultData;
 
             @BeforeEach
             void setUp() {
-                productUpdateData = ProductUpdateData.builder()
+                productResultData = ProductResultData.builder()
                         .name(UPDATED_PRODUCT_NAME)
                         .maker(UPDATED_PRODUCT_MAKER)
                         .price(UPDATED_PRODUCT_PRICE)
                         .imageUrl(UPDATED_PRODUCT_IMAGEURL)
                         .build();
-
-                productResultData = mapper.map(productUpdateData, ProductResultData.class);
             }
 
             @Test

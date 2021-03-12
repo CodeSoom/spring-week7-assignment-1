@@ -7,8 +7,6 @@ import com.codesoom.assignment.dto.UserResultData;
 import com.codesoom.assignment.dto.UserUpdateData;
 import com.codesoom.assignment.errors.UserEmailDuplicatedException;
 import com.codesoom.assignment.errors.UserNotFoundException;
-import com.github.dozermapper.core.DozerBeanMapperBuilder;
-import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,7 +27,6 @@ import static org.mockito.Mockito.verify;
 
 @DisplayName("UserService 테스트")
 class UserServiceTest {
-    private Mapper mapper;
     private UserService userService;
     private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
@@ -62,10 +59,9 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        mapper = DozerBeanMapperBuilder.buildDefault();
         userRepository = mock(UserRepository.class);
         passwordEncoder = new BCryptPasswordEncoder();
-        userService = new UserService(mapper, userRepository, passwordEncoder);
+        userService = new UserService(userRepository, passwordEncoder);
         setUpEncodedPassword = passwordEncoder.encode(SETUP_USER_PASSWORD);
         createEncodedPassword = passwordEncoder.encode(CREATE_USER_PASSWORD);
 

@@ -1,6 +1,6 @@
 package com.codesoom.assignment.dto;
 
-import com.github.dozermapper.core.Mapping;
+import com.codesoom.assignment.domain.Product;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,19 +14,15 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
 public class ProductCreateData {
-    @Mapping("name")
     @NotBlank(message = "name 값은 필수입니다")
     private String name;
 
-    @Mapping("maker")
     @NotBlank(message = "maker 값은 필수입니다")
     private String maker;
 
-    @Mapping("price")
     @NotNull(message = "price 값은 필수입니다")
     private Integer price;
 
-    @Mapping("imageUrl")
     private String imageUrl;
 
     @Builder
@@ -35,5 +31,14 @@ public class ProductCreateData {
         this.maker = maker;
         this.price = price;
         this.imageUrl = imageUrl;
+    }
+
+    public Product toEntity() {
+        return Product.builder()
+                .name(this.name)
+                .maker(this.maker)
+                .price(this.price)
+                .imageUrl((this.imageUrl))
+                .build();
     }
 }

@@ -6,7 +6,6 @@ import com.codesoom.assignment.dto.ProductCreateData;
 import com.codesoom.assignment.dto.ProductResultData;
 import com.codesoom.assignment.dto.ProductUpdateData;
 import com.codesoom.assignment.errors.ProductNotFoundException;
-import com.github.dozermapper.core.Mapper;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -17,14 +16,9 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class ProductService {
-    private final Mapper mapper;
     private final ProductRepository productRepository;
 
-    public ProductService(
-            Mapper dozerMapper,
-            ProductRepository productRepository
-    ) {
-        this.mapper = dozerMapper;
+    public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
@@ -61,7 +55,8 @@ public class ProductService {
      * @return 저장 된 상품
      */
     public ProductResultData createProduct(ProductCreateData productCreateData) {
-        Product product = mapper.map(productCreateData, Product.class);
+        Product product = productCreateData.toEntity();
+
         Product savedProduct =  productRepository.save(product);
 
         return ProductResultData.of(savedProduct);
@@ -77,11 +72,11 @@ public class ProductService {
      *         주어진  {@code id}에 해당하는 상품이 저장되어 있지 않은 경우
      */
     public ProductResultData updateProduct(Long id, ProductUpdateData productUpdateData) {
-        ProductResultData productResultData = getProduct(id);
+        Product product = getProduct(id).toEntity();
 
-        mapper.map(productUpdateData, productResultData);
+        product.updateWith(productUpdateData);
 
-        return productResultData;
+        return ProductResultData.of(product);
     }
 
     /**
@@ -93,12 +88,10 @@ public class ProductService {
      *         주어진  {@code id}에 해당하는 상품이 저장되어 있지 않은 경우
      */
     public ProductResultData deleteProduct(Long id) {
-        ProductResultData productResultData = getProduct(id);
-
-        Product deletedProduct = productResultData.toEntity();
+        Product deletedProduct = getProduct(id).toEntity();
 
         productRepository.delete(deletedProduct);
 
-        return productResultData;
+        return ProductResultData.of(deletedProduct);
     }
 }

@@ -1,6 +1,6 @@
 package com.codesoom.assignment.dto;
 
-import com.github.dozermapper.core.Mapping;
+import com.codesoom.assignment.domain.User;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,16 +14,13 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
 public class UserCreateData {
-    @Mapping("name")
     @NotBlank(message = "name 값은 필수입니다")
     private String name;
 
-    @Mapping("email")
     @NotBlank(message = "email 값은 필수입니다")
     @Size(min=3)
     private String email;
 
-    @Mapping("password")
     @NotBlank(message = "password 값은 필수입니다")
     @Size(min = 4, max = 1024)
     private String password;
@@ -33,5 +30,13 @@ public class UserCreateData {
         this.name = name;
         this.email = email;
         this.password = password;
+    }
+
+    public User toEntity() {
+        return User.builder()
+                .name(this.name)
+                .email(this.email)
+                .password(this.password)
+                .build();
     }
 }

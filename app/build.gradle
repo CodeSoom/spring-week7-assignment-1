@@ -51,7 +51,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.16'
     annotationProcessor 'org.projectlombok:lombok:1.18.16'
 
-    // DozerMapper
+    // DozerMapper - Not use !
     implementation 'com.github.dozermapper:dozer-core:6.4.0'
 
     // JWT

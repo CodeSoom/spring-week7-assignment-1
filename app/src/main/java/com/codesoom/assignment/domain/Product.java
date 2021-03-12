@@ -1,5 +1,6 @@
 package com.codesoom.assignment.domain;
 
+import com.codesoom.assignment.dto.ProductUpdateData;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -45,12 +46,10 @@ public class Product {
         this.imageUrl = imageUrl;
     }
 
-    //상품수정은 dozerMapper가 대신합니다.
-//    /** 상품 정보를 업데이트한다. */
-//    public void change(Product product) {
-//        this.name = product.getName();
-//        this.maker = product.getMaker();
-//        this.price = product.getPrice();
-//        this.imageUrl = product.getImageUrl();
-//    }
+    public void updateWith(ProductUpdateData productUpdateData) {
+        this.name = productUpdateData.getName();
+        this.maker = productUpdateData.getMaker();
+        this.price = productUpdateData.getPrice();
+        this.imageUrl = productUpdateData.getImageUrl();
+    }
 }

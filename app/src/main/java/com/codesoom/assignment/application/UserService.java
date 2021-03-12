@@ -7,7 +7,6 @@ import com.codesoom.assignment.dto.UserResultData;
 import com.codesoom.assignment.dto.UserUpdateData;
 import com.codesoom.assignment.errors.UserEmailDuplicatedException;
 import com.codesoom.assignment.errors.UserNotFoundException;
-import com.github.dozermapper.core.Mapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,14 +18,11 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class UserService {
-    private final Mapper mapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(Mapper dozerMapper,
-                       UserRepository userRepository,
+    public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder) {
-        this.mapper = dozerMapper;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -71,8 +67,10 @@ public class UserService {
             throw new UserEmailDuplicatedException(email);
         }
 
-        User user = mapper.map(userCreateData, User.class);
+        User user = userCreateData.toEntity();
+
         user.updatePassword(userCreateData.getPassword(), passwordEncoder);
+
         User savedUser = userRepository.save(user);
 
         return UserResultData.of(savedUser);
@@ -88,13 +86,12 @@ public class UserService {
      *         주어진 {@code id}에 해당하는 사용자가 저장되어 있지 않은 경우
      */
     public UserResultData updateUser(Long id, UserUpdateData userUpdateData) {
-        UserResultData userResultData = getUser(id);
+        User user = getUser(id).toEntity();
 
-        User updatedUser = mapper.map(userResultData, User.class);
-        updatedUser.updateName(userUpdateData.getName());
-        updatedUser.updatePassword(userUpdateData.getPassword(), passwordEncoder);
+        user.updateName(userUpdateData.getName());
+        user.updatePassword(userUpdateData.getPassword(), passwordEncoder);
 
-        return UserResultData.of(updatedUser);
+        return UserResultData.of(user);
     }
 
     /**
@@ -106,11 +103,11 @@ public class UserService {
      *          주어진 {@code id}에 해당하는 사용자가 저장되어 있지 않은 경우
      */
     public UserResultData deleteUser(Long id) {
-        UserResultData userResultData = getUser(id);
 
-        User deleteUser = mapper.map(userResultData, User.class);
-        deleteUser.delete();
+        User user = getUser(id).toEntity();
 
-        return UserResultData.of(deleteUser);
+        user.delete();
+
+        return UserResultData.of(user);
     }
 }
