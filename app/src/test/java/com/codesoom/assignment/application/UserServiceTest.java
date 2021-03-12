@@ -4,6 +4,7 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.AccessDeniedException;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
@@ -171,6 +172,17 @@ class UserServiceTest {
                 .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
+    }
+
+    @Test
+    void updateUserWithDifferentAuthentication() {
+        UserModificationData modificationData = UserModificationData.builder()
+                .name(MODIFIED_NAME)
+                .password(MODIFIED_PASSWORD)
+                .build();
+
+        assertThatThrownBy(() -> userService.updateUser(authentication, USER2_ID, modificationData))
+                .isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
