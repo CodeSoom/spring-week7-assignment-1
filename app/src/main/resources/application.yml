@@ -1,6 +1,7 @@
 spring:
   datasource:
-    url: jdbc:h2:~/data/demo
+#    url: jdbc:h2:~/data/demo/test
+    url: jdbc:h2:~/test;AUTO_SERVER=true
   jpa:
     hibernate:
       ddl-auto: create
