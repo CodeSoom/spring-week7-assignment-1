@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,7 +23,6 @@ import java.util.List;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -53,10 +53,11 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() {
-        given(authenticationService.parseToken(VALID_TOKEN)).willReturn(1L);
+        Mockito.doReturn(1L)
+                .when(authenticationService).parseToken(VALID_TOKEN);
 
-        given(authenticationService.parseToken(INVALID_TOKEN))
-                .willThrow(new InvalidTokenException(INVALID_TOKEN));
+        Mockito.doThrow(new InvalidTokenException(INVALID_TOKEN))
+                .when(authenticationService).parseToken(INVALID_TOKEN);
     }
 
     @Nested
@@ -64,7 +65,8 @@ class ProductControllerTest {
     class Describe_products_get {
         @BeforeEach
         void setup() {
-            given(productService.getProducts()).willReturn(List.of(givenProduct));
+            Mockito.doReturn(List.of(givenProduct))
+                    .when(productService).getProducts();
         }
 
         @Test
@@ -84,10 +86,11 @@ class ProductControllerTest {
     class Describe_products_id_get {
         @BeforeEach
         void setup() {
-            given(productService.getProduct(1L)).willReturn(givenProduct);
+            Mockito.doReturn(givenProduct)
+                    .when(productService).getProduct(1L);
 
-            given(productService.getProduct(1000L))
-                    .willThrow(new ProductNotFoundException(1000L));
+            Mockito.doThrow(new ProductNotFoundException(1000L))
+                    .when(productService).getProduct(1000L);
         }
 
         @Nested
@@ -160,26 +163,26 @@ class ProductControllerTest {
         class Context_with_valid_access_token {
             @BeforeEach
             void setup() {
-                given(productService.createProduct(any(ProductData.class)))
-                        .will(invocation -> {
-                            ProductData productData = invocation.getArgument(0);
+                Mockito.doAnswer(invocation -> {
+                    ProductData productData = invocation.getArgument(0);
 
-                            System.out.println(productData.getName());
+                    System.out.println(productData.getName());
 
-                            if (
-                                    productData.getName().isEmpty()
-                                            || productData.getMaker().isEmpty()
-                            ) {
-                                throw new MappingException("invalid product data");
-                            }
+                    if (
+                            productData.getName().isEmpty()
+                                    || productData.getMaker().isEmpty()
+                    ) {
+                        throw new MappingException("invalid product data");
+                    }
 
-                            return Product.builder()
-                                    .id(1L)
-                                    .name(productData.getName())
-                                    .maker(productData.getMaker())
-                                    .price(productData.getPrice())
-                                    .build();
-                        });
+                    return Product.builder()
+                            .id(1L)
+                            .name(productData.getName())
+                            .maker(productData.getMaker())
+                            .price(productData.getPrice())
+                            .build();
+                })
+                        .when(productService).createProduct(any(ProductData.class));
             }
 
             @Nested
@@ -231,20 +234,20 @@ class ProductControllerTest {
         class Context_with_valid_access_token {
             @BeforeEach
             void setup() {
-                given(productService.updateProduct(eq(1L), any(ProductData.class)))
-                        .will(invocation -> {
-                            Long id = invocation.getArgument(0);
-                            ProductData productData = invocation.getArgument(1);
-                            return Product.builder()
-                                    .id(id)
-                                    .name(productData.getName())
-                                    .maker(productData.getMaker())
-                                    .price(productData.getPrice())
-                                    .build();
-                        });
+                Mockito.doAnswer(invocation -> {
+                    Long id = invocation.getArgument(0);
+                    ProductData productData = invocation.getArgument(1);
+                    return Product.builder()
+                            .id(id)
+                            .name(productData.getName())
+                            .maker(productData.getMaker())
+                            .price(productData.getPrice())
+                            .build();
+                })
+                        .when(productService).updateProduct(eq(1L), any(ProductData.class));
 
-                given(productService.updateProduct(eq(1000L), any(ProductData.class)))
-                        .willThrow(new ProductNotFoundException(1000L));
+                Mockito.doThrow(new ProductNotFoundException(1000L))
+                        .when(productService).updateProduct(eq(1000L), any(ProductData.class));
             }
 
             @Nested
@@ -350,8 +353,8 @@ class ProductControllerTest {
         class Context_with_valid_access_token {
             @BeforeEach
             void setup() {
-                given(productService.deleteProduct(1000L))
-                        .willThrow(new ProductNotFoundException(1000L));
+                Mockito.doThrow(new ProductNotFoundException(1000L))
+                        .when(productService).deleteProduct(1000L);
             }
 
             @Nested
