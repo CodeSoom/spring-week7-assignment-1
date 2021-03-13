@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import com.codesoom.assignment.errors.AccessDeniedException;
 
+/**
+ * 회원에 관한 비즈니스 로직을 담당합니다.
+ */
 @Service
 @Transactional
 public class UserService {
