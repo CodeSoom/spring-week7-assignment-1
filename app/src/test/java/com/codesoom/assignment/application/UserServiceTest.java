@@ -1,6 +1,5 @@
 package com.codesoom.assignment.application;
 
-import com.codesoom.assignment.config.AppConfig;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
@@ -9,11 +8,12 @@ import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -24,6 +24,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
     private static final String EXISTED_EMAIL_ADDRESS = "existed@example.com";
     private static final String USER2_EMAIL_ADDRESS = "test2@test.com";
@@ -46,14 +47,11 @@ class UserServiceTest {
 
     private SecurityContext securityContext = mock(SecurityContext.class);
 
-    @Autowired
-    private AppConfig appConfig;
+    @Mock
+    private MyPasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
-        appConfig = new AppConfig();
-        PasswordEncoder passwordEncoder = appConfig.passwordEncoder();
-
         userService = new UserService(userRepository, passwordEncoder);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))

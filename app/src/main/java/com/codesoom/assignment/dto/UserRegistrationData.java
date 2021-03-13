@@ -1,5 +1,6 @@
 package com.codesoom.assignment.dto;
 
+import com.codesoom.assignment.domain.PasswordSupplier;
 import com.github.dozermapper.core.Mapping;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +14,7 @@ import javax.validation.constraints.Size;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRegistrationData {
+public class UserRegistrationData implements PasswordSupplier {
     @NotBlank
     @Size(min = 3)
     @Mapping("email")
