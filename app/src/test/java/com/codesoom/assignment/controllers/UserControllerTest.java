@@ -6,8 +6,12 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import com.github.dozermapper.core.MappingException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +23,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -43,72 +46,29 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        given(userService.registerUser(any(UserRegistrationData.class)))
-                .will(invocation -> {
-                    UserRegistrationData registrationData = invocation.getArgument(0);
-                    return User.builder()
-                            .id(13L)
-                            .email(registrationData.getEmail())
-                            .name(registrationData.getName())
-                            .build();
-                });
+        Mockito.doAnswer(invocation -> {
+            Long id = invocation.getArgument(0);
+            UserModificationData modificationData =
+                    invocation.getArgument(1);
+            return User.builder()
+                    .id(id)
+                    .email("tester@example.com")
+                    .name(modificationData.getName())
+                    .build();
+        })
+                .when(userService).updateUser(eq(1L), any(UserModificationData.class));
 
+        Mockito.doThrow(new UserNotFoundException(100L))
+                .when(userService).updateUser(eq(100L), any(UserModificationData.class));
 
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
-                .will(invocation -> {
-                    Long id = invocation.getArgument(0);
-                    UserModificationData modificationData =
-                            invocation.getArgument(1);
-                    return User.builder()
-                            .id(id)
-                            .email("tester@example.com")
-                            .name(modificationData.getName())
-                            .build();
-                });
-
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
-                .willThrow(new UserNotFoundException(100L));
-
-        given(userService.deleteUser(100L))
-                .willThrow(new UserNotFoundException(100L));
+        Mockito.doThrow(new UserNotFoundException(100L))
+                .when(userService).deleteUser(100L);
 
         Mockito.doReturn(1L)
                 .when(authenticationService).parseToken(VALID_TOKEN);
 
         Mockito.doThrow(new InvalidTokenException(INVALID_TOKEN))
                 .when(authenticationService).parseToken(INVALID_TOKEN);
-    }
-
-    @Test
-    void registerUserWithValidAttributes() throws Exception {
-        mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"tester@example.com\"," +
-                                "\"name\":\"Tester\",\"password\":\"test\"}")
-        )
-                .andExpect(status().isCreated())
-                .andExpect(content().string(
-                        containsString("\"id\":13")
-                ))
-                .andExpect(content().string(
-                        containsString("\"email\":\"tester@example.com\"")
-                ))
-                .andExpect(content().string(
-                        containsString("\"name\":\"Tester\"")
-                ));
-
-        verify(userService).registerUser(any(UserRegistrationData.class));
-    }
-
-    @Test
-    void registerUserWithInvalidAttributes() throws Exception {
-        mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}")
-        )
-                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -175,5 +135,90 @@ class UserControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
+    }
+
+    @Nested
+    @DisplayName("[POST] /users 요청은")
+    class Describe_post_users {
+        @BeforeEach
+        void setup() {
+            Mockito.doAnswer(invocation -> {
+                UserRegistrationData registrationData = invocation.getArgument(0);
+
+                if (
+                        registrationData.getEmail().isEmpty()
+                                || registrationData.getName().isEmpty()
+                ) {
+                    throw new MappingException("invalid user data");
+                }
+
+                if (registrationData.getEmail().equals("duplicated@email.com")) {
+                    throw new UserEmailDuplicationException("duplicated@email.com");
+                }
+
+                return User.builder()
+                        .id(13L)
+                        .email(registrationData.getEmail())
+                        .name(registrationData.getName())
+                        .build();
+            })
+                    .when(userService).registerUser(any(UserRegistrationData.class));
+        }
+
+        @Nested
+        @DisplayName("주어진 정보가 올바를 때")
+        class Context_with_valid_attributes {
+            @Test
+            @DisplayName("created 와 생성된 user 를 응답한다.")
+            void It_respond_created_and_created_user() throws Exception {
+                mockMvc.perform(
+                        post("/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"email\":\"tester@example.com\"," +
+                                        "\"name\":\"Tester\",\"password\":\"test\"}")
+                )
+                        .andExpect(status().isCreated())
+                        .andExpect(content().string(
+                                containsString("\"id\":13")
+                        ))
+                        .andExpect(content().string(
+                                containsString("\"email\":\"tester@example.com\"")
+                        ))
+                        .andExpect(content().string(
+                                containsString("\"name\":\"Tester\"")
+                        ));
+            }
+        }
+
+        @Nested
+        @DisplayName("주어진 정보가 올바르지 않을 때")
+        class Context_with_invalid_attributes {
+            @Test
+            @DisplayName("bad request 를 응답한다.")
+            void It_respond_bad_request() throws Exception {
+                mockMvc.perform(
+                        post("/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}")
+                )
+                        .andExpect(status().isBadRequest());
+            }
+        }
+
+        @Nested
+        @DisplayName("주어진 email 을 등록된 유저가 이미 보유중일 때")
+        class Context_with_already_has_given_email_who_registered_user {
+            @Test
+            @DisplayName("bad request 를 응답한다.")
+            void It_respond_bad_request() throws Exception {
+                mockMvc.perform(
+                        post("/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"email\":\"duplicated@email.com\"," +
+                                        "\"name\":\"Tester\",\"password\":\"test\"}")
+                )
+                        .andExpect(status().isBadRequest());
+            }
+        }
     }
 }
