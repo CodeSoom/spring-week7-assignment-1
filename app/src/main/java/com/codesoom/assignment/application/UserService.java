@@ -54,7 +54,7 @@ public class UserService {
         User user = userRepository.save(
                 mapper.map(createRequest, User.class));
 
-        user.changePassword(createRequest.getPassword(), passwordEncoder);
+        user.changePassword(createRequest.getPassword());
 
         return user;
     }
@@ -71,7 +71,7 @@ public class UserService {
 
         user.updateWith(mapper.map(updateRequest, User.class));
 
-        user.changePassword(updateRequest.getPassword(), passwordEncoder);
+        user.changePassword(updateRequest.getPassword());
 
         return user;
     }

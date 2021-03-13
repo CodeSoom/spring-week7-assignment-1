@@ -50,7 +50,7 @@ class AuthenticationServiceTest {
                 .email(EMAIL)
                 .build();
 
-        user.changePassword(PASSWORD, passwordEncoder);
+        user.changePassword(PASSWORD);
         
         given(userRepository.findByEmail(EMAIL)).willReturn(Optional.of(user));
     }

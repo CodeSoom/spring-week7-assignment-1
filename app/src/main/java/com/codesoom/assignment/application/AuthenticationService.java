@@ -29,7 +29,7 @@ public class AuthenticationService {
         User user = userRepository.findByEmail(userLoginData.getEmail())
                 .orElseThrow(() -> new LoginFailException(userLoginData.getEmail()));
 
-        if (!user.authenticate(userLoginData.getPassword(), passwordEncoder)) {
+        if (!user.authenticate(userLoginData.getPassword())) {
             throw new LoginFailException(userLoginData.getEmail());
         }
 
