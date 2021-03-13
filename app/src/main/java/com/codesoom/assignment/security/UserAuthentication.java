@@ -2,7 +2,9 @@ package com.codesoom.assignment.security;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserAuthentication extends AbstractAuthenticationToken {
@@ -15,7 +17,14 @@ public class UserAuthentication extends AbstractAuthenticationToken {
     }
 
     private static List<GrantedAuthority> authorities() {
-        return null;
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("USER"));
+        return authorities;
+    }
+
+    @Override
+    public boolean isAuthenticated() {
+        return true;
     }
 
     @Override
