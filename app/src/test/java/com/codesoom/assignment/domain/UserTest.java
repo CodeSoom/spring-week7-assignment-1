@@ -1,10 +1,13 @@
 package com.codesoom.assignment.domain;
 
+import com.codesoom.assignment.dependency.Container;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UserTest {
+    EncryptionService encryptionService = Container.encryptionService();
+
     @Test
     void changeWith() {
         User user = new User(1L, "test user", "aaa@bbb.ccc", "test");
@@ -12,7 +15,7 @@ class UserTest {
         user.changeWith("TEST", "TEST");
 
         assertThat(user.getName()).isEqualTo("TEST");
-        assertThat(user.getPassword()).isEqualTo("TEST");
+        assertThat(user.getPassword()).isEqualTo(encryptionService.encryptedValue("TEST"));
     }
 
     @Test

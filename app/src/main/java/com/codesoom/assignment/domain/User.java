@@ -1,5 +1,10 @@
 package com.codesoom.assignment.domain;
 
+import com.codesoom.assignment.dependency.Container;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -18,18 +23,26 @@ public class User {
 
     private boolean deleted = false;
 
+    private EncryptionService encryptionService;
+
     public User(Long id, String email, String name, String password) {
+        encryptionService = Container.encryptionService();
+
         this.id = id;
         this.email = email;
         this.name = name;
-        this.password = password;
+        protectPassword(password);
     }
 
     public User() {}
 
     public void changeWith(String name, String password) {
         this.name = name;
-        this.password = password;
+        protectPassword(password);
+    }
+
+    private void protectPassword(String aChangedPassword) {
+        this.password = encryptionService.encryptedValue(aChangedPassword);
     }
 
     public void destroy() {
@@ -37,7 +50,8 @@ public class User {
     }
 
     public boolean authenticate(String password) {
-        return !deleted && password.equals(this.password);
+        String encryptedPassword = encryptionService.encryptedValue(password);
+        return !deleted && encryptedPassword.equals(this.password);
     }
 
     public Long getId() {
