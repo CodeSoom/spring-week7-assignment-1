@@ -115,10 +115,10 @@ jacocoTestCoverageVerification {
 
             excludes = [
                     "com.codesoom.assignment.App",
-                    "com.codesoom.assignment.dto.*",
-                    "com.codesoom.assignment.controllers.ControllerErrorAdvice",
-                    "com.codesoom.assignment.controllers",
-                    "com.codesoom.assignment.interceptors.AuthenticationInterceptor"
+                    "com.codesoom.assignment.web.dto.*",
+                    "com.codesoom.assignment.web.controllers.ControllerErrorAdvice",
+                    "com.codesoom.assignment.web.controllers",
+                    "com.codesoom.assignment.web.interceptors.AuthenticationInterceptor"
             ]
         }
     }

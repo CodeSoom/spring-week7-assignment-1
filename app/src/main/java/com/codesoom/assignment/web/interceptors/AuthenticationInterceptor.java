@@ -1,4 +1,4 @@
-package com.codesoom.assignment.interceptors;
+package com.codesoom.assignment.web.interceptors;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import org.springframework.http.HttpStatus;

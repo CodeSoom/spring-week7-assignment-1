@@ -1,10 +1,10 @@
-package com.codesoom.assignment.controllers;
+package com.codesoom.assignment.web.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
-import com.codesoom.assignment.dto.UserModificationData;
-import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.web.dto.UserModificationData;
+import com.codesoom.assignment.web.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

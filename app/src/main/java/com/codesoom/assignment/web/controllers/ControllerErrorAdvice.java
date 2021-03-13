@@ -1,6 +1,6 @@
-package com.codesoom.assignment.controllers;
+package com.codesoom.assignment.web.controllers;
 
-import com.codesoom.assignment.dto.ErrorResponse;
+import com.codesoom.assignment.web.dto.ErrorResponse;
 import com.codesoom.assignment.errors.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;

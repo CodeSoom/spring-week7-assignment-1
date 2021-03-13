@@ -1,6 +1,6 @@
-package com.codesoom.assignment.config;
+package com.codesoom.assignment.web.config;
 
-import com.codesoom.assignment.interceptors.AuthenticationInterceptor;
+import com.codesoom.assignment.web.interceptors.AuthenticationInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
