@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -48,6 +49,8 @@ class UserServiceTest {
     private static final Long CREATE_ID = 2L;
     private static final Long DELETED_ID = 1L;
     private static final Long NOT_EXISTED_ID = 100L;
+    private static final String MY_EMAIL = EXISTED_USER_EMAIL;
+    private static final String OTHER_EMAIL = CREATE_USER_EMAIL;
 
     private List<User> users;
     private User setUpUser;
@@ -244,10 +247,11 @@ class UserServiceTest {
     @DisplayName("updateUser 메서드는")
     class Describe_updateUser {
         @Nested
-        @DisplayName("만약 저장되어 있는 사용자의 아이디와 수정 할 사용자가 주어진다면")
-        class Context_WithExistedIdAndUser {
+        @DisplayName("만약 저장되어 있는 사용자의 아이디와 수정 할 사용자와 본인 이메일이 주어진다면")
+        class Context_WithExistedIdAndUserAndEmail {
             private final Long givenExistedId = EXISTED_ID;
             private UserUpdateData userUpdateData;
+            private final String givenExistedEmail = MY_EMAIL;
 
             @BeforeEach
             void setUp() {
@@ -262,7 +266,7 @@ class UserServiceTest {
             void itUpdatesUserAndReturnsUpdatedUser() {
                 given(userRepository.findByIdAndDeletedIsFalse(givenExistedId)).willReturn(Optional.of(setUpUser));
 
-                UserResultData updatedUser = userService.updateUser(givenExistedId, userUpdateData);
+                UserResultData updatedUser = userService.updateUser(givenExistedId, userUpdateData, givenExistedEmail);
 
                 assertThat(updatedUser.getId()).isEqualTo(givenExistedId);
                 assertThat(updatedUser.getName()).isEqualTo(userUpdateData.getName());
@@ -277,6 +281,7 @@ class UserServiceTest {
         class Context_WithNotExistedId {
             private final Long givenNotExistedId = NOT_EXISTED_ID;
             private UserUpdateData userUpdateData;
+            private final String givenExistedEmail = MY_EMAIL;
 
             @BeforeEach
             void setUp() {
@@ -291,7 +296,7 @@ class UserServiceTest {
             void itThrowsUserNotFoundException() {
                 given(userRepository.findByIdAndDeletedIsFalse(givenNotExistedId)).willReturn(Optional.empty());
 
-                assertThatThrownBy(() -> userService.updateUser(givenNotExistedId, userUpdateData))
+                assertThatThrownBy(() -> userService.updateUser(givenNotExistedId, userUpdateData, givenExistedEmail))
                         .isInstanceOf(UserNotFoundException.class)
                         .hasMessageContaining("User not found");
 
@@ -304,6 +309,7 @@ class UserServiceTest {
         class Context_WithDeletedId {
             private final Long givenDeletedId = DELETED_ID;
             private UserUpdateData userUpdateData;
+            private final String givenExistedEmail = MY_EMAIL;
 
             @BeforeEach
             void setUp() {
@@ -320,11 +326,37 @@ class UserServiceTest {
             void itThrowsUserNotFoundException() {
                 given(userRepository.findByIdAndDeletedIsFalse(givenDeletedId)).willReturn(Optional.empty());
 
-                assertThatThrownBy(() -> userService.updateUser(givenDeletedId, userUpdateData))
+                assertThatThrownBy(() -> userService.updateUser(givenDeletedId, userUpdateData, givenExistedEmail))
                         .isInstanceOf(UserNotFoundException.class)
                         .hasMessageContaining("User not found");
 
                 verify(userRepository).findByIdAndDeletedIsFalse(givenDeletedId);
+            }
+        }
+
+        @Nested
+        @DisplayName("만약 다른 사용자의 이메일이 주어진다면")
+        class Context_WithOtherEmail {
+            private final Long givenExistedId = EXISTED_ID;
+            private UserUpdateData userUpdateData;
+            private final String givenNotExistedEmail = OTHER_EMAIL;
+
+            @BeforeEach
+            void setUp() {
+                userUpdateData = UserUpdateData.builder()
+                        .name(UPDATE_USER_NAME)
+                        .password(UPDATE_USER_PASSWORD)
+                        .build();
+            }
+
+            @Test
+            @DisplayName("접근이 거부되었다는 예외를 던진다")
+            void itThrowsAccessDeniedException() {
+                given(userRepository.findByIdAndDeletedIsFalse(givenExistedId)).willReturn(Optional.of(setUpUser));
+
+                assertThatThrownBy(() -> userService.updateUser(givenExistedId, userUpdateData, givenNotExistedEmail))
+                        .isInstanceOf(AccessDeniedException.class)
+                        .hasMessageContaining("Access denied");
             }
         }
     }

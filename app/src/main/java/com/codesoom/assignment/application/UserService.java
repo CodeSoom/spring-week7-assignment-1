@@ -7,6 +7,7 @@ import com.codesoom.assignment.dto.UserResultData;
 import com.codesoom.assignment.dto.UserUpdateData;
 import com.codesoom.assignment.errors.UserEmailDuplicatedException;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -81,12 +82,22 @@ public class UserService {
      *
      * @param id - 수정하고자 하는 사용자의 식별자
      * @param userUpdateData - 수정하고자 하는 새로운 사용자
+     * @param email - 수정을 하려고하는 사용자의 이메일
      * @return 수정 된 사용자
      * @throws UserNotFoundException 만약
      *         주어진 {@code id}에 해당하는 사용자가 저장되어 있지 않은 경우
+     * @throws AccessDeniedException 만약
+     *         주어진 {@code email}과 수정하려는 이메일이 다른 경우
      */
-    public UserResultData updateUser(Long id, UserUpdateData userUpdateData) {
+    public UserResultData updateUser(
+            Long id,
+            UserUpdateData userUpdateData,
+            String email
+    ) {
         User user = getUser(id).toEntity();
+        if (!user.getEmail().equals(email)) {
+            throw new AccessDeniedException("Access denied");
+        }
 
         user.updateName(userUpdateData.getName());
         user.updatePassword(userUpdateData.getPassword(), passwordEncoder);

@@ -4,6 +4,7 @@ import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.dto.UserCreateData;
 import com.codesoom.assignment.dto.UserResultData;
 import com.codesoom.assignment.dto.UserUpdateData;
+import com.codesoom.assignment.security.UserAuthentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -67,15 +68,17 @@ public class UserController {
      *
      * @param id - 수정하고자 하는 사용자의 식별자
      * @param userUpdateData - 수정하고자 하는 새로운 사용자
+     * @param authentication - 수정을 하려고하는 사용자 인증 정보
      * @return 수정 된 사용자
      */
     @PatchMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public UserResultData update(
             @PathVariable Long id,
-            @RequestBody @Valid UserUpdateData userUpdateData
+            @RequestBody @Valid UserUpdateData userUpdateData,
+            UserAuthentication authentication
     ) {
-        return userService.updateUser(id, userUpdateData);
+        return userService.updateUser(id, userUpdateData, authentication.getEmail());
     }
 
     /**

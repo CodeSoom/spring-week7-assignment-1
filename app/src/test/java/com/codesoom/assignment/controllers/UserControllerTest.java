@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -59,8 +60,8 @@ class UserControllerTest {
     private static final Long DELETE_ID = 1L;
     private static final Long NOT_EXISTED_ID = 100L;
 
-//    @Autowired
-//    private WebApplicationContext wac;
+    private static final String MY_EMAIL = SETUP_USER_EMAIL;
+    private static final String OTHER_EMAIL = CREATE_USER_EMAIL;
 
     @Autowired
     private MockMvc mockMvc;
@@ -81,11 +82,6 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-//        mockMvc = webAppContextSetup(wac).addFilter(((request, response, chain) -> {
-//            response.setCharacterEncoding("UTF-8");
-//            chain.doFilter(request, response);
-//        })).build();
-
         setUpUser = User.builder()
                 .id(EXISTED_ID)
                 .name(SETUP_USER_NAME)
@@ -229,10 +225,11 @@ class UserControllerTest {
     @DisplayName("update 메서드는")
     class Describe_update {
         @Nested
-        @DisplayName("만약 저장되어 있는 사용자의 아이디와 수정 할 사용자가 주어진다면")
+        @DisplayName("만약 저장되어 있는 사용자의 아이디와 수정 할 사용자와 본인 이메일이 주어진다면")
         class Context_WithExistedIdAndUser {
             private final Long givenExistedId = EXISTED_ID;
             private UserUpdateData userUpdateData;
+            private final String givenExistedEmail = MY_EMAIL;
 
             @BeforeEach
             void setUp() {
@@ -245,7 +242,7 @@ class UserControllerTest {
             @Test
             @DisplayName("주어진 아이디에 해당하는 사용자를 수정하고 수정된 사용자와 OK를 리턴한다")
             void itUpdatesUserAndReturnUpdatedUserAndOKHttpStatus() throws Exception {
-                given(userService.updateUser(eq(givenExistedId), any(UserUpdateData.class)))
+                given(userService.updateUser(eq(givenExistedId), any(UserUpdateData.class), eq(givenExistedEmail)))
                         .will(invocation -> {
                             Long id = invocation.getArgument(0);
                             UserUpdateData userUpdateData = invocation.getArgument(1);
@@ -273,12 +270,14 @@ class UserControllerTest {
         @DisplayName("만약 저장되어 있지 않은 사용자의 아이디가 주어진다면")
         class Context_WithNotExistedIdAndUser {
             private final Long givenNotExistedId = NOT_EXISTED_ID;
+            private final String givenExistedEmail = MY_EMAIL;
 
             @Test
             @DisplayName("사용자를 찾을 수 없다는 예외를 던지고 NOT_FOUND를 리턴한다")
             void itThrowsUserNotFoundExceptionAndReturnsNOT_FOUNDHttpStatus() throws Exception {
-                given(userService.updateUser(eq(givenNotExistedId), any(UserUpdateData.class)))
+                given(userService.updateUser(eq(givenNotExistedId), any(UserUpdateData.class), eq(givenExistedEmail)))
                         .willThrow(new UserNotFoundException(givenNotExistedId));
+                given(authenticationService.parseToken(MY_TOKEN)).willReturn(MY_EMAIL);
 
                 mockMvc.perform(
                         patch("/users/"+givenNotExistedId)
@@ -287,10 +286,9 @@ class UserControllerTest {
                                 .content("{\"name\":\"createdUser\",\"password\":\"createdPassword\"}")
                 )
                         .andDo(print())
-                        .andExpect(content().string(containsString("User not found")))
                         .andExpect(status().isNotFound());
 
-                verify(userService).updateUser(eq(givenNotExistedId), any(UserUpdateData.class));
+                verify(userService).updateUser(eq(givenNotExistedId), any(UserUpdateData.class), eq(givenExistedEmail));
             }
         }
 
@@ -298,11 +296,12 @@ class UserControllerTest {
         @DisplayName("만약 비어있는 값이 주어진다면")
         class Context_WithEmpty {
             private final Long givenExistedId = EXISTED_ID;
+            private final String givenMyEmail = MY_EMAIL;
 
             @Test
             @DisplayName("사용자 요청이 잘못 되었다는 예외를 던지고 BAD_REQUEST를 리턴한다")
             void itThrowsUserBadRequestExceptionAndReturnsBAD_REQUESTHttpStatus() throws Exception {
-                given(userService.updateUser(eq(givenExistedId), any(UserUpdateData.class)))
+                given(userService.updateUser(eq(givenExistedId), any(UserUpdateData.class), eq(givenMyEmail)))
                         .willThrow(new UserBadRequestException());
 
                 mockMvc.perform(
@@ -332,6 +331,32 @@ class UserControllerTest {
                 )
                         .andDo(print())
                         .andExpect(status().isUnauthorized());
+            }
+        }
+
+        @Nested
+        @DisplayName("만약 다른 사용자의 토큰이 주어진다면")
+        class Context_WithOtherToken {
+            private final Long givenExistedId = EXISTED_ID;
+            private final String givenNotExistedEmail = OTHER_EMAIL;
+
+            @Test
+            @DisplayName("접근이 거부되었다는 예외를 던지고 FORBIDDEN를 리턴한다")
+            void itThrowsAccessDeniedExceptionAndReturnsFORBIDDENHttpStatus() throws Exception {
+                given(authenticationService.parseToken(OTHER_TOKEN)).willReturn(OTHER_EMAIL);
+                given(userService.updateUser(eq(givenExistedId), any(UserUpdateData.class), eq(givenNotExistedEmail)))
+                        .willThrow(new AccessDeniedException("Access denied"));
+
+                mockMvc.perform(
+                        patch("/users/" + givenExistedId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + OTHER_TOKEN)
+                                .content("{\"name\":\"createdUser\",\"password\":\"createdPassword\"}")
+                )
+                        .andDo(print())
+                        .andExpect(status().isForbidden());
+
+                verify(userService).updateUser(eq(givenExistedId), any(UserUpdateData.class), eq(OTHER_EMAIL));
             }
         }
     }

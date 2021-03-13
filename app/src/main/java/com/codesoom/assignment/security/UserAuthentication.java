@@ -30,6 +30,10 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         return true;
     }
 
+    public String getEmail() {
+        return this.email;
+    }
+
     @Override
     public String toString() {
         return "UserAuthentication{" +
