@@ -30,7 +30,6 @@ public class User {
 
     public void changeWith(User source) {
         name = source.name;
-        password = source.password;
     }
 
     public void destroy() {
