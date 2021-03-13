@@ -25,6 +25,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
+    private static final String MY_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String OTHER_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -104,6 +109,7 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
         )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -122,21 +128,34 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
         )
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void updateUserWithNotExsitedId() throws Exception {
+    void updateUserWithNotExistedId() throws Exception {
         mockMvc.perform(
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
         )
                 .andExpect(status().isNotFound());
 
         verify(userService)
                 .updateUser(eq(100L), any(UserModificationData.class));
+    }
+
+    @Test
+    void updateUserWithoutAccessToken() throws Exception {
+        mockMvc.perform(
+                patch("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"tester@example.com\"," +
+                                "\"name\":\"Tester\",\"password\":\"test\"}")
+        )
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
