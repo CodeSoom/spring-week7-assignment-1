@@ -37,16 +37,19 @@ public class User {
         name = source.name;
     }
 
+    public void changePassword(String password,
+                               PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(password);
+    }
+
     public void destroy() {
         deleted = true;
     }
 
-    public boolean authenticate(String password) {
-        return !deleted && password.equals(this.password);
+    public boolean authenticate(String password,
+                                PasswordEncoder passwordEncoder) {
+        return !deleted && passwordEncoder.matches(password, this.password);
     }
 
-    public void changePassword(String password) {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        this.password = passwordEncoder.encode(password);
-    }
+
 }
