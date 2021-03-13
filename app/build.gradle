@@ -37,6 +37,9 @@ dependencies {
     // AssertJ
     testImplementation 'org.assertj:assertj-core:3.18.1'
 
+    // Use for Spring Security Test
+    testImplementation 'org.springframework.security:spring-security-test:5.4.5'
+
     // Use JUnit Jupiter Engine for testing.
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 

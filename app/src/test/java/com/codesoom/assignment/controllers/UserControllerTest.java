@@ -18,7 +18,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
@@ -35,12 +34,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @AutoConfigureMockMvc
 @WebMvcTest(UserController.class)
 @DisplayName("UserController 테스트")
 class UserControllerTest {
+    private static final String MY_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJzdWIiOiJleGlzdGVkRW1haWwifQ.UQodS3elf3Cu4g0PDFHqVloFbcKHHmTTnk0jGmiwPXY";
+    private static final String OTHER_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJzdWIiOiJjcmVhdGVkRW1haWwifQ.8mfjGjxD-qmkIXjJ-iznb38c92xijMUJOs8GKt8GYbU";
     private static final String SETUP_USER_NAME = "setUpName";
     private static final String SETUP_USER_EMAIL = "setUpdEmail";
     private static final String SETUP_USER_PASSWORD = "setUpPassword";
@@ -57,8 +59,8 @@ class UserControllerTest {
     private static final Long DELETE_ID = 1L;
     private static final Long NOT_EXISTED_ID = 100L;
 
-    @Autowired
-    private WebApplicationContext wac;
+//    @Autowired
+//    private WebApplicationContext wac;
 
     @Autowired
     private MockMvc mockMvc;
@@ -79,10 +81,10 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = webAppContextSetup(wac).addFilter(((request, response, chain) -> {
-            response.setCharacterEncoding("UTF-8");
-            chain.doFilter(request, response);
-        })).build();
+//        mockMvc = webAppContextSetup(wac).addFilter(((request, response, chain) -> {
+//            response.setCharacterEncoding("UTF-8");
+//            chain.doFilter(request, response);
+//        })).build();
 
         setUpUser = User.builder()
                 .id(EXISTED_ID)
@@ -256,15 +258,14 @@ class UserControllerTest {
 
                 mockMvc.perform(
                         patch("/users/" + givenExistedId)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"name\":\"updatedName\",\"password\":\"updatedPassword\"}")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + MY_TOKEN)
+                                .content("{\"name\":\"updatedName\",\"password\":\"updatedPassword\"}")
                 )
                         .andDo(print())
                         .andExpect(jsonPath("name").value(userUpdateData.getName()))
                         .andExpect(jsonPath("password").value(userUpdateData.getPassword()))
                         .andExpect(status().isOk());
-
-                verify(userService).updateUser(eq(givenExistedId), any(UserUpdateData.class));
             }
         }
 
@@ -281,8 +282,9 @@ class UserControllerTest {
 
                 mockMvc.perform(
                         patch("/users/"+givenNotExistedId)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"name\":\"createdUser\",\"password\":\"createdPassword\"}")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + MY_TOKEN)
+                                .content("{\"name\":\"createdUser\",\"password\":\"createdPassword\"}")
                 )
                         .andDo(print())
                         .andExpect(content().string(containsString("User not found")))
@@ -305,11 +307,31 @@ class UserControllerTest {
 
                 mockMvc.perform(
                         patch("/users/" + givenExistedId)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{}")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + MY_TOKEN)
+                                .content("{}")
+
                 )
                         .andDo(print())
                         .andExpect(status().isBadRequest());
+            }
+        }
+
+        @Nested
+        @DisplayName("만약 토큰이 주어지지 않는다면")
+        class Context_WithoutToken {
+            private final Long givenExistedId = EXISTED_ID;
+
+            @Test
+            @DisplayName("권한이 없다는 예외를 던지고 UNAUTHORIZED를 리턴한다")
+            void itThrowsUnauthorizedExceptionAndReturnsUNAUTHORIZEDHttpStatus() throws Exception {
+                mockMvc.perform(
+                        patch("/users/" + givenExistedId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"createdUser\",\"password\":\"createdPassword\"}")
+                )
+                        .andDo(print())
+                        .andExpect(status().isUnauthorized());
             }
         }
     }

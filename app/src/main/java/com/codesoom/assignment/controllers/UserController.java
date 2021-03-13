@@ -5,6 +5,7 @@ import com.codesoom.assignment.dto.UserCreateData;
 import com.codesoom.assignment.dto.UserResultData;
 import com.codesoom.assignment.dto.UserUpdateData;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -69,6 +70,7 @@ public class UserController {
      * @return 수정 된 사용자
      */
     @PatchMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public UserResultData update(
             @PathVariable Long id,
             @RequestBody @Valid UserUpdateData userUpdateData
