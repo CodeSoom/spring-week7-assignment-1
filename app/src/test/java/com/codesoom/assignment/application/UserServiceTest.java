@@ -63,11 +63,11 @@ class UserServiceTest {
 
     @Test
     void registerUser() {
-        UserRegistrationData registrationData = UserRegistrationData.builder()
-                .email("tester@example.com")
-                .name("Tester")
-                .password("test")
-                .build();
+        UserRegistrationData registrationData = new UserRegistrationData(
+            "tester@example.com",
+            "Tester",
+            "test"
+        );
 
         User user = userService.registerUser(registrationData);
 
@@ -80,12 +80,11 @@ class UserServiceTest {
 
     @Test
     void registerUserWithDuplicatedEmail() {
-        UserRegistrationData registrationData = UserRegistrationData.builder()
-                .email(EXISTED_EMAIL_ADDRESS)
-                .name("Tester")
-                .password("test")
-                .build();
-
+        UserRegistrationData registrationData = new UserRegistrationData(
+            EXISTED_EMAIL_ADDRESS,
+            "Tester",
+            "test"
+        );
         assertThatThrownBy(() -> userService.registerUser(registrationData))
                 .isInstanceOf(UserEmailDuplicationException.class);
 
@@ -94,10 +93,10 @@ class UserServiceTest {
 
     @Test
     void updateUserWithExistedId() {
-        UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
+        UserModificationData modificationData = new UserModificationData(
+            "TEST",
+            "TEST"
+        );
 
         User user = userService.updateUser(1L, modificationData);
 
@@ -110,10 +109,10 @@ class UserServiceTest {
 
     @Test
     void updateUserWithNotExistedId() {
-        UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
+        UserModificationData modificationData = new UserModificationData(
+            "TEST",
+            "TEST"
+        );
 
         assertThatThrownBy(() -> userService.updateUser(100L, modificationData))
                 .isInstanceOf(UserNotFoundException.class);
@@ -124,10 +123,10 @@ class UserServiceTest {
 
     @Test
     void updateUserWithDeletedId() {
-        UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
+        UserModificationData modificationData = new UserModificationData(
+            "TEST",
+            "TEST"
+        );
 
         assertThatThrownBy(
                 () -> userService.updateUser(DELETED_USER_ID, modificationData)

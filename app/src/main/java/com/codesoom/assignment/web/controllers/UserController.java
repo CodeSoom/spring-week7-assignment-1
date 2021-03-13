@@ -43,10 +43,10 @@ public class UserController {
     }
 
     private UserResultData getUserResultData(User user) {
-        return UserResultData.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .build();
+        return new UserResultData(
+            user.getId(),
+            user.getEmail(),
+            user.getName()
+        );
     }
 }

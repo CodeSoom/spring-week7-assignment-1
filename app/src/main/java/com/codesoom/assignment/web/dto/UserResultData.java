@@ -1,16 +1,27 @@
 package com.codesoom.assignment.web.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-
-@Getter
-@Builder
-@AllArgsConstructor
 public class UserResultData {
-    private Long id;
+    private final Long id;
 
-    private String email;
+    private final String email;
 
-    private String name;
+    private final String name;
+
+    public UserResultData(Long id, String email, String name) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getName() {
+        return name;
+    }
 }
