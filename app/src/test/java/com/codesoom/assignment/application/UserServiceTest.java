@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Optional;
 
@@ -124,6 +125,17 @@ class UserServiceTest {
                 .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(100L);
+    }
+
+    @Test
+    void updateUserWithDifferentUserId() {
+        UserModificationData modificationData = UserModificationData.builder()
+                .name("TEST")
+                .password("TEST")
+                .build();
+
+        assertThatThrownBy(() -> userService.updateUser(10L, modificationData))
+                .isInstanceOf(UnauthorizedAccessException.class);
     }
 
 
