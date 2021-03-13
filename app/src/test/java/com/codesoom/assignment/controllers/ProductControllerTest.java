@@ -75,9 +75,6 @@ class ProductControllerTest {
         given(productService.updateProduct(eq(1000L), any(ProductData.class)))
                 .willThrow(new ProductNotFoundException(1000L));
 
-        given(productService.deleteProduct(1000L))
-                .willThrow(new ProductNotFoundException(1000L));
-
         given(authenticationService.parseToken(VALID_TOKEN)).willReturn(1L);
 
         given(authenticationService.parseToken(INVALID_TOKEN))
@@ -167,41 +164,6 @@ class ProductControllerTest {
 
     @Test
     void updateWithInvalidAccessToken() throws Exception {
-        mockMvc.perform(
-                patch("/products/1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
-                        .header("Authorization", "Bearer " + INVALID_TOKEN)
-        )
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void destroyWithExistedProduct() throws Exception {
-        mockMvc.perform(
-                delete("/products/1")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
-        )
-                .andExpect(status().isNoContent());
-
-        verify(productService).deleteProduct(1L);
-    }
-
-    @Test
-    void destroyWithNotExistedProduct() throws Exception {
-        mockMvc.perform(
-                delete("/products/1000")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
-        )
-                .andExpect(status().isNotFound());
-
-        verify(productService).deleteProduct(1000L);
-    }
-
-    @Test
-    void destroyWithInvalidAccessToken() throws Exception {
         mockMvc.perform(
                 patch("/products/1")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
@@ -315,6 +277,71 @@ class ProductControllerTest {
                     )
                             .andExpect(status().isBadRequest());
                 }
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("[DELETE] /products 요청은")
+    class Describe_delete_products {
+        @Nested
+        @DisplayName("주어진 access token 이 올바를 때")
+        class Context_with_valid_access_token {
+            @BeforeEach
+            void setup() {
+                given(productService.deleteProduct(1000L))
+                        .willThrow(new ProductNotFoundException(1000L));
+            }
+
+            @Nested
+            @DisplayName("주어진 id 에 해당하는 상품이 존재할 때")
+            class Context_when_exists_given_id_product {
+
+                @Test
+                @DisplayName("no content 를 응답한다.")
+                void It_respond_no_content() throws Exception {
+                    mockMvc.perform(
+                            delete("/products/1")
+                                    .header("Authorization", "Bearer " + VALID_TOKEN)
+                    )
+                            .andExpect(status().isNoContent());
+
+                    verify(productService).deleteProduct(1L);
+                }
+            }
+
+            @Nested
+            @DisplayName("주어진 id 에 해당하는 상품이 존재하지 않을  때")
+            class Context_when_not_exists_given_id_product {
+                @Test
+                @DisplayName("not found 를 응답한다.")
+                void It_respond_not_found() throws Exception {
+                    mockMvc.perform(
+                            delete("/products/1000")
+                                    .header("Authorization", "Bearer " + VALID_TOKEN)
+                    )
+                            .andExpect(status().isNotFound());
+
+                    verify(productService).deleteProduct(1000L);
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("주어진 access token 이 올바르지 않을 때")
+        class Context_with_invalid_access_token {
+            @Test
+            @DisplayName("unauthorized 를 응답한다.")
+            void It_respond_unauthorized() throws Exception {
+                mockMvc.perform(
+                        patch("/products/1")
+                                .accept(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
+                                        "\"price\":5000}")
+                                .header("Authorization", "Bearer " + INVALID_TOKEN)
+                )
+                        .andExpect(status().isUnauthorized());
             }
         }
     }
