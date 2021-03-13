@@ -53,7 +53,6 @@ public class ProductController {
     @PatchMapping("{id}")
     @PreAuthorize("isAuthenticated()")
     public Product update(
-            @RequestAttribute Long userId,
             @PathVariable Long id,
             @RequestBody @Valid ProductData productData
     ) {

@@ -60,21 +60,6 @@ class ProductControllerTest {
         given(productService.getProduct(1000L))
                 .willThrow(new ProductNotFoundException(1000L));
 
-        given(productService.updateProduct(eq(1L), any(ProductData.class)))
-                .will(invocation -> {
-                    Long id = invocation.getArgument(0);
-                    ProductData productData = invocation.getArgument(1);
-                    return Product.builder()
-                            .id(id)
-                            .name(productData.getName())
-                            .maker(productData.getMaker())
-                            .price(productData.getPrice())
-                            .build();
-                });
-
-        given(productService.updateProduct(eq(1000L), any(ProductData.class)))
-                .willThrow(new ProductNotFoundException(1000L));
-
         given(authenticationService.parseToken(VALID_TOKEN)).willReturn(1L);
 
         given(authenticationService.parseToken(INVALID_TOKEN))
@@ -105,74 +90,6 @@ class ProductControllerTest {
     void deatilWithNotExsitedProduct() throws Exception {
         mockMvc.perform(get("/products/1000"))
                 .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void updateWithExistedProduct() throws Exception {
-        mockMvc.perform(
-                patch("/products/1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
-        )
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("쥐순이")));
-
-        verify(productService).updateProduct(eq(1L), any(ProductData.class));
-    }
-
-    @Test
-    void updateWithNotExistedProduct() throws Exception {
-        mockMvc.perform(
-                patch("/products/1000")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
-        )
-                .andExpect(status().isNotFound());
-
-        verify(productService).updateProduct(eq(1000L), any(ProductData.class));
-    }
-
-    @Test
-    void updateWithInvalidAttributes() throws Exception {
-        mockMvc.perform(
-                patch("/products/1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"maker\":\"\"," +
-                                "\"price\":0}")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
-        )
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void updateWithoutAccessToken() throws Exception {
-        mockMvc.perform(
-                patch("/products/1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
-        )
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void updateWithInvalidAccessToken() throws Exception {
-        mockMvc.perform(
-                patch("/products/1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
-                        .header("Authorization", "Bearer " + INVALID_TOKEN)
-        )
-                .andExpect(status().isUnauthorized());
     }
 
     @Nested
@@ -282,7 +199,126 @@ class ProductControllerTest {
     }
 
     @Nested
-    @DisplayName("[DELETE] /products 요청은")
+    @DisplayName("[PATCH] /products/{id} 요청은")
+    class Describe_patch_products {
+        @Nested
+        @DisplayName("주어진 access token 이 올바를 때")
+        class Context_with_valid_access_token {
+            @BeforeEach
+            void setup() {
+                given(productService.updateProduct(eq(1L), any(ProductData.class)))
+                        .will(invocation -> {
+                            Long id = invocation.getArgument(0);
+                            ProductData productData = invocation.getArgument(1);
+                            return Product.builder()
+                                    .id(id)
+                                    .name(productData.getName())
+                                    .maker(productData.getMaker())
+                                    .price(productData.getPrice())
+                                    .build();
+                        });
+
+                given(productService.updateProduct(eq(1000L), any(ProductData.class)))
+                        .willThrow(new ProductNotFoundException(1000L));
+            }
+
+            @Nested
+            @DisplayName("주어진 id 에 해당하는 product 가 존재할 때")
+            class Context_when_exists_given_id_product {
+                @Test
+                @DisplayName("ok 와 변경된 product 를 응답한다.")
+                void It_respond_ok_and_modified_product() throws Exception {
+                    mockMvc.perform(
+                            patch("/products/1")
+                                    .accept(MediaType.APPLICATION_JSON_UTF8)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
+                                            "\"price\":5000}")
+                                    .header("Authorization", "Bearer " + VALID_TOKEN)
+                    )
+                            .andExpect(status().isOk())
+                            .andExpect(content().string(containsString("쥐순이")));
+
+                    verify(productService).updateProduct(eq(1L), any(ProductData.class));
+                }
+            }
+
+            @Nested
+            @DisplayName("주어진 id 에 해당하는 product 가 존재하지 않을 때")
+            class Context_when_not_exists_given_id_product {
+                @Test
+                @DisplayName("not found 를 응답한다.")
+                void It_respond_not_found() throws Exception {
+                    mockMvc.perform(
+                            patch("/products/1000")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
+                                            "\"price\":5000}")
+                                    .header("Authorization", "Bearer " + VALID_TOKEN)
+                    )
+                            .andExpect(status().isNotFound());
+
+                    verify(productService).updateProduct(eq(1000L), any(ProductData.class));
+                }
+            }
+
+            @Nested
+            @DisplayName("주어진 product 가 올바르지 않을 때")
+            class Context_without_correct_product_attributes {
+                @Test
+                @DisplayName("bad request 를 응답한다.")
+                void It_respond_bad_request() throws Exception {
+                    mockMvc.perform(
+                            patch("/products/1")
+                                    .accept(MediaType.APPLICATION_JSON_UTF8)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{\"name\":\"\",\"maker\":\"\"," +
+                                            "\"price\":0}")
+                                    .header("Authorization", "Bearer " + VALID_TOKEN)
+                    )
+                            .andExpect(status().isBadRequest());
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("주어진 access token 이 올바르지 않을 때 때")
+        class Context_with_invalid_access_token {
+            @Test
+            @DisplayName("unauthorized 를 응답한다.")
+            void It_respond_unauthorized() throws Exception {
+                mockMvc.perform(
+                        patch("/products/1")
+                                .accept(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
+                                        "\"price\":5000}")
+                                .header("Authorization", "Bearer " + INVALID_TOKEN)
+                )
+                        .andExpect(status().isUnauthorized());
+            }
+        }
+
+        @Nested
+        @DisplayName("주어진 access token 이 없을 때")
+        class Context_without_access_token {
+            @Test
+            @DisplayName("unauthorized 를 응답한다.")
+            void It_respond_unauthorized() throws Exception {
+                mockMvc.perform(
+                        patch("/products/1")
+                                .accept(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
+                                        "\"price\":5000}")
+                )
+                        .andExpect(status().isUnauthorized());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("[DELETE] /products/{id} 요청은")
     class Describe_delete_products {
         @Nested
         @DisplayName("주어진 access token 이 올바를 때")
