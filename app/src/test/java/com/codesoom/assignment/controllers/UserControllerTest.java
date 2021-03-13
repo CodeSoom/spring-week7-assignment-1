@@ -5,9 +5,11 @@ import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -69,6 +71,12 @@ class UserControllerTest {
 
         given(userService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
+
+        Mockito.doReturn(1L)
+                .when(authenticationService).parseToken(VALID_TOKEN);
+
+        Mockito.doThrow(new InvalidTokenException(INVALID_TOKEN))
+                .when(authenticationService).parseToken(INVALID_TOKEN);
     }
 
     @Test
