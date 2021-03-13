@@ -35,6 +35,10 @@ public class User {
         name = source.name;
     }
 
+    public void changePassword(String password) {
+        this.password = password;
+    }
+
     public void destroy() {
         deleted = true;
     }
