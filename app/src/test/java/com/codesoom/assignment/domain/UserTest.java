@@ -2,6 +2,7 @@ package com.codesoom.assignment.domain;
 
 import org.junit.jupiter.api.Test;
 
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UserTest {
@@ -15,7 +16,7 @@ class UserTest {
                 .build());
 
         assertThat(user.getName()).isEqualTo("TEST");
-        assertThat(user.getPassword()).isEqualTo("TEST");
+        assertThat(user.getPassword()).isEqualTo("");
     }
 
     @Test
@@ -27,6 +28,16 @@ class UserTest {
         user.destroy();
 
         assertThat(user.isDeleted()).isTrue();
+    }
+
+    @Test
+    void changePassword() {
+        User user = User.builder().build();
+
+        user.changePassword("TEST");
+
+        assertThat(user.getPassword()).isNotEqualTo("TEST");
+        assertThat(user.getPassword()).isNotEmpty();
     }
 
     @Test
