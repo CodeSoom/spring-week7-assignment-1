@@ -11,7 +11,7 @@ public class UserAuthentication extends AbstractAuthenticationToken {
     private final String email;
 
     public UserAuthentication(String email) {
-        super(authorities());
+        super(authorities(email));
         this.email = email;
     }
 
@@ -41,9 +41,14 @@ public class UserAuthentication extends AbstractAuthenticationToken {
                 '}';
     }
 
-    private static List<GrantedAuthority> authorities() {
+    private static List<GrantedAuthority> authorities(String email) {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("USER"));
+
+        if (email.equals("adminEmail")) {
+            authorities.add(new SimpleGrantedAuthority("ADMIN"));
+        }
+
         return authorities;
     }
 }

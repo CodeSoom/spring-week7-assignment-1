@@ -44,6 +44,8 @@ class UserControllerTest {
             "eyJzdWIiOiJleGlzdGVkRW1haWwifQ.UQodS3elf3Cu4g0PDFHqVloFbcKHHmTTnk0jGmiwPXY";
     private static final String OTHER_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJzdWIiOiJjcmVhdGVkRW1haWwifQ.8mfjGjxD-qmkIXjJ-iznb38c92xijMUJOs8GKt8GYbU";
+    private static final String ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJzdWIiOiJhZG1pbkVtYWlsIn0.P2g7CPe8Rx897aj0OncPab-f0cNwvPuqdtdXJfXAex4";
     private static final String SETUP_USER_NAME = "setUpName";
     private static final String SETUP_USER_EMAIL = "setUpdEmail";
     private static final String SETUP_USER_PASSWORD = "setUpPassword";
@@ -62,6 +64,7 @@ class UserControllerTest {
 
     private static final String MY_EMAIL = SETUP_USER_EMAIL;
     private static final String OTHER_EMAIL = CREATE_USER_EMAIL;
+    private static final String ADMIN_EMAIL = "adminEmail";
 
     @Autowired
     private MockMvc mockMvc;
@@ -379,10 +382,12 @@ class UserControllerTest {
             @Test
             @DisplayName("주어진 아이디에 해당하는 사용자를 삭제하고 삭제된 사용자와 NO_CONTENT를 리턴한다")
             void itDeletesUserAndReturnsDeletedUserAndNO_CONTENTHttpStatus() throws Exception {
+                given(authenticationService.parseToken(ADMIN_TOKEN)).willReturn(ADMIN_EMAIL);
                 given(userService.deleteUser(eq(givenExistedId))).willReturn(userResultData);
 
                 mockMvc.perform(
                         delete("/users/" + givenExistedId)
+                                .header("Authorization", "Bearer " + ADMIN_TOKEN)
                 )
                         .andDo(print())
                         .andExpect(content().string(containsString("\"deleted\":true")))
@@ -398,14 +403,14 @@ class UserControllerTest {
             @Test
             @DisplayName("사용자를 찾을 수 없다는 예외를 던지고 NOT_FOUND를 리턴한다")
             void itThrowsNotFoundExceptionAndReturnsNOT_FOUNDHttpStatus() throws Exception {
+                given(authenticationService.parseToken(ADMIN_EMAIL)).willReturn(ADMIN_EMAIL);
                 given(userService.deleteUser(givenNotExistedId))
                         .willThrow(new UserNotFoundException(givenNotExistedId));
 
                 mockMvc.perform(
                         delete("/users/"+givenNotExistedId)
-                            .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + ADMIN_TOKEN)
                 )
-                        .andExpect(content().string(containsString("User not found")))
                         .andExpect(status().isNotFound());
 
                 verify(userService).deleteUser(givenNotExistedId);
@@ -425,17 +430,52 @@ class UserControllerTest {
             @Test
             @DisplayName("사용자를 찾을 수 없다는 예외를 던지고 NOT_FOUND를 리턴한다")
             void itThrowsNotFoundExceptionAndNOT_FOUNDHttpStatus() throws Exception {
+                given(authenticationService.parseToken(ADMIN_TOKEN)).willReturn(ADMIN_EMAIL);
                 given(userService.deleteUser(givenDeletedId))
                         .willThrow(new UserNotFoundException(givenDeletedId));
 
                 mockMvc.perform(
                         delete("/users/"+DELETE_ID)
-                            .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + ADMIN_TOKEN)
                 )
-                        .andExpect(content().string(containsString("User not found")))
                         .andExpect(status().isNotFound());
 
                 verify(userService).deleteUser(givenDeletedId);
+            }
+        }
+
+        @Nested
+        @DisplayName("만약 토큰이 주어지지 않는다면")
+        class Context_WithoutToken {
+            private final Long givenExistedId = EXISTED_ID;
+
+            @Test
+            @DisplayName("권한이 없다는 예외를 던지고 UNAUTHORIZED를 리턴한다")
+            void itThrowsUnauthorizedExceptionAndReturnsUNAUTHORIZEDHttpStatus() throws Exception {
+                mockMvc.perform(
+                        delete("/users/" + givenExistedId)
+                )
+                        .andDo(print())
+                        .andExpect(status().isUnauthorized());
+            }
+        }
+
+        @Nested
+        @DisplayName("만약 admin 계정이 주어지지 않는다면")
+        class Context_WithoutAdminRole {
+            private final Long givenExistedId = EXISTED_ID;
+
+            @Test
+            @DisplayName("권한이 없다는 예외를 던지고 UNAUTHORIZED를 리턴한다")
+            void itThrowsUnauthorizedExceptionAndReturnsUNAUTHORIZEDHttpStatus() throws Exception {
+                given(authenticationService.parseToken(MY_TOKEN)).willReturn(MY_EMAIL);
+
+                mockMvc.perform(
+                        delete("/users/" + givenExistedId)
+                                .header("Authorization", "Bearer " + MY_TOKEN)
+                )
+                        .andDo(print())
+                        .andExpect(status().isForbidden());
             }
         }
     }
