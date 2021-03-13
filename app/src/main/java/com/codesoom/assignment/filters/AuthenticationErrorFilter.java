@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * 사용자 인증 에러 처리 필터
+ * 사용자 인증 에러 처리 필터.
  */
 public class AuthenticationErrorFilter extends HttpFilter {
     @Override
