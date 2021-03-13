@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.management.relation.RoleNotFoundException;
 import javax.validation.Valid;
 
 @RestController
@@ -32,7 +33,8 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    UserResultData create(@RequestBody @Valid UserRegistrationData registrationData) {
+    UserResultData create(@RequestBody @Valid UserRegistrationData registrationData)
+            throws RoleNotFoundException {
         User user = userService.registerUser(registrationData);
         return getUserResultData(user);
     }

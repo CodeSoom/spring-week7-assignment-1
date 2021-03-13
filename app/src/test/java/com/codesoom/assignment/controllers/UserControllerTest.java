@@ -20,6 +20,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.management.relation.RoleNotFoundException;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -113,7 +115,7 @@ class UserControllerTest {
         @DisplayName("올바른 회원 가입 정보가 주어진다면")
         class Context_with_a_valid_user_registration_data {
             @BeforeEach
-            void setUp() {
+            void setUp() throws RoleNotFoundException {
                 given(userService.registerUser(any(UserRegistrationData.class)))
                         .willReturn(user);
             }
@@ -151,7 +153,7 @@ class UserControllerTest {
         @DisplayName("주어진 이메일이 중복되었다면")
         class Context_with_an_duplicate_user_registration_data {
             @BeforeEach
-            void setUp() {
+            void setUp() throws RoleNotFoundException {
                 given(userService.registerUser(any(UserRegistrationData.class)))
                         .willThrow(new UserEmailDuplicationException(duplicateUserRegistrationData.getEmail()));
             }

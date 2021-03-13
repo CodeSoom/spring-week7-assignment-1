@@ -1,5 +1,6 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.domain.RoleRepository;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.management.relation.RoleNotFoundException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,12 +34,23 @@ class UserServiceTest {
     private final UserRepository userRepository = mock(UserRepository.class);
     private final RoleRepository roleRepository = mock(RoleRepository.class);
 
+    private Role role;
+    private Role wrongRole;
+
     @BeforeEach
     void setUp() {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
         userService = new UserService(mapper, userRepository, roleRepository, passwordEncoder);
+
+        role = Role.builder()
+                .name("ROLE_USER")
+                .build();
+
+        wrongRole = Role.builder()
+                .name(role.getName() + "WRONG")
+                .build();
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
                 .willReturn(true);
@@ -65,16 +78,22 @@ class UserServiceTest {
 
         given(userRepository.findByIdAndDeletedIsFalse(DELETED_USER_ID))
                 .willReturn(Optional.empty());
+
+        given(roleRepository.findByName(role.getName()))
+                .willReturn(Optional.of(role));
+
+        given(roleRepository.findByName(wrongRole.getName()))
+                .willReturn(Optional.empty());
     }
 
     @Test
-    void registerUser() {
+    void registerUser() throws RoleNotFoundException {
         UserRegistrationData registrationData = UserRegistrationData.builder()
                 .email("tester@example.com")
                 .name("Tester")
                 .password("test")
                 .build();
-
+        
         User user = userService.registerUser(registrationData);
 
         assertThat(user.getId()).isEqualTo(13L);
@@ -82,6 +101,19 @@ class UserServiceTest {
         assertThat(user.getName()).isEqualTo("Tester");
 
         verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    void registerUserWithWrongRoleName() {
+        UserRegistrationData registrationData = UserRegistrationData.builder()
+                .email("tester@example.com")
+                .name("Tester")
+                .password("test")
+                .roleName(wrongRole.getName())
+                .build();
+
+        assertThatThrownBy(() -> userService.registerUser(registrationData))
+                .isInstanceOf(RoleNotFoundException.class);
     }
 
     @Test

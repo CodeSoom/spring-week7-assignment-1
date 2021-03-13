@@ -28,4 +28,8 @@ public class UserRegistrationData {
     @Size(min = 4, max = 1024)
     @Mapping("password")
     private String password;
+
+    @Mapping("role.name")
+    @Builder.Default
+    private String roleName = "ROLE_USER";
 }

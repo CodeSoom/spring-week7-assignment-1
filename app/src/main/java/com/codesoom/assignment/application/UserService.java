@@ -12,6 +12,7 @@ import com.github.dozermapper.core.Mapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.management.relation.RoleNotFoundException;
 import javax.transaction.Transactional;
 
 @Service
@@ -32,17 +33,19 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User registerUser(UserRegistrationData registrationData) {
+    public User registerUser(UserRegistrationData registrationData)
+            throws RoleNotFoundException {
         String email = registrationData.getEmail();
         if (userRepository.existsByEmail(email)) {
             throw new UserEmailDuplicationException(email);
         }
 
         User user = mapper.map(registrationData, User.class);
-
+        
         Role role = user.getRole();
-        Role foundRole = roleRepository.findByName(role.getName())
-                .orElseGet(() -> roleRepository.save(role));
+        Role foundRole = roleRepository.findByName(role.getName()).orElseThrow(
+                () -> new RoleNotFoundException("주어진 권한이 존재하지 않습니다. " +
+                        "문제의 권한 = " + role.getName()));
 
         user.setRole(foundRole);
         user.changePassword(registrationData.getPassword(), passwordEncoder);
