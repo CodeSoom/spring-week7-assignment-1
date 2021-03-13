@@ -27,6 +27,12 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("User not found");
     }
 
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ErrorResponse handleUnauthorizedAccess() {
+        return new ErrorResponse("Unauthorized access");
+    }
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(UserEmailDuplicationException.class)
     public ErrorResponse handleUserEmailIsAlreadyExisted() {
