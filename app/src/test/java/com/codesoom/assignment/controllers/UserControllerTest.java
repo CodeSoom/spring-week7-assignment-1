@@ -60,6 +60,7 @@ class UserControllerTest {
     private UserRegistrationData validUserRegistrationData;
     private UserRegistrationData invalidUserRegistrationData;
     private UserRegistrationData duplicateUserRegistrationData;
+    private UserRegistrationData userRegistrationDataWithWrongRole;
 
     private UserModificationData validUserModificationData;
     private UserModificationData invalidUserModificationData;
@@ -75,6 +76,12 @@ class UserControllerTest {
         validUserRegistrationData = createUserRegistrationData("valid@test.com");
         invalidUserRegistrationData = createUserRegistrationData("");
         duplicateUserRegistrationData = createUserRegistrationData("duplicate@test.com");
+        userRegistrationDataWithWrongRole = UserRegistrationData.builder()
+                .email("email@example.com")
+                .name("name")
+                .password("12345678")
+                .roleName("ROLE_WRONG")
+                .build();
 
         validUserModificationData = createUserModificationData("이름수정");
         invalidUserModificationData = createUserModificationData("");
@@ -168,6 +175,28 @@ class UserControllerTest {
                         .andExpect(jsonPath("name").doesNotExist())
                         .andExpect(jsonPath("message").exists())
                         .andExpect(status().isBadRequest());
+            }
+        }
+
+        @Nested
+        @DisplayName("주어진 Role이 존재하지 않는다면")
+        class Context_with_wrong_role {
+            @BeforeEach
+            void setUp() throws RoleNotFoundException {
+                given(userService.registerUser(any(UserRegistrationData.class)))
+                        .willThrow(new RoleNotFoundException());
+            }
+
+            @Test
+            @DisplayName("에러메시지와 상태코드 404 Not Found 를 응답한다.")
+            void it_responds_the_error_message_and_status_code_404() throws Exception {
+                mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userRegistrationDataWithWrongRole)))
+                        .andExpect(jsonPath("name").doesNotExist())
+                        .andExpect(jsonPath("message").exists())
+                        .andExpect(status().isNotFound());
             }
         }
     }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import javax.management.relation.RoleNotFoundException;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.util.Set;
@@ -28,6 +29,12 @@ public class ControllerErrorAdvice {
     @ExceptionHandler(UserNotFoundException.class)
     public ErrorResponse handleUserNotFound() {
         return new ErrorResponse("User not found");
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ErrorResponse handleRoleNotFound() {
+        return new ErrorResponse("Role not found");
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
