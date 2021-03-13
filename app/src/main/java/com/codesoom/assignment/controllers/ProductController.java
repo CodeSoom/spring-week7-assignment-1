@@ -44,7 +44,6 @@ public class ProductController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     public Product create(
-            @RequestAttribute Long userId,
             @RequestBody @Valid ProductData productData,
             Authentication authentication
     ) {
