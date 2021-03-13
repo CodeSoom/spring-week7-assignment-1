@@ -7,6 +7,8 @@ import com.codesoom.assignment.dto.ProductData;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.ProductNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -139,18 +141,6 @@ class ProductControllerTest {
     }
 
     @Test
-    void createWithoutAccessToken() throws Exception {
-        mockMvc.perform(
-                post("/products")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
-        )
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
     void createWithWrongAccessToken() throws Exception {
         mockMvc.perform(
                 post("/products")
@@ -264,5 +254,26 @@ class ProductControllerTest {
                         .header("Authorization", "Bearer " + INVALID_TOKEN)
         )
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Nested
+    @DisplayName("[POST] /products 요청은")
+    class Describe_post_products {
+        @Nested
+        @DisplayName("주어진 요청에 access token 이 없을 때")
+        class Context_without_access_token {
+            @Test
+            @DisplayName("unauthorized 를 응답한다.")
+            void It_respond_unauthorized() throws Exception {
+                mockMvc.perform(
+                        post("/products")
+                                .accept(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
+                                        "\"price\":5000}")
+                )
+                        .andExpect(status().isUnauthorized());
+            }
+        }
     }
 }
