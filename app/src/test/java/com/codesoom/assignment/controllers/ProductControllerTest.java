@@ -112,48 +112,6 @@ class ProductControllerTest {
     }
 
     @Test
-    void createWithValidAttributes() throws Exception {
-        mockMvc.perform(
-                post("/products")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
-        )
-                .andExpect(status().isCreated())
-                .andExpect(content().string(containsString("쥐돌이")));
-
-        verify(productService).createProduct(any(ProductData.class));
-    }
-
-    @Test
-    void createWithInvalidAttributes() throws Exception {
-        mockMvc.perform(
-                post("/products")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"maker\":\"\"," +
-                                "\"price\":0}")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
-        )
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void createWithWrongAccessToken() throws Exception {
-        mockMvc.perform(
-                post("/products")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
-                        .header("Authorization", "Bearer " + INVALID_TOKEN)
-        )
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
     void updateWithExistedProduct() throws Exception {
         mockMvc.perform(
                 patch("/products/1")
@@ -273,6 +231,67 @@ class ProductControllerTest {
                                         "\"price\":5000}")
                 )
                         .andExpect(status().isUnauthorized());
+            }
+        }
+
+        @Nested
+        @DisplayName("주어진 요청의 access token 이 올바르지 않을 때")
+        class Context_with_invalid_access_token {
+            @Test
+            @DisplayName("unauthorized 를 응답한다.")
+            void It_respond_unauthorized() throws Exception {
+                mockMvc.perform(
+                        post("/products")
+                                .accept(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
+                                        "\"price\":5000}")
+                                .header("Authorization", "Bearer " + INVALID_TOKEN)
+                )
+                        .andExpect(status().isUnauthorized());
+            }
+        }
+
+        @Nested
+        @DisplayName("주어진 요청의 access token 이 올바를 때")
+        class Context_with_valid_access_token {
+            @Nested
+            @DisplayName("주어진 상품의 정보가 올바르다면")
+            class Context_with_correct_product_attributes {
+                @Test
+                @DisplayName("created 상태와 생성된 product 를 응답한다.")
+                void It_response_created_and_created_product() throws Exception {
+                    mockMvc.perform(
+                            post("/products")
+                                    .accept(MediaType.APPLICATION_JSON_UTF8)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
+                                            "\"price\":5000}")
+                                    .header("Authorization", "Bearer " + VALID_TOKEN)
+                    )
+                            .andExpect(status().isCreated())
+                            .andExpect(content().string(containsString("쥐돌이")));
+
+                    verify(productService).createProduct(any(ProductData.class));
+                }
+            }
+
+            @Nested
+            @DisplayName("주어진 상품의 정보가 올바르지 않다면")
+            class Context_without_correct_product_attributes {
+                @Test
+                @DisplayName("bad request 를 응답한다.")
+                void It_respond_bad_request() throws Exception {
+                    mockMvc.perform(
+                            post("/products")
+                                    .accept(MediaType.APPLICATION_JSON_UTF8)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{\"name\":\"\",\"maker\":\"\"," +
+                                            "\"price\":0}")
+                                    .header("Authorization", "Bearer " + VALID_TOKEN)
+                    )
+                            .andExpect(status().isBadRequest());
+                }
             }
         }
     }
