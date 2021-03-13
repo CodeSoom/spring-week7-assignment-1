@@ -53,43 +53,68 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() {
-        given(productService.getProducts()).willReturn(List.of(givenProduct));
-
-        given(productService.getProduct(1L)).willReturn(givenProduct);
-
-        given(productService.getProduct(1000L))
-                .willThrow(new ProductNotFoundException(1000L));
-
         given(authenticationService.parseToken(VALID_TOKEN)).willReturn(1L);
 
         given(authenticationService.parseToken(INVALID_TOKEN))
                 .willThrow(new InvalidTokenException(INVALID_TOKEN));
     }
 
-    @Test
-    void list() throws Exception {
-        mockMvc.perform(
-                get("/products")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-        )
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("쥐돌이")));
+    @Nested
+    @DisplayName("[GET] /products 요청은")
+    class Describe_products_get {
+        @BeforeEach
+        void setup() {
+            given(productService.getProducts()).willReturn(List.of(givenProduct));
+        }
+
+        @Test
+        @DisplayName("ok 와 저장된 product 들을 응답한다.")
+        void It_respond_ok_and_products() throws Exception {
+            mockMvc.perform(
+                    get("/products")
+                            .accept(MediaType.APPLICATION_JSON_UTF8)
+            )
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("쥐돌이")));
+        }
     }
 
-    @Test
-    void deatilWithExsitedProduct() throws Exception {
-        mockMvc.perform(
-                get("/products/1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-        )
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("쥐돌이")));
-    }
+    @Nested
+    @DisplayName("[GET] /products/{id} 요청은")
+    class Describe_products_id_get {
+        @BeforeEach
+        void setup() {
+            given(productService.getProduct(1L)).willReturn(givenProduct);
 
-    @Test
-    void deatilWithNotExsitedProduct() throws Exception {
-        mockMvc.perform(get("/products/1000"))
-                .andExpect(status().isNotFound());
+            given(productService.getProduct(1000L))
+                    .willThrow(new ProductNotFoundException(1000L));
+        }
+
+        @Nested
+        @DisplayName("주어진 id에 해당하는 product 가 존재할 때")
+        class Context_when_exists_given_id_product {
+            @Test
+            @DisplayName("ok 와 id 에 해당하는 product 를 응답한다.")
+            void It_respond_okj_and_product() throws Exception {
+                mockMvc.perform(
+                        get("/products/1")
+                                .accept(MediaType.APPLICATION_JSON_UTF8)
+                )
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(containsString("쥐돌이")));
+            }
+        }
+
+        @Nested
+        @DisplayName("주어진 id에 해당하는 product 가 존재하지 않을 때")
+        class Context_when_not_exists_given_id_product {
+            @Test
+            @DisplayName("not found 를 응답한다.")
+            void It_respond_not_found() throws Exception {
+                mockMvc.perform(get("/products/1000"))
+                        .andExpect(status().isNotFound());
+            }
+        }
     }
 
     @Nested
