@@ -6,6 +6,7 @@ import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.ProductNotFoundException;
+import com.github.dozermapper.core.MappingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -34,6 +35,13 @@ class ProductControllerTest {
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
 
+    private final Product givenProduct = Product.builder()
+            .id(1L)
+            .name("쥐돌이")
+            .maker("냥이월드")
+            .price(5000)
+            .build();
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -45,21 +53,12 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() {
-        Product product = Product.builder()
-                .id(1L)
-                .name("쥐돌이")
-                .maker("냥이월드")
-                .price(5000)
-                .build();
-        given(productService.getProducts()).willReturn(List.of(product));
+        given(productService.getProducts()).willReturn(List.of(givenProduct));
 
-        given(productService.getProduct(1L)).willReturn(product);
+        given(productService.getProduct(1L)).willReturn(givenProduct);
 
         given(productService.getProduct(1000L))
                 .willThrow(new ProductNotFoundException(1000L));
-
-        given(productService.createProduct(any(ProductData.class)))
-                .willReturn(product);
 
         given(productService.updateProduct(eq(1L), any(ProductData.class)))
                 .will(invocation -> {
@@ -255,6 +254,30 @@ class ProductControllerTest {
         @Nested
         @DisplayName("주어진 요청의 access token 이 올바를 때")
         class Context_with_valid_access_token {
+            @BeforeEach
+            void setup() {
+                given(productService.createProduct(any(ProductData.class)))
+                        .will(invocation -> {
+                            ProductData productData = invocation.getArgument(0);
+
+                            System.out.println(productData.getName());
+
+                            if (
+                                    productData.getName().isEmpty()
+                                            || productData.getMaker().isEmpty()
+                            ) {
+                                throw new MappingException("invalid product data");
+                            }
+
+                            return Product.builder()
+                                    .id(1L)
+                                    .name(productData.getName())
+                                    .maker(productData.getMaker())
+                                    .price(productData.getPrice())
+                                    .build();
+                        });
+            }
+
             @Nested
             @DisplayName("주어진 상품의 정보가 올바르다면")
             class Context_with_correct_product_attributes {
