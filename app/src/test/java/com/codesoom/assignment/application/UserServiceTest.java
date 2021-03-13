@@ -30,9 +30,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        Mapper mapper = DozerBeanMapperBuilder.buildDefault();
-
-        userService = new UserService(mapper, userRepository);
+        userService = new UserService(userRepository);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
                 .willReturn(true);

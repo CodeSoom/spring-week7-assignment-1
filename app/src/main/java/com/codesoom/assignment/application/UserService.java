@@ -14,11 +14,9 @@ import javax.transaction.Transactional;
 @Service
 @Transactional
 public class UserService {
-    private final Mapper mapper;
     private final UserRepository userRepository;
 
-    public UserService(Mapper dozerMapper, UserRepository userRepository) {
-        this.mapper = dozerMapper;
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
