@@ -4,7 +4,6 @@
 
 package com.codesoom.assignment.controllers;
 
-import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
@@ -22,12 +21,8 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
 
-    private final AuthenticationService authenticationService;
-
-    public ProductController(ProductService productService,
-                             AuthenticationService authenticationService) {
+    public ProductController(ProductService productService) {
         this.productService = productService;
-        this.authenticationService = authenticationService;
     }
 
     @GetMapping
