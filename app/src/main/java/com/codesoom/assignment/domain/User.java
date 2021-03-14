@@ -42,8 +42,7 @@ public class User {
 
         return this;
     }
-
-
+    
     public void changePassword(String password) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         this.password = passwordEncoder.encode(password);
