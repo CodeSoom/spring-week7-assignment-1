@@ -50,7 +50,7 @@ class AuthenticationServiceTest {
         String accessToken = authenticationService.login(
                 "tester@example.com", "test");
 
-        assertThat(accessToken).isEqualTo(VALID_TOKEN);
+        assertThat(accessToken).isEqualTo("eyJhbGciOiJIUzI1NiJ9..Y3zwinksGMfE9Ym4QHp3jFBeDE_iJdw3F-DDlvMEE9Q");
 
         verify(userRepository).findByEmail("tester@example.com");
     }

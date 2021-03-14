@@ -127,7 +127,7 @@ class ProductControllerTest {
         @DisplayName("주어진 요청에 access token 이 없을 때")
         class Context_without_access_token {
             @Test
-            @DisplayName("unauthorized 를 응답한다.")
+            @DisplayName("forbidden 를 응답한다.")
             void It_respond_unauthorized() throws Exception {
                 mockMvc.perform(
                         post("/products")
@@ -136,7 +136,7 @@ class ProductControllerTest {
                                 .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
                                         "\"price\":5000}")
                 )
-                        .andExpect(status().isUnauthorized());
+                        .andExpect(status().isForbidden());
             }
         }
 
@@ -310,7 +310,7 @@ class ProductControllerTest {
         }
 
         @Nested
-        @DisplayName("주어진 access token 이 올바르지 않을 때 때")
+        @DisplayName("주어진 access token 이 올바르지 않을 때")
         class Context_with_invalid_access_token {
             @Test
             @DisplayName("unauthorized 를 응답한다.")
@@ -331,7 +331,7 @@ class ProductControllerTest {
         @DisplayName("주어진 access token 이 없을 때")
         class Context_without_access_token {
             @Test
-            @DisplayName("unauthorized 를 응답한다.")
+            @DisplayName("forbidden 를 응답한다.")
             void It_respond_unauthorized() throws Exception {
                 mockMvc.perform(
                         patch("/products/1")
@@ -340,7 +340,7 @@ class ProductControllerTest {
                                 .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
                                         "\"price\":5000}")
                 )
-                        .andExpect(status().isUnauthorized());
+                        .andExpect(status().isForbidden());
             }
         }
     }
@@ -375,7 +375,7 @@ class ProductControllerTest {
             }
 
             @Nested
-            @DisplayName("주어진 id 에 해당하는 상품이 존재하지 않을  때")
+            @DisplayName("주어진 id 에 해당하는 상품이 존재하지 않을 때")
             class Context_when_not_exists_given_id_product {
                 @Test
                 @DisplayName("not found 를 응답한다.")

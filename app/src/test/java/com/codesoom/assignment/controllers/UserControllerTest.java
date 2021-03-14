@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
@@ -184,16 +185,16 @@ class UserControllerTest {
             }
 
             @Nested
-            @DisplayName("주어진 id 에 해당하는 유저가 존재하지 않을 때")
+            @DisplayName("주어진 토큰에 있는 id 가 아닌 다른 id 를 변경하려 할 때")
             class Context_when_not_exists_given_id_user {
                 @BeforeEach
                 void setup() {
-                    Mockito.doThrow(new UserNotFoundException(100L))
+                    Mockito.doThrow(new AccessDeniedException("Access denied"))
                             .when(userService).updateUser(eq(100L), any(UserModificationData.class));
                 }
 
                 @Test
-                @DisplayName("not found 를 응답한다.")
+                @DisplayName("forbidden 를 응답한다.")
                 void It_respond_not_found() throws Exception {
                     mockMvc.perform(
                             patch("/users/100")
@@ -201,10 +202,7 @@ class UserControllerTest {
                                     .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
                                     .header("Authorization", "Bearer " + VALID_TOKEN)
                     )
-                            .andExpect(status().isNotFound());
-
-                    verify(userService)
-                            .updateUser(eq(100L), any(UserModificationData.class));
+                            .andExpect(status().isForbidden());
                 }
             }
 
