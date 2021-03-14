@@ -46,36 +46,11 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        Mockito.doThrow(new UserNotFoundException(100L))
-                .when(userService).deleteUser(100L);
-
         Mockito.doReturn(1L)
                 .when(authenticationService).parseToken(VALID_TOKEN);
 
         Mockito.doThrow(new InvalidTokenException(INVALID_TOKEN))
                 .when(authenticationService).parseToken(INVALID_TOKEN);
-    }
-
-    @Test
-    void destroyWithExistedId() throws Exception {
-        mockMvc.perform(
-                delete("/users/1")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
-        )
-                .andExpect(status().isNoContent());
-
-        verify(userService).deleteUser(1L);
-    }
-
-    @Test
-    void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(
-                delete("/users/100")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
-        )
-                .andExpect(status().isNotFound());
-
-        verify(userService).deleteUser(100L);
     }
 
     @Nested
@@ -263,6 +238,48 @@ class UserControllerTest {
                                 .header("Authorization", "Bearer " + INVALID_TOKEN)
                 )
                         .andExpect(status().isUnauthorized());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("/users/{id} DELETE 요청은")
+    class Describe_user_id_delete_request {
+        @Nested
+        @DisplayName("주어진 id에 해당하는 user 가 존재할 때")
+        class Context_when_exists_given_id_user {
+            @Test
+            @DisplayName("no content 를 응답한다.")
+            void It_respond_no_content() throws Exception {
+                mockMvc.perform(
+                        delete("/users/1")
+                                .header("Authorization", "Bearer " + VALID_TOKEN)
+                )
+                        .andExpect(status().isNoContent());
+
+                verify(userService).deleteUser(1L);
+            }
+        }
+
+        @Nested
+        @DisplayName("주어진 id에 해당하는 user 가 존재하지 않을 때")
+        class Context_when_not_exists_given_id_user {
+            @BeforeEach
+            void setup() {
+                Mockito.doThrow(new UserNotFoundException(100L))
+                        .when(userService).deleteUser(100L);
+            }
+
+            @Test
+            @DisplayName("not found 를 응답한다.")
+            void it_respond_not_found() throws Exception {
+                mockMvc.perform(
+                        delete("/users/100")
+                                .header("Authorization", "Bearer " + VALID_TOKEN)
+                )
+                        .andExpect(status().isNotFound());
+
+                verify(userService).deleteUser(100L);
             }
         }
     }
