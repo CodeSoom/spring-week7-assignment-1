@@ -150,6 +150,16 @@ class UserControllerTest {
     }
 
     @Test
+    void updateUserWithoutAccessToken() throws Exception {
+        mockMvc.perform(
+                patch("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+        )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void destroyWithExistedId() throws Exception {
         mockMvc.perform(
                 delete("/users/1")
