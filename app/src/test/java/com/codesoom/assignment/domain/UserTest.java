@@ -1,6 +1,7 @@
 package com.codesoom.assignment.domain;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -67,5 +68,12 @@ class UserTest {
 
         assertThat(user.authenticate("test", passwordEncoder)).isFalse();
         assertThat(user.authenticate("xxx", passwordEncoder)).isFalse();
+    }
+
+    @Test
+    @DisplayName("toString 메서드 테스트")
+    void toStringTest() {
+        assertThat(User.builder().name("name").toString())
+                .contains("name");
     }
 }

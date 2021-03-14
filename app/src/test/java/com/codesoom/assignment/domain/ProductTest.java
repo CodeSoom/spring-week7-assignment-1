@@ -1,5 +1,6 @@
 package com.codesoom.assignment.domain;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,5 +40,12 @@ class ProductTest {
         assertThat(product.getName()).isEqualTo("쥐순이");
         assertThat(product.getMaker()).isEqualTo("코드숨");
         assertThat(product.getPrice()).isEqualTo(10000);
+    }
+
+    @Test
+    @DisplayName("toString 메서드 테스트")
+    void toStringTest() {
+        assertThat(Product.builder().imageUrl("image").toString())
+                .contains("image");
     }
 }
