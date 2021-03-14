@@ -9,7 +9,6 @@ import java.util.List;
 
 /**
  * 유저 인증 토큰.
- * 유저 인증 여부를 확인하기 위해 사용되는 객체.
  */
 public class UserAuthentication extends AbstractAuthenticationToken {
     private final Long userId;
@@ -19,6 +18,7 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         this.userId = userId;
     }
 
+    @lombok.Generated
     @Override
     public Object getCredentials() {
         return null;
@@ -34,6 +34,7 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         return true;
     }
 
+    @lombok.Generated
     @Override
     public String toString() {
         return "UserAuthentication{" +
