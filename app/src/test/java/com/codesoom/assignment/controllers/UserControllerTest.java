@@ -7,12 +7,14 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.security.UserAuthentication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
@@ -42,6 +44,8 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
+        Authentication authentication = new UserAuthentication(1L);
+
         given(userService.registerUser(any(UserRegistrationData.class)))
                 .will(invocation -> {
                     UserRegistrationData registrationData = invocation.getArgument(0);
@@ -53,7 +57,7 @@ class UserControllerTest {
                 });
 
 
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
+        given(userService.updateUser(eq(1L), any(UserModificationData.class), any(Authentication.class)))
                 .will(invocation -> {
                     Long id = invocation.getArgument(0);
                     UserModificationData modificationData =
@@ -65,7 +69,7 @@ class UserControllerTest {
                             .build();
                 });
 
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
+        given(userService.updateUser(eq(100L), any(UserModificationData.class), any(Authentication.class)))
                 .willThrow(new UserNotFoundException(100L));
 
         given(userService.deleteUser(100L))
@@ -125,7 +129,7 @@ class UserControllerTest {
                         containsString("\"name\":\"TEST\"")
                 ));
 
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
+        verify(userService).updateUser(eq(1L), any(UserModificationData.class), any(Authentication.class));
     }
 
     @Test
@@ -150,7 +154,7 @@ class UserControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
+                .updateUser(eq(100L), any(UserModificationData.class), any(Authentication.class));
     }
 
     @Test
