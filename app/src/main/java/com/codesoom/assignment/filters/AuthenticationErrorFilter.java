@@ -10,6 +10,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * 유저 인증 시 발생하는 에러처리 필터.
+ */
 public class AuthenticationErrorFilter extends HttpFilter {
 
     @Override
@@ -18,6 +21,7 @@ public class AuthenticationErrorFilter extends HttpFilter {
                             FilterChain chain)
             throws IOException, ServletException {
         try {
+            // 체인의 다음 필터를 처리한다.
             chain.doFilter(request, response);
         } catch (InvalidTokenException e) {
             response.sendError(HttpStatus.UNAUTHORIZED.value());
