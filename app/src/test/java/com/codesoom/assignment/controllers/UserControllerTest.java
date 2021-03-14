@@ -78,6 +78,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"tester@example.com\"," +
                                 "\"name\":\"Tester\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
         )
                 .andExpect(status().isCreated())
                 .andExpect(content().string(
@@ -99,6 +100,7 @@ class UserControllerTest {
                 post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
         )
                 .andExpect(status().isBadRequest());
     }
@@ -109,6 +111,7 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
         )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -127,6 +130,7 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
         )
                 .andExpect(status().isBadRequest());
     }
@@ -137,6 +141,7 @@ class UserControllerTest {
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
         )
                 .andExpect(status().isNotFound());
 
@@ -146,7 +151,10 @@ class UserControllerTest {
 
     @Test
     void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
+        mockMvc.perform(
+                delete("/users/1")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
+        )
                 .andExpect(status().isNoContent());
 
         verify(userService).deleteUser(1L);
@@ -154,7 +162,10 @@ class UserControllerTest {
 
     @Test
     void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
+        mockMvc.perform(
+                delete("/users/100")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
+        )
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
