@@ -7,6 +7,7 @@ import com.codesoom.assignment.dto.ProductData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -67,15 +67,16 @@ public class ProductController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     public Product create(
-            @RequestBody @Valid ProductData productData
-    ) {
+            @RequestBody @Valid ProductData productData,
+            Authentication authentication
+            ) {
         return productService.createProduct(productData);
     }
 
     /**
      * 상품 정보 수정 요청을 처리하고, 수정된 상품 정보를 반환합니다.
      *
-     * @param authorization
+     * @param
      * @param id
      * @param productData
      * @return 수정된 상품
@@ -83,13 +84,10 @@ public class ProductController {
     @RequestMapping(value = "{id}", method = {RequestMethod.PUT, RequestMethod.PATCH})
     @PreAuthorize("isAuthenticated()")
     public Product update(
-            @RequestHeader("Authorization") String authorization,
             @PathVariable Long id,
-            @RequestBody @Valid ProductData productData
-    ) {
-        String accessToken = authorization.substring("Bearer ".length());
-        authenticationService.parseToken(accessToken);
-
+            @RequestBody @Valid ProductData productData,
+            Authentication authentication
+            ) {
         return productService.updateProduct(id, productData);
     }
 
