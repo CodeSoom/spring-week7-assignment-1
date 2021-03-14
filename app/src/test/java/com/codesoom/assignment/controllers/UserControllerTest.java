@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.nio.file.AccessDeniedException;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,7 +20,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,9 +33,6 @@ class UserControllerTest {
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
     private static final String VALID_TOKEN2 = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjJ9.TEM6MULsZeqkBbUKziCR4Dg_8kymmZkyxsCXlfNJ3g0";
 
-
-    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
     private static final Long ID = 1L;
 
     @Autowired
@@ -127,7 +123,6 @@ class UserControllerTest {
     }
 
     @Test
-//    @WithUserYang(1L)
     void updateUserWithValidAttributesByMe() throws Exception {
         mockMvc.perform(
                 patch("/users/1")
@@ -148,19 +143,15 @@ class UserControllerTest {
     }
 
     @Test
-//    @WithUserYang(2L)
     void updateUserWithValidAttributesBySomeoneElse() throws Exception {
         mockMvc.perform(
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + VALID_TOKEN2)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
-                .with(user("other user").password("password").roles("USER"))
         )
                 .andDo(print())
                 .andExpect(status().isForbidden());
-
-
     }
 
     @Test
