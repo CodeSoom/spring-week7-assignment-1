@@ -4,12 +4,18 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.UnauthorizedAccessException;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.security.UserAuthentication;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Optional;
 
@@ -28,11 +34,17 @@ class UserServiceTest {
 
     private final UserRepository userRepository = mock(UserRepository.class);
 
+    private Authentication authentication;
+
     @BeforeEach
     void setUp() {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-        userService = new UserService(mapper, userRepository);
+        userService = new UserService(
+                mapper, userRepository, passwordEncoder);
+
+        authentication = new UserAuthentication(1L);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
                 .willReturn(true);
@@ -53,6 +65,15 @@ class UserServiceTest {
                                 .email(EXISTED_EMAIL_ADDRESS)
                                 .name("Tester")
                                 .password("test")
+                                .build()));
+
+        given(userRepository.findByIdAndDeletedIsFalse(10L))
+                .willReturn(Optional.of(
+                        User.builder()
+                                .id(10L)
+                                .email("10" + EXISTED_EMAIL_ADDRESS)
+                                .name("Tester10")
+                                .password("test10")
                                 .build()));
 
         given(userRepository.findByIdAndDeletedIsFalse(100L))
@@ -100,7 +121,7 @@ class UserServiceTest {
                 .password("TEST")
                 .build();
 
-        User user = userService.updateUser(1L, modificationData);
+        User user = userService.updateUser(1L, modificationData, authentication);
 
         assertThat(user.getId()).isEqualTo(1L);
         assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
@@ -116,10 +137,23 @@ class UserServiceTest {
                 .password("TEST")
                 .build();
 
-        assertThatThrownBy(() -> userService.updateUser(100L, modificationData))
+        authentication = new UserAuthentication(100L);
+
+        assertThatThrownBy(() -> userService.updateUser(100L, modificationData, authentication))
                 .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(100L);
+    }
+
+    @Test
+    void updateUserWithDifferentUserId() {
+        UserModificationData modificationData = UserModificationData.builder()
+                .name("TEST")
+                .password("TEST")
+                .build();
+
+        assertThatThrownBy(() -> userService.updateUser(10L, modificationData, authentication))
+                .isInstanceOf(UnauthorizedAccessException.class);
     }
 
 
@@ -130,8 +164,10 @@ class UserServiceTest {
                 .password("TEST")
                 .build();
 
+        authentication = new UserAuthentication(DELETED_USER_ID);
+
         assertThatThrownBy(
-                () -> userService.updateUser(DELETED_USER_ID, modificationData)
+                () -> userService.updateUser(DELETED_USER_ID, modificationData, authentication)
         )
                 .isInstanceOf(UserNotFoundException.class);
 
