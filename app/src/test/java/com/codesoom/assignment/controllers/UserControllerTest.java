@@ -46,21 +46,6 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        Mockito.doAnswer(invocation -> {
-            Long id = invocation.getArgument(0);
-            UserModificationData modificationData =
-                    invocation.getArgument(1);
-            return User.builder()
-                    .id(id)
-                    .email("tester@example.com")
-                    .name(modificationData.getName())
-                    .build();
-        })
-                .when(userService).updateUser(eq(1L), any(UserModificationData.class));
-
-        Mockito.doThrow(new UserNotFoundException(100L))
-                .when(userService).updateUser(eq(100L), any(UserModificationData.class));
-
         Mockito.doThrow(new UserNotFoundException(100L))
                 .when(userService).deleteUser(100L);
 
@@ -69,50 +54,6 @@ class UserControllerTest {
 
         Mockito.doThrow(new InvalidTokenException(INVALID_TOKEN))
                 .when(authenticationService).parseToken(INVALID_TOKEN);
-    }
-
-    @Test
-    void updateUserWithValidAttributes() throws Exception {
-        mockMvc.perform(
-                patch("/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
-        )
-                .andExpect(status().isOk())
-                .andExpect(content().string(
-                        containsString("\"id\":1")
-                ))
-                .andExpect(content().string(
-                        containsString("\"name\":\"TEST\"")
-                ));
-
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
-    }
-
-    @Test
-    void updateUserWithInvalidAttributes() throws Exception {
-        mockMvc.perform(
-                patch("/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"password\":\"\"}")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
-        )
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void updateUserWithNotExsitedId() throws Exception {
-        mockMvc.perform(
-                patch("/users/100")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
-        )
-                .andExpect(status().isNotFound());
-
-        verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
     }
 
     @Test
@@ -218,6 +159,110 @@ class UserControllerTest {
                                         "\"name\":\"Tester\",\"password\":\"test\"}")
                 )
                         .andExpect(status().isBadRequest());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("/users/{id} PATCH 요청은")
+    class Describe_users_id_patch_request {
+        @Nested
+        @DisplayName("주어진 access token 이 올바를 때")
+        class Context_with_correct_given_access_token {
+            @Nested
+            @DisplayName("주어진 id 에 해당하는 유저가 존재할 때")
+            class Context_when_exists_given_id_user {
+                @BeforeEach
+                void setup() {
+                    Mockito.doAnswer(invocation -> {
+                        Long id = invocation.getArgument(0);
+                        UserModificationData modificationData =
+                                invocation.getArgument(1);
+                        return User.builder()
+                                .id(id)
+                                .email("tester@example.com")
+                                .name(modificationData.getName())
+                                .build();
+                    })
+                            .when(userService).updateUser(eq(1L), any(UserModificationData.class));
+                }
+
+                @Test
+                @DisplayName("ok 와 변경된 user 를 응답한다.")
+                void It_respond_ok_and_modified_user() throws Exception {
+                    mockMvc.perform(
+                            patch("/users/1")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                                    .header("Authorization", "Bearer " + VALID_TOKEN)
+                    )
+                            .andExpect(status().isOk())
+                            .andExpect(content().string(
+                                    containsString("\"id\":1")
+                            ))
+                            .andExpect(content().string(
+                                    containsString("\"name\":\"TEST\"")
+                            ));
+
+                    verify(userService).updateUser(eq(1L), any(UserModificationData.class));
+                }
+            }
+
+            @Nested
+            @DisplayName("주어진 id 에 해당하는 유저가 존재하지 않을 때")
+            class Context_when_not_exists_given_id_user {
+                @BeforeEach
+                void setup() {
+                    Mockito.doThrow(new UserNotFoundException(100L))
+                            .when(userService).updateUser(eq(100L), any(UserModificationData.class));
+                }
+
+                @Test
+                @DisplayName("not found 를 응답한다.")
+                void It_respond_not_found() throws Exception {
+                    mockMvc.perform(
+                            patch("/users/100")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                                    .header("Authorization", "Bearer " + VALID_TOKEN)
+                    )
+                            .andExpect(status().isNotFound());
+
+                    verify(userService)
+                            .updateUser(eq(100L), any(UserModificationData.class));
+                }
+            }
+
+            @Nested
+            @DisplayName("주어진 유저의 정보가 올바르지 않을 때")
+            class Context_without_correct_user_attributes {
+                @Test
+                @DisplayName("bad request 를 응답한다.")
+                void It_respond_bad_request() throws Exception {
+                    mockMvc.perform(
+                            patch("/users/1")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{\"name\":\"\",\"password\":\"\"}")
+                                    .header("Authorization", "Bearer " + VALID_TOKEN)
+                    )
+                            .andExpect(status().isBadRequest());
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("주어진 access token 이 올바르지 않을 때")
+        class Context_without_correct_given_access_token {
+            @Test
+            @DisplayName("unatuthorized 를 응답한다.")
+            void It_respond_unauthorized() throws Exception {
+                mockMvc.perform(
+                        patch("/users/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"\",\"password\":\"\"}")
+                                .header("Authorization", "Bearer " + INVALID_TOKEN)
+                )
+                        .andExpect(status().isUnauthorized());
             }
         }
     }
