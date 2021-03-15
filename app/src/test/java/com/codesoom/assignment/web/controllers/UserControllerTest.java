@@ -3,11 +3,13 @@ package com.codesoom.assignment.web.controllers;
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
+import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.web.dto.UserModificationData;
 import com.codesoom.assignment.web.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,6 +27,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+        "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+        "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -36,6 +43,11 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
+        Mockito.doReturn(1L)
+            .when(authenticationService).parseToken(VALID_TOKEN);
+        Mockito.doThrow(new InvalidTokenException(INVALID_TOKEN))
+            .when(authenticationService).parseToken(INVALID_TOKEN);
+
         given(userService.registerUser(any(UserRegistrationData.class)))
                 .will(invocation -> {
                     UserRegistrationData registrationData = invocation.getArgument(0);
@@ -106,6 +118,7 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -124,34 +137,55 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void updateUserWithNotExsitedId() throws Exception {
+    void updateUserWithNotExistedId() throws Exception {
         mockMvc.perform(
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
-                .andExpect(status().isNotFound());
+                .andExpect(status().isForbidden());
 
-        verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
+    }
+
+    @Test
+    void updateUserWithNotExistedIdAndInvalidToken() throws Exception {
+        mockMvc.perform(
+                patch("/users/100")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                        .header("Authorization", "Bearer " + INVALID_TOKEN)
+        )
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
+        mockMvc.perform(delete("/users/1")
+            .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isNoContent());
 
         verify(userService).deleteUser(1L);
     }
 
     @Test
+    void destroyWithExistedIdAndInvalidToken() throws Exception {
+        mockMvc.perform(delete("/users/1")
+            .header("Authorization", "Bearer " + INVALID_TOKEN))
+                .andExpect(status().isUnauthorized());
+
+    }
+
+    @Test
     void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
+        mockMvc.perform(delete("/users/100")
+            .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
