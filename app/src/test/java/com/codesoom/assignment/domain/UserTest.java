@@ -45,4 +45,13 @@ class UserTest {
         assertThat(user.authenticate("test")).isFalse();
         assertThat(user.authenticate("xxx")).isFalse();
     }
+
+    @Test
+    void createUser() {
+        User user1 = new User(1L, "aaa@bbb.ccc", "test user", "test password");
+        assertThat(user1).isNotNull();
+
+        User user2 = new User();
+        assertThat(user2).isNotNull();
+    }
 }

@@ -33,7 +33,9 @@ public class User {
         protectPassword(password);
     }
 
-    public User() {}
+    public User() {
+        encryptionService = Container.encryptionService();
+    }
 
     public void changeWith(String name, String password) {
         this.name = name;
