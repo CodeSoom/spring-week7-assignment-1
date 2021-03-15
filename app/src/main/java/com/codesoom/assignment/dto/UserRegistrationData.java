@@ -1,15 +1,18 @@
 package com.codesoom.assignment.dto;
 
 import com.github.dozermapper.core.Mapping;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+/**
+ * 유저 생성 요청 정보.
+ */
 @Getter
 @Builder
+@NoArgsConstructor
+@EqualsAndHashCode
 @AllArgsConstructor
 public class UserRegistrationData {
     @NotBlank

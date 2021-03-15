@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 
+/**
+ * 상품에 대한 비즈니스 로직을 담당.
+ */
 @Service
 @Transactional
 public class ProductService {
