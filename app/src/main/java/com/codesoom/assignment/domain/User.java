@@ -5,6 +5,7 @@ import com.codesoom.assignment.dependency.Container;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 @Entity
 public class User {
@@ -20,6 +21,7 @@ public class User {
 
     private boolean deleted = false;
 
+    @Transient
     private EncryptionService encryptionService;
 
     public User(Long id, String email, String name, String password) {
