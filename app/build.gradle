@@ -120,7 +120,7 @@ jacocoTestCoverageVerification {
                     "com.codesoom.assignment.web.dto.*",
                     "com.codesoom.assignment.web.controllers.ControllerErrorAdvice",
                     "com.codesoom.assignment.web.controllers",
-                    "com.codesoom.assignment.web.interceptors.AuthenticationInterceptor"
+                    "com.codesoom.assignment.web.security.UserAuthentication"
             ]
         }
     }
