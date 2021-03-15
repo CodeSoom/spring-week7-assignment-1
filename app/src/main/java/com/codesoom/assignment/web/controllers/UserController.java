@@ -38,11 +38,6 @@ public class UserController {
             Authentication authentication
     ) {
         if (!id.equals(authentication.getPrincipal())) {
-            System.out.println("=======");
-            System.out.println(id);
-            System.out.println(authentication.getPrincipal());
-            System.out.println(id.equals(authentication.getPrincipal()));
-            System.out.println("=======");
             throw new AccessDeniedException("다른 유저의 정보를 수정할 수 없습니다.");
         }
         User user = userService.updateUser(id, modificationData);
