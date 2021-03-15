@@ -1,5 +1,7 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.Role;
+import com.codesoom.assignment.domain.RoleRepository;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserCreateData;
@@ -30,6 +32,7 @@ import static org.mockito.Mockito.verify;
 class UserServiceTest {
     private UserService userService;
     private UserRepository userRepository;
+    private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
 
     private static final String SETUP_USER_NAME = "setUpName";
@@ -63,8 +66,9 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
+        roleRepository = mock(RoleRepository.class);
         passwordEncoder = new BCryptPasswordEncoder();
-        userService = new UserService(userRepository, passwordEncoder);
+        userService = new UserService(userRepository, roleRepository, passwordEncoder);
         setUpEncodedPassword = passwordEncoder.encode(SETUP_USER_PASSWORD);
         createEncodedPassword = passwordEncoder.encode(CREATE_USER_PASSWORD);
 
@@ -211,6 +215,7 @@ class UserServiceTest {
                 assertThat(createdUser.getEmail()).isEqualTo(userCreateData.getEmail());
 
                 verify(userRepository).save(any(User.class));
+                verify(roleRepository).save(any(Role.class));
             }
         }
 

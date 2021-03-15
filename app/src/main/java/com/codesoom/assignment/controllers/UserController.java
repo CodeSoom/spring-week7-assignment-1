@@ -72,7 +72,7 @@ public class UserController {
      * @return 수정 된 사용자
      */
     @PatchMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     public UserResultData update(
             @PathVariable Long id,
             @RequestBody @Valid UserUpdateData userUpdateData,

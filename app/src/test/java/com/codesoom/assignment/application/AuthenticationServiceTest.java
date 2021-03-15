@@ -1,5 +1,7 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.Role;
+import com.codesoom.assignment.domain.RoleRepository;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.AuthenticationCreateData;
@@ -8,9 +10,6 @@ import com.codesoom.assignment.dto.UserResultData;
 import com.codesoom.assignment.errors.AuthenticationBadRequestException;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.utils.JwtUtil;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,7 +17,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.mock;
 class AuthenticationServiceTest {
     private AuthenticationService authenticationService;
     private UserRepository userRepository;
+    private RoleRepository roleRepository;
     private JwtUtil jwtUtil;
     private PasswordEncoder passwordEncoder;
 
@@ -44,12 +46,17 @@ class AuthenticationServiceTest {
     private static final String NOT_EXISTED_EMAIL = "existedEmail";
     private static final String NOT_EXISTED_PASSWORD = "existedPassword";
 
+    private static final String USER_EMAIL = EXISTED_EMAIL;
+    private static final String OTHER_EMAIL = "otherEmail";
+    private static final String ADMIN_EMAIL = "adminEmail";
+
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
+        roleRepository = mock(RoleRepository.class);
         jwtUtil = new JwtUtil(SECRET);
         passwordEncoder = new BCryptPasswordEncoder();
-        authenticationService = new AuthenticationService(userRepository, jwtUtil, passwordEncoder);
+        authenticationService = new AuthenticationService(userRepository, roleRepository, jwtUtil, passwordEncoder);
     }
 
     @Nested
@@ -199,21 +206,15 @@ class AuthenticationServiceTest {
         class Context_WithUserWithoutPassword {
             private final String givenNotExistedPassword = NOT_EXISTED_PASSWORD;
             private AuthenticationCreateData givenUser;
-            private User user;
             private String encodedPassword;
 
             @BeforeEach
             void setUp() {
                 encodedPassword = passwordEncoder.encode(givenNotExistedPassword);
 
-                user = User.builder()
-                        .email(EXISTED_EMAIL)
-                        .password(encodedPassword)
-                        .build();
-
                 givenUser = AuthenticationCreateData.builder()
                         .email(EXISTED_EMAIL)
-                        .password(NOT_EXISTED_PASSWORD)
+                        .password(encodedPassword)
                         .build();
             }
 
@@ -236,16 +237,6 @@ class AuthenticationServiceTest {
         @DisplayName("만약 유효한 토큰이 주어진다면")
         class Context_WithValidToken {
             private final String givenValidToken = EXISTED_TOKEN;
-            private Claims claims;
-
-            @BeforeEach
-            void setUp() {
-                claims = Jwts.parserBuilder()
-                        .setSigningKey(Keys.hmacShaKeyFor(SECRET.getBytes()))
-                        .build()
-                        .parseClaimsJws(EXISTED_TOKEN)
-                        .getBody();
-            }
 
             @Test
             @DisplayName("주어진 토큰을 해석하여 안에 담긴 내용을 리턴한다")
@@ -271,14 +262,56 @@ class AuthenticationServiceTest {
         }
 
         @Nested
-        @DisplayName("만약 null 이 주어진다면")
-        class Context_WithNull {
+        @DisplayName("만약 토큰이 주어지지 않는다면")
+        class Context_WithoutToken {
             @Test
             @DisplayName("토큰이 유효하지 않다는 예외를 던진다")
             void itThrowsInvalidTokenException() {
                 assertThatThrownBy(() -> authenticationService.parseToken(null))
                         .isInstanceOf(InvalidTokenException.class)
                         .hasMessageContaining("Invalid token");
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("roles 메서드는")
+    class Describe_roles {
+        @Nested
+        @DisplayName("만약 사용자 이메일이 주어진다면")
+        class Context_WithExistedUserEmail {
+            private final String givenExistedEmail = USER_EMAIL;
+
+            @Test
+            @DisplayName("사용자 계정을 리턴한다")
+            void itReturnsUser() {
+                given(roleRepository.findAllByEmail(givenExistedEmail))
+                        .willReturn(Arrays.asList(new Role("USER")));
+
+                assertThat(
+                        authenticationService.roles(givenExistedEmail).stream()
+                                .map(Role::getName)
+                                .collect(Collectors.toList())
+                ).isEqualTo(Arrays.asList("USER"));
+            }
+        }
+
+        @Nested
+        @DisplayName("만약 admin 이메일이 주어진다면")
+        class Context_WithExistedAdminEmail {
+            private final String givenExistedEmail = ADMIN_EMAIL;
+
+            @Test
+            @DisplayName("사용자 계정과 admin 계정을 리턴한다")
+            void itReturnsUserAndAdmin() {
+                given(roleRepository.findAllByEmail(givenExistedEmail))
+                        .willReturn(Arrays.asList(new Role("USER"), new Role("ADMIN")));
+
+                assertThat(
+                        authenticationService.roles(givenExistedEmail).stream()
+                                .map(Role::getName)
+                                .collect(Collectors.toList())
+                ).isEqualTo(Arrays.asList("USER", "ADMIN"));
             }
         }
     }

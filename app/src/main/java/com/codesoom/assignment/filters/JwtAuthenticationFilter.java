@@ -1,6 +1,7 @@
 package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.security.UserAuthentication;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContext;
@@ -12,6 +13,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     private final AuthenticationService authenticationService;
@@ -32,7 +34,8 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         if(authorization != null) {
             String accessToken = authorization.substring("Bearer ".length());
             String email = authenticationService.parseToken(accessToken);
-            UserAuthentication authentication = new UserAuthentication(email);
+            List<Role> roles = authenticationService.roles(email);
+            UserAuthentication authentication = new UserAuthentication(email, roles);
 
             SecurityContext context = SecurityContextHolder.getContext();
             context.setAuthentication(authentication);

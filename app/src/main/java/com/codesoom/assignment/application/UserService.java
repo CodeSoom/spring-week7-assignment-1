@@ -1,5 +1,7 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.Role;
+import com.codesoom.assignment.domain.RoleRepository;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserCreateData;
@@ -20,11 +22,14 @@ import java.util.stream.Collectors;
 @Transactional
 public class UserService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
+                       RoleRepository roleRepository,
                        PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -73,6 +78,7 @@ public class UserService {
         user.updatePassword(userCreateData.getPassword(), passwordEncoder);
 
         User savedUser = userRepository.save(user);
+        roleRepository.save(new Role(savedUser.getEmail(), "USER")) ;
 
         return UserResultData.of(savedUser);
     }
@@ -114,10 +120,10 @@ public class UserService {
      *          주어진 {@code id}에 해당하는 사용자가 저장되어 있지 않은 경우
      */
     public UserResultData deleteUser(Long id) {
-
         User user = getUser(id).toEntity();
 
         user.delete();
+        userRepository.delete(user);
 
         return UserResultData.of(user);
     }

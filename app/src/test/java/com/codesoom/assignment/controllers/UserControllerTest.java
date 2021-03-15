@@ -2,6 +2,7 @@ package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
+import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserCreateData;
 import com.codesoom.assignment.dto.UserResultData;
@@ -20,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.core.StringContains.containsString;
@@ -245,6 +247,8 @@ class UserControllerTest {
             @Test
             @DisplayName("주어진 아이디에 해당하는 사용자를 수정하고 수정된 사용자와 OK를 리턴한다")
             void itUpdatesUserAndReturnUpdatedUserAndOKHttpStatus() throws Exception {
+                given(authenticationService.parseToken(MY_TOKEN)).willReturn(MY_EMAIL);
+                given(authenticationService.roles(givenExistedEmail)).willReturn(Arrays.asList(new Role("USER")));
                 given(userService.updateUser(eq(givenExistedId), any(UserUpdateData.class), eq(givenExistedEmail)))
                         .will(invocation -> {
                             Long id = invocation.getArgument(0);
@@ -278,9 +282,11 @@ class UserControllerTest {
             @Test
             @DisplayName("사용자를 찾을 수 없다는 예외를 던지고 NOT_FOUND를 리턴한다")
             void itThrowsUserNotFoundExceptionAndReturnsNOT_FOUNDHttpStatus() throws Exception {
+                given(authenticationService.parseToken(MY_TOKEN)).willReturn(MY_EMAIL);
+                given(authenticationService.roles(givenExistedEmail)).willReturn(Arrays.asList(new Role("USER")));
                 given(userService.updateUser(eq(givenNotExistedId), any(UserUpdateData.class), eq(givenExistedEmail)))
                         .willThrow(new UserNotFoundException(givenNotExistedId));
-                given(authenticationService.parseToken(MY_TOKEN)).willReturn(MY_EMAIL);
+
 
                 mockMvc.perform(
                         patch("/users/"+givenNotExistedId)
@@ -312,7 +318,6 @@ class UserControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header("Authorization", "Bearer " + MY_TOKEN)
                                 .content("{}")
-
                 )
                         .andDo(print())
                         .andExpect(status().isBadRequest());
@@ -347,6 +352,7 @@ class UserControllerTest {
             @DisplayName("접근이 거부되었다는 예외를 던지고 FORBIDDEN를 리턴한다")
             void itThrowsAccessDeniedExceptionAndReturnsFORBIDDENHttpStatus() throws Exception {
                 given(authenticationService.parseToken(OTHER_TOKEN)).willReturn(OTHER_EMAIL);
+                given(authenticationService.roles(givenNotExistedEmail)).willReturn(Arrays.asList(new Role("USER")));
                 given(userService.updateUser(eq(givenExistedId), any(UserUpdateData.class), eq(givenNotExistedEmail)))
                         .willThrow(new AccessDeniedException("Access denied"));
 
@@ -382,6 +388,8 @@ class UserControllerTest {
             @Test
             @DisplayName("주어진 아이디에 해당하는 사용자를 삭제하고 삭제된 사용자와 NO_CONTENT를 리턴한다")
             void itDeletesUserAndReturnsDeletedUserAndNO_CONTENTHttpStatus() throws Exception {
+                given(authenticationService.roles(ADMIN_EMAIL))
+                        .willReturn(Arrays.asList(new Role("USER"), new Role("ADMIN")));
                 given(authenticationService.parseToken(ADMIN_TOKEN)).willReturn(ADMIN_EMAIL);
                 given(userService.deleteUser(eq(givenExistedId))).willReturn(userResultData);
 
@@ -403,6 +411,8 @@ class UserControllerTest {
             @Test
             @DisplayName("사용자를 찾을 수 없다는 예외를 던지고 NOT_FOUND를 리턴한다")
             void itThrowsNotFoundExceptionAndReturnsNOT_FOUNDHttpStatus() throws Exception {
+                given(authenticationService.roles(ADMIN_EMAIL))
+                        .willReturn(Arrays.asList(new Role("USER"), new Role("ADMIN")));
                 given(authenticationService.parseToken(ADMIN_EMAIL)).willReturn(ADMIN_EMAIL);
                 given(userService.deleteUser(givenNotExistedId))
                         .willThrow(new UserNotFoundException(givenNotExistedId));
@@ -430,6 +440,8 @@ class UserControllerTest {
             @Test
             @DisplayName("사용자를 찾을 수 없다는 예외를 던지고 NOT_FOUND를 리턴한다")
             void itThrowsNotFoundExceptionAndNOT_FOUNDHttpStatus() throws Exception {
+                given(authenticationService.roles(ADMIN_EMAIL))
+                        .willReturn(Arrays.asList(new Role("USER"), new Role("ADMIN")));
                 given(authenticationService.parseToken(ADMIN_TOKEN)).willReturn(ADMIN_EMAIL);
                 given(userService.deleteUser(givenDeletedId))
                         .willThrow(new UserNotFoundException(givenDeletedId));

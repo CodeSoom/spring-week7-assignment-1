@@ -1,5 +1,7 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.Role;
+import com.codesoom.assignment.domain.RoleRepository;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.AuthenticationCreateData;
 import com.codesoom.assignment.dto.SessionResultData;
@@ -11,18 +13,25 @@ import io.jsonwebtoken.security.SignatureException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.util.List;
+
 /** 인증에 대한 요청을 수행한다. */
 @Service
+@Transactional
 public class AuthenticationService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 
     public AuthenticationService(UserRepository userRepository,
+                                 RoleRepository roleRepository,
                                  JwtUtil jwtUtil,
                                  PasswordEncoder passwordEncoder
                                  ) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
     }
@@ -79,5 +88,9 @@ public class AuthenticationService {
         } catch(SignatureException e) {
             throw new InvalidTokenException(token);
         }
+    }
+
+    public List<Role> roles(String email) {
+        return roleRepository.findAllByEmail(email);
     }
 }
