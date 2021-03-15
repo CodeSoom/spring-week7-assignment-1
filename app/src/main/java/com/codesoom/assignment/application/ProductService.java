@@ -10,6 +10,10 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 
+/**
+ * 상품 데이터의 조회와 변경 작업을 담당합니다.
+ *
+ */
 @Service
 @Transactional
 public class ProductService {
