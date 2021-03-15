@@ -9,7 +9,11 @@ import javax.validation.constraints.NotBlank;
 
 @Getter
 @NoArgsConstructor
-public class SessionRequestData {
+public class UserCreateRequestDto {
+    @NotBlank
+    @Mapping("name")
+    private String name;
+
     @NotBlank
     @Mapping("email")
     private String email;
@@ -19,12 +23,9 @@ public class SessionRequestData {
     private String password;
 
     @Builder
-    public SessionRequestData(String email, String password) {
+    public UserCreateRequestDto(String name, String email, String password) {
+        this.name = name;
         this.email = email;
         this.password = password;
-    }
-
-    public boolean authenticate(String password) {
-        return password.equals(this.password);
     }
 }

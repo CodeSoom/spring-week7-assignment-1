@@ -4,33 +4,48 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-@Entity
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 public class User {
     @Id
     @GeneratedValue
     private Long id;
 
-    private String email;
+    @Setter
+    @Builder.Default
+    private String name = "";
 
-    private String name;
+    @Setter
+    @Builder.Default
+    private String email = "";
 
-    private String password;
+    @Setter
+    @Builder.Default
+    private String password = "";
 
     @Builder.Default
     private boolean deleted = false;
 
-    public void changeWith(User source) {
-        name = source.name;
-        password = source.password;
+    public User updateWith(User user) {
+        this.email = user.getEmail();
+
+        return this;
+    }
+    
+    public void changePassword(String password) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        this.password = passwordEncoder.encode(password);
     }
 
     public void destroy() {
@@ -38,6 +53,7 @@ public class User {
     }
 
     public boolean authenticate(String password) {
-        return !deleted && password.equals(this.password);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        return !deleted && passwordEncoder.matches(password, this.password);
     }
 }
