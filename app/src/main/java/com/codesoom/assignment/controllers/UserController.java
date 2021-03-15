@@ -6,8 +6,19 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.management.relation.RoleNotFoundException;
 import javax.validation.Valid;
 
 @RestController
@@ -22,15 +33,18 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    UserResultData create(@RequestBody @Valid UserRegistrationData registrationData) {
+    UserResultData create(@RequestBody @Valid UserRegistrationData registrationData)
+            throws RoleNotFoundException {
         User user = userService.registerUser(registrationData);
         return getUserResultData(user);
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("(isAuthenticated() and #id == authentication.principal) or hasAuthority('ROLE_ADMIN')")
     UserResultData update(
             @PathVariable Long id,
-            @RequestBody @Valid UserModificationData modificationData
+            @RequestBody @Valid UserModificationData modificationData,
+            Authentication authentication
     ) {
         User user = userService.updateUser(id, modificationData);
         return getUserResultData(user);
