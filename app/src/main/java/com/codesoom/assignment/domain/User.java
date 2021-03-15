@@ -1,9 +1,6 @@
 package com.codesoom.assignment.domain;
 
 import com.codesoom.assignment.dependency.Container;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
