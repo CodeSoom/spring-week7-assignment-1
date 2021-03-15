@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -81,6 +82,9 @@ class ProductControllerTest {
 
         given(authenticationService.parseToken(INVALID_TOKEN))
                 .willThrow(new InvalidTokenException(INVALID_TOKEN));
+
+        given(productService.updateProduct(eq(9999L), any(ProductData.class)))
+                .willThrow(new AccessDeniedException("9999L"));
     }
 
     @Test
@@ -232,6 +236,22 @@ class ProductControllerTest {
     }
 
     @Test
+    void updateWithDifferentAuthentication() throws Exception {
+        mockMvc.perform(
+                patch("/products/9999")
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
+                                "\"price\":5000}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+        )
+                .andExpect(status().isForbidden());
+
+        verify(productService).updateProduct(eq(9999L), any(ProductData.class));
+    }
+
+
+    @Test
     void destroyWithExistedProduct() throws Exception {
         mockMvc.perform(
                 delete("/products/1")
@@ -262,6 +282,18 @@ class ProductControllerTest {
                         .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
                                 "\"price\":5000}")
                         .header("Authorization", "Bearer " + INVALID_TOKEN)
+        )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void destroyWithoutAccessToken() throws Exception {
+        mockMvc.perform(
+                patch("/products/1")
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
+                                "\"price\":5000}")
         )
                 .andExpect(status().isUnauthorized());
     }
