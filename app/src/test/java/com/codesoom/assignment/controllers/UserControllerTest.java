@@ -1,17 +1,25 @@
 package com.codesoom.assignment.controllers;
 
+import com.codesoom.assignment.application.AuthenticationGuard;
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.AccessDeniedException;
+import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
@@ -19,12 +27,24 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(UserController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 class UserControllerTest {
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9." +
+            "ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String USER1_VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9." +
+            "ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+    private static final Long USER2 = 2L;
+    public static final Long USER1 = 1L;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -33,6 +53,15 @@ class UserControllerTest {
 
     @MockBean
     private AuthenticationService authenticationService;
+
+    @MockBean
+    private Authentication authentication;
+
+    @MockBean
+    private SecurityContext securityContext;
+
+    @MockBean(name = "authenticationGuard")
+    private AuthenticationGuard authenticationGuard;
 
     @BeforeEach
     void setUp() {
@@ -46,24 +75,34 @@ class UserControllerTest {
                             .build();
                 });
 
+        User user = User.builder()
+                .id(1L)
+                .email("tester@example.com")
+                .name("TEST")
+                .build();
 
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
-                .will(invocation -> {
-                    Long id = invocation.getArgument(0);
-                    UserModificationData modificationData =
-                            invocation.getArgument(1);
-                    return User.builder()
-                            .id(id)
-                            .email("tester@example.com")
-                            .name(modificationData.getName())
-                            .build();
-                });
+        given(userService.updateUser(
+                eq(1L), any(UserModificationData.class)))
+                .willReturn(user);
 
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
+        given(userService.updateUser(
+                eq(100L), any(UserModificationData.class)))
                 .willThrow(new UserNotFoundException(100L));
 
         given(userService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
+
+        SecurityContextHolder.setContext(securityContext);
+
+        given(authenticationService.parseToken(VALID_TOKEN))
+                .willReturn(1L);
+
+        given(authenticationService.parseToken(INVALID_TOKEN))
+                .willThrow(new InvalidTokenException(INVALID_TOKEN));
+
+        given(userService.updateUser(
+                eq(USER2), any(UserModificationData.class)))
+                .willThrow(new AccessDeniedException(USER2));
     }
 
     @Test
@@ -100,10 +139,14 @@ class UserControllerTest {
 
     @Test
     void updateUserWithValidAttributes() throws Exception {
+        given(authenticationGuard.checkIdMatch(any(Authentication.class), eq(USER1)))
+                .willReturn(true);
+
         mockMvc.perform(
-                patch("/users/1")
+                patch("/users/" + USER1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -112,36 +155,62 @@ class UserControllerTest {
                 .andExpect(content().string(
                         containsString("\"name\":\"TEST\"")
                 ));
-
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
     }
 
     @Test
-    void updateUserWithInvalidAttributes() throws Exception {
+    void updateUserWithInValidAttributes() throws Exception {
+        given(authenticationGuard.checkIdMatch(any(Authentication.class), eq(USER1)))
+                .willReturn(true);
+
         mockMvc.perform(
-                patch("/users/1")
+                patch("/users/" + USER1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"password\":\"\"}")
+                        .content("{\"name\":\"\",\"password\":\"1\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void updateUserWithNotExsitedId() throws Exception {
+    void updateUserWithInvalidToken() throws Exception {
         mockMvc.perform(
-                patch("/users/100")
+                patch("/users/" + USER1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + INVALID_TOKEN)
         )
-                .andExpect(status().isNotFound());
+                .andExpect(status().isUnauthorized());
+    }
 
-        verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
+    @Test
+    void updateUserWithAccessDeniedToken() throws Exception {
+        mockMvc.perform(
+                patch("/users/" + USER2)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + USER1_VALID_TOKEN)
+        )
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateUserWithInvalidAttributes() throws Exception {
+        given(authenticationGuard.checkIdMatch(any(Authentication.class), eq(USER1)))
+                .willReturn(true);
+
+        mockMvc.perform(
+                patch("/users/" + USER1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"\",\"password\":\"\"}")
+                        .header("Authorization", "Bearer " + USER1_VALID_TOKEN)
+
+        )
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
+        mockMvc.perform(delete("/users/" + USER1))
                 .andExpect(status().isNoContent());
 
         verify(userService).deleteUser(1L);
@@ -153,5 +222,19 @@ class UserControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
+    }
+
+    @Test
+    void registerUserWithExistedEmail() throws Exception {
+        given(userService.registerUser(any(UserRegistrationData.class)))
+                .willThrow(new UserEmailDuplicationException("tester@example.com"));
+
+        mockMvc.perform(
+                post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"tester@example.com\"," +
+                                "\"name\":\"Tester\",\"password\":\"test\"}")
+        )
+                .andExpect(status().isBadRequest());
     }
 }

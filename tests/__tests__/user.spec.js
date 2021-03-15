@@ -90,6 +90,18 @@ describe('Users', () => {
       });
     });
 
+    context('with wrong parameter', () => {
+      it('responses Bad Request', async () => {
+        const promises = [
+          { name: '' },
+          { password: '' },
+        ].map((it) => frisby.patch(`/users/${id}`, { ...userData, ...it })
+            .expect('status', 400));
+
+        await Promise.all(promises);
+      });
+    });
+
     context('with others', () => {
       beforeEach(() => {
         id = 9999;
@@ -97,21 +109,10 @@ describe('Users', () => {
 
       it('responses Forbidden', async () => {
         await frisby.patch(`/users/${id}`, userData)
-          .expect('status', 403);
+            .expect('status', 403);
       });
     });
 
-    context('with wrong parameter', () => {
-      it('responses Bad Request', async () => {
-        const promises = [
-          { name: '' },
-          { password: '' },
-        ].map((it) => frisby.patch(`/users/${id}`, { ...userData, ...it })
-          .expect('status', 400));
-
-        await Promise.all(promises);
-      });
-    });
   });
 
   describe('DELETE /users/{id}', () => {

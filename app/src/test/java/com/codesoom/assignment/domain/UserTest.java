@@ -7,12 +7,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class UserTest {
     @Test
     void changeWith() {
-        User user = User.builder().build();
+        User user = new User();
 
-        user.changeWith(User.builder()
-                .name("TEST")
-                .password("TEST")
-                .build());
+        user.changeWith(User.of("TEST", "TEST"));
 
         assertThat(user.getName()).isEqualTo("TEST");
         assertThat(user.getPassword()).isEqualTo("TEST");
@@ -48,5 +45,17 @@ class UserTest {
 
         assertThat(user.authenticate("test")).isFalse();
         assertThat(user.authenticate("xxx")).isFalse();
+    }
+
+    @Test
+    void checkIdMatch() {
+        User user = User.builder()
+                .id(1L)
+                .build();
+        Long givenId = 1L;
+        Long wrongId = 2L;
+
+        assertThat(user.checkMatchId(givenId)).isTrue();
+        assertThat(user.checkMatchId(wrongId)).isFalse();
     }
 }
