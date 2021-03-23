@@ -1,19 +1,13 @@
 package com.codesoom.assignment.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.codesoom.assignment.dependency.Container;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 @Entity
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue
@@ -25,12 +19,31 @@ public class User {
 
     private String password;
 
-    @Builder.Default
     private boolean deleted = false;
 
-    public void changeWith(User source) {
-        name = source.name;
-        password = source.password;
+    @Transient
+    private EncryptionService encryptionService;
+
+    public User(Long id, String email, String name, String password) {
+        encryptionService = Container.encryptionService();
+
+        this.id = id;
+        this.email = email;
+        this.name = name;
+        protectPassword(password);
+    }
+
+    public User() {
+        encryptionService = Container.encryptionService();
+    }
+
+    public void changeWith(String name, String password) {
+        this.name = name;
+        protectPassword(password);
+    }
+
+    private void protectPassword(String aChangedPassword) {
+        this.password = encryptionService.encryptedValue(aChangedPassword);
     }
 
     public void destroy() {
@@ -38,6 +51,27 @@ public class User {
     }
 
     public boolean authenticate(String password) {
-        return !deleted && password.equals(this.password);
+        String encryptedPassword = encryptionService.encryptedValue(password);
+        return !deleted && encryptedPassword.equals(this.password);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public boolean isDestroyed() {
+        return deleted;
     }
 }
