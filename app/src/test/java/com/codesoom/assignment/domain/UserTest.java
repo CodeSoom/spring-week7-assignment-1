@@ -15,7 +15,17 @@ class UserTest {
                 .build());
 
         assertThat(user.getName()).isEqualTo("TEST");
-        assertThat(user.getPassword()).isEqualTo("TEST");
+        assertThat(user.getPassword()).isEqualTo("");
+    }
+
+    @Test
+    void changePassword() {
+        User user = User.builder().build();
+
+        user.changePassword("TEST");
+
+        assertThat(user.getPassword()).isNotEmpty();
+        assertThat(user.getPassword()).isNotEqualTo("TEST");
     }
 
     @Test

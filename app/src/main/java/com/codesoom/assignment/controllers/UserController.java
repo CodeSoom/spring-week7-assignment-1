@@ -6,6 +6,7 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -28,6 +29,7 @@ public class UserController {
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     UserResultData update(
             @PathVariable Long id,
             @RequestBody @Valid UserModificationData modificationData
@@ -37,6 +39,8 @@ public class UserController {
     }
 
     @DeleteMapping("{id}")
+    // 누가 이걸 하는 거지? => authentication
+    // 이건 로그인해야 해! => authorization
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void destroy(@PathVariable Long id) {
         userService.deleteUser(id);

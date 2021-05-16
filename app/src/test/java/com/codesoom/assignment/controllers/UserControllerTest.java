@@ -25,6 +25,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
+    private static final String MY_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String OTHER_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjJ9.TEM6MULsZeqkBbUKziCR4Dg_8kymmZkyxsCXlfNJ3g0";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -73,6 +78,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"tester@example.com\"," +
                                 "\"name\":\"Tester\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
         )
                 .andExpect(status().isCreated())
                 .andExpect(content().string(
@@ -94,6 +100,7 @@ class UserControllerTest {
                 post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
         )
                 .andExpect(status().isBadRequest());
     }
@@ -104,6 +111,7 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
         )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -122,6 +130,7 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
         )
                 .andExpect(status().isBadRequest());
     }
@@ -132,6 +141,7 @@ class UserControllerTest {
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
         )
                 .andExpect(status().isNotFound());
 
@@ -140,8 +150,32 @@ class UserControllerTest {
     }
 
     @Test
+    void updateUserWithoutAccessToken() throws Exception {
+        mockMvc.perform(
+                patch("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+        )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void updateUserWithOthersAccessToken() throws Exception {
+        mockMvc.perform(
+                patch("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + OTHER_TOKEN)
+        )
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
+        mockMvc.perform(
+                delete("/users/1")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
+        )
                 .andExpect(status().isNoContent());
 
         verify(userService).deleteUser(1L);
@@ -149,7 +183,10 @@ class UserControllerTest {
 
     @Test
     void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
+        mockMvc.perform(
+                delete("/users/100")
+                        .header("Authorization", "Bearer " + MY_TOKEN)
+        )
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
