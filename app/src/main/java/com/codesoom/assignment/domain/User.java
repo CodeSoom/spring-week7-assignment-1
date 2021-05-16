@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,25 +20,44 @@ public class User {
     @GeneratedValue
     private Long id;
 
-    private String email;
+    @Builder.Default
+    private String email = "";
 
-    private String name;
+    @Builder.Default
+    private String name = "";
 
-    private String password;
+    @Builder.Default
+    private String password = "";
 
     @Builder.Default
     private boolean deleted = false;
 
     public void changeWith(User source) {
         name = source.name;
-        password = source.password;
+    }
+
+    /**
+     * 패스워드를 인코딩하고 저장합니다.
+     *
+     * @param password        변경할 패스워드
+     * @param passwordEncoder 패스워드 인코더
+     */
+    public void changePassword(String password, PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(password);
     }
 
     public void destroy() {
         deleted = true;
     }
 
-    public boolean authenticate(String password) {
-        return !deleted && password.equals(this.password);
+    /**
+     * 로그인할 수 있는지 확인합니다.
+     *
+     * @param password 검증할 패스워드
+     * @param passwordEncoder 패스워드 인코더
+     * @return 검증 여부
+     */
+    public boolean authenticate(String password, PasswordEncoder passwordEncoder) {
+        return !deleted && passwordEncoder.matches(password, this.password);
     }
 }
