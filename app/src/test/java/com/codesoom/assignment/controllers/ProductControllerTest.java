@@ -6,7 +6,10 @@ import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.ProductNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -25,6 +28,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Nested
+@DisplayName("ProductController의")
 @WebMvcTest(ProductController.class)
 class ProductControllerTest {
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
@@ -41,20 +46,17 @@ class ProductControllerTest {
     @MockBean
     private AuthenticationService authenticationService;
 
+    private ObjectMapper objectMapper;
+
     @BeforeEach
     void setUp() {
+        this.objectMapper = new ObjectMapper();
         Product product = Product.builder()
                 .id(1L)
                 .name("쥐돌이")
                 .maker("냥이월드")
                 .price(5000)
                 .build();
-        given(productService.getProducts()).willReturn(List.of(product));
-
-        given(productService.getProduct(1L)).willReturn(product);
-
-        given(productService.getProduct(1000L))
-                .willThrow(new ProductNotFoundException(1000L));
 
         given(productService.createProduct(any(ProductData.class)))
                 .willReturn(product);
@@ -83,30 +85,93 @@ class ProductControllerTest {
                 .willThrow(new InvalidTokenException(INVALID_TOKEN));
     }
 
-    @Test
-    void list() throws Exception {
-        mockMvc.perform(
-                get("/products")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-        )
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("쥐돌이")));
+    @Nested
+    @DisplayName("list 메소드는")
+    class DescribeList {
+
+        @Nested
+        @DisplayName("상품 목록에 대한 요청을 받으면")
+        class ContextWithProducts {
+
+            private Product product;
+
+            @BeforeEach
+            void setUp() {
+                product = Product.builder()
+                        .id(1L)
+                        .name("쥐돌이")
+                        .maker("냥이월드")
+                        .price(5000)
+                        .build();
+                given(productService.getProducts()).willReturn(List.of(product));
+            }
+
+            @Test
+            @DisplayName("Ok status와 상품 목록을 반환합니다")
+            void ItReturnsOkWithProductList() throws Exception {
+                String expected = objectMapper.writeValueAsString(List.of(product));
+                mockMvc.perform(
+                        get("/products")
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                        .andExpect(status().isOk())
+                        .andExpect(content().json(expected, true));
+            }
+        }
     }
 
-    @Test
-    void deatilWithExsitedProduct() throws Exception {
-        mockMvc.perform(
-                get("/products/1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-        )
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("쥐돌이")));
-    }
+    @Nested
+    @DisplayName("detail 메소드는")
+    class DescribeDetail {
 
-    @Test
-    void deatilWithNotExsitedProduct() throws Exception {
-        mockMvc.perform(get("/products/1000"))
-                .andExpect(status().isNotFound());
+        @Nested
+        @DisplayName("존재하는 상품에 대한 요청을 받으면")
+        class ContextWithExistedProduct {
+
+            private Product product;
+
+            @BeforeEach
+            void setUp() {
+                product = Product.builder()
+                        .id(1L)
+                        .name("쥐돌이")
+                        .maker("냥이월드")
+                        .price(5000)
+                        .build();
+                given(productService.getProduct(1L))
+                        .willReturn(product);
+            }
+
+            @Test
+            @DisplayName("Ok status와 상품을 반환합니다")
+            void ItReturnsOkWithProduct() throws Exception {
+                String expected = objectMapper.writeValueAsString(product);
+                mockMvc.perform(
+                        get("/products/1")
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                        .andExpect(status().isOk())
+                        .andExpect(content().json(expected, true));
+            }
+        }
+
+        @Nested
+        @DisplayName("존재하지 않는 상품에 대한 요청을 받으면")
+        class ContextWithNotExistedProduct {
+
+            @BeforeEach
+            void setUp() {
+                given(productService.getProduct(1000L))
+                        .willThrow(ProductNotFoundException.class);
+            }
+
+            @Test
+            @DisplayName("NotFound status를 반환합니다")
+            void ItReturnsNotFound() throws Exception {
+                mockMvc.perform(get("/products/1000"))
+                        .andExpect(status().isNotFound());
+            }
+        }
     }
 
     @Test
