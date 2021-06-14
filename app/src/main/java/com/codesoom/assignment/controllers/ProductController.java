@@ -9,6 +9,7 @@ import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -39,6 +40,7 @@ public class ProductController {
     }
 
     @PostMapping
+    @PreAuthorize("isAuthenticated() and hasAuthorizty('USER')")
     @ResponseStatus(HttpStatus.CREATED)
     public Product create(
             @RequestAttribute Long userId,
@@ -48,6 +50,7 @@ public class ProductController {
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     public Product update(
             @RequestAttribute Long userId,
             @PathVariable Long id,
@@ -57,6 +60,7 @@ public class ProductController {
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void destroy(
             @RequestAttribute Long userId,
