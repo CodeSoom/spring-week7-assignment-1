@@ -7,10 +7,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserAuthenticaiton extends AbstractAuthenticationToken {
+public class UserAuthentication extends AbstractAuthenticationToken {
     private final Long userId;
 
-    public UserAuthenticaiton(Long userId) {
+    public UserAuthentication(Long userId) {
         super(authorities());
         this.userId = userId;
     }
