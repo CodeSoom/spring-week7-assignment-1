@@ -7,11 +7,14 @@ import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -28,15 +31,18 @@ class AuthenticationServiceTest {
 
     private UserRepository userRepository = mock(UserRepository.class);
 
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setUp() {
         JwtUtil jwtUtil = new JwtUtil(SECRET);
+        passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
         authenticationService = new AuthenticationService(
-                userRepository, jwtUtil);
+                userRepository, jwtUtil, passwordEncoder);
 
         User user = User.builder()
-                .password("test")
+                .password(passwordEncoder.encode("test"))
                 .build();
 
         given(userRepository.findByEmail("tester@example.com"))
