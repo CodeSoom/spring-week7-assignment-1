@@ -1,7 +1,6 @@
 package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.security.UserAuthentication;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -15,6 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * 요청에 포함된 JWT를 관리합니다.
+ */
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     private final AuthenticationService authenticationService;
 
@@ -24,6 +26,15 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         this.authenticationService = authenticationService;
     }
 
+    /**
+     * 요청에 포함된 `Authorization` 헤더를 검증하고 다음 메소드로 요청을 전달합니다.
+     *
+     * @param request 받은 요청
+     * @param response 보낼 응답
+     * @param chain 필터 컬렉션
+     * @throws IOException
+     * @throws ServletException
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -41,21 +52,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             context.setAuthentication(authentication);
         }
 
-
         chain.doFilter(request, response);
-    }
-
-    private boolean filterWithPathAndMethod(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        if (!path.startsWith("/products")) {
-            return true;
-        }
-
-        String method = request.getMethod();
-        if (method.equals("GET")) {
-            return true;
-        }
-
-        return false;
     }
 }
