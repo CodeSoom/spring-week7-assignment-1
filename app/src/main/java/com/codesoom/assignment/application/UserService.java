@@ -33,7 +33,7 @@ public class UserService {
         }
 
         User user = mapper.map(registrationData, User.class);
-        user.changePassword(registrationData.getPassword(), passwordEncoder);
+        user.encodePassword(registrationData.getPassword(), passwordEncoder);
 
         return userRepository.save(user);
     }

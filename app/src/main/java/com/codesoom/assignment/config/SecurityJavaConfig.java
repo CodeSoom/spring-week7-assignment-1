@@ -6,7 +6,6 @@ import com.codesoom.assignment.filters.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -23,7 +22,7 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
     private AuthenticationService authenticationService;
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception{
+    protected void configure(HttpSecurity http) throws Exception {
         Filter authenticationFilter = new JwtAuthenticationFilter(authenticationManager(), authenticationService);
         Filter authenticationErrorFilter = new AuthenticationErrorFilter();
         http.csrf().disable()
@@ -31,13 +30,12 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(authenticationErrorFilter,
                         JwtAuthenticationFilter.class)
                 .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .exceptionHandling()
-                    .authenticationEntryPoint(
-                            new HttpStatusEntryPoint((HttpStatus.UNAUTHORIZED)
-                            )
+                .authenticationEntryPoint(
+                        new HttpStatusEntryPoint((HttpStatus.UNAUTHORIZED)
+                        )
                 );
-
     }
 }
