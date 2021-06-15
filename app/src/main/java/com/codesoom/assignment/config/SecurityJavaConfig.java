@@ -5,13 +5,17 @@ import com.codesoom.assignment.filters.AuthenticationErrorFilter;
 import com.codesoom.assignment.filters.JwtAuthenticationFliter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.web.authentication.AuthenticationFilter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 import javax.servlet.Filter;
 
 @Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -19,15 +23,20 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        Filter authenticationFilter = new JwtAuthenticationFliter(
-                authenticationManager(),
-                authenticationService);
+
+        Filter authenticationFilter = new JwtAuthenticationFliter(authenticationManager(), authenticationService);
 
         Filter authenticationErrorFilter = new AuthenticationErrorFilter();
+
         http
                 .csrf().disable()
                 .addFilter(authenticationFilter)
                 .addFilterBefore(authenticationErrorFilter,
-                        JwtAuthenticationFliter.class);
+                        JwtAuthenticationFliter.class)
+                .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .exceptionHandling()
+                    .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
     }
 }

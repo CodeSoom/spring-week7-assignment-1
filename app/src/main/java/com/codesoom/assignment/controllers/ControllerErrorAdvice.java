@@ -39,12 +39,6 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Log-in failed");
     }
 
-//    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-//    @ExceptionHandler(InvalidTokenException.class)
-//    public ErrorResponse handleInvalidAccessTokenException() {
-//        return new ErrorResponse("Invalid access token");
-//    }
-
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
