@@ -15,9 +15,7 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import javax.servlet.Filter;
 
 /**
- * 스프링 시큐리티 설정.
- *
- * @see <a href="https://tools.ietf.org/html/rfc7231#section-4">RFC7231 - Request Methods</a>
+ * 스프링 시큐리티 설정
  */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)

@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verify;
 class AuthenticationServiceTest {
     private static final String SECRET = "12345678901234567890123456789012";
 
+    private static final Long VALID_ID = 1L;
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
@@ -38,7 +39,7 @@ class AuthenticationServiceTest {
         authenticationService = new AuthenticationService(
                 userRepository, jwtUtil, passwordEncoder);
 
-        User user = User.builder().build();
+        User user = User.builder().id(VALID_ID).build();
         user.changePassword("test", passwordEncoder);
 
         given(userRepository.findByEmail("tester@example.com"))
