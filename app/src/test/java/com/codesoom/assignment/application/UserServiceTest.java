@@ -8,8 +8,11 @@ import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
+import org.checkerframework.checker.nullness.Opt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -25,14 +28,16 @@ class UserServiceTest {
     private static final Long DELETED_USER_ID = 200L;
 
     private UserService userService;
+    private PasswordEncoder passwordEncoder;
 
     private final UserRepository userRepository = mock(UserRepository.class);
 
     @BeforeEach
     void setUp() {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
+        passwordEncoder = new BCryptPasswordEncoder();
 
-        userService = new UserService(mapper, userRepository);
+        userService = new UserService(mapper, userRepository, passwordEncoder);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
                 .willReturn(true);
@@ -46,14 +51,15 @@ class UserServiceTest {
                     .build();
         });
 
+        Optional<User> user =Optional.of(
+                User.builder()
+                        .id(1L)
+                        .email(EXISTED_EMAIL_ADDRESS)
+                        .name("Tester")
+                        .build());
+        user.get().changePassword("test",passwordEncoder);
         given(userRepository.findByIdAndDeletedIsFalse(1L))
-                .willReturn(Optional.of(
-                        User.builder()
-                                .id(1L)
-                                .email(EXISTED_EMAIL_ADDRESS)
-                                .name("Tester")
-                                .password("test")
-                                .build()));
+                .willReturn(user);
 
         given(userRepository.findByIdAndDeletedIsFalse(100L))
                 .willReturn(Optional.empty());
