@@ -6,6 +6,7 @@ import com.codesoom.assignment.web.dto.UserModificationData;
 import com.codesoom.assignment.web.dto.UserRegistrationData;
 import com.codesoom.assignment.web.dto.UserResultData;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -42,9 +43,11 @@ public class UserController {
      * @return 갱신한 회원
      */
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     UserResultData update(
             @PathVariable Long id,
             @RequestBody @Valid UserModificationData modificationData
+
     ) {
         User user = userService.updateUser(id, modificationData);
         return getUserResultData(user);
@@ -56,6 +59,7 @@ public class UserController {
      */
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("isAuthenticated()")
     void destroy(@PathVariable Long id) {
         userService.deleteUser(id);
     }
