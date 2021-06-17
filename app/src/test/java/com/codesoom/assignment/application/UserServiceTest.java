@@ -32,8 +32,6 @@ class UserServiceTest {
     private static final String NAME_BEFORE_UPDATE = "Tester";
     private static final String NAME_AFTER_UPDATE = "UPDATE";
 
-
-
     private UserService userService;
 
     private final UserRepository userRepository = mock(UserRepository.class);
@@ -44,33 +42,6 @@ class UserServiceTest {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
         userService = new UserService(mapper, userRepository, passwordEncoder);
-
-        given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
-                .willReturn(true);
-
-        given(userRepository.save(any(User.class))).will(invocation -> {
-            User source = invocation.getArgument(0);
-            return User.builder()
-                    .id(13L)
-                    .email(source.getEmail())
-                    .name(source.getName())
-                    .build();
-        });
-
-        given(userRepository.findByIdAndDeletedIsFalse(1L))
-                .willReturn(Optional.of(
-                        User.builder()
-                                .id(1L)
-                                .email(EXISTED_EMAIL_ADDRESS)
-                                .name(NAME_BEFORE_UPDATE)
-                                .password("test")
-                                .build()));
-
-        given(userRepository.findByIdAndDeletedIsFalse(100L))
-                .willReturn(Optional.empty());
-
-        given(userRepository.findByIdAndDeletedIsFalse(DELETED_USER_ID))
-                .willReturn(Optional.empty());
     }
 
     @Nested
@@ -80,6 +51,18 @@ class UserServiceTest {
         @Nested
         @DisplayName("사용할 수 있는 이메일이면")
         class WithAvailableEmail {
+
+            @BeforeEach
+            void setUp() {
+                given(userRepository.save(any(User.class))).will(invocation -> {
+                    User source = invocation.getArgument(0);
+                    return User.builder()
+                            .id(13L)
+                            .email(source.getEmail())
+                            .name(source.getName())
+                            .build();
+                });
+            }
 
             @Test
             @DisplayName("사용자를 등록한다.")
@@ -104,7 +87,13 @@ class UserServiceTest {
 
         @Nested
         @DisplayName("이미 존재하는 이메일이면")
-        class WithExistedEmail{
+        class WithExistedEmail {
+
+            @BeforeEach
+            void setUp() {
+                given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
+                        .willReturn(true);
+            }
 
             @Test
             @DisplayName("이메일 중복 예외를 던진다.")
@@ -125,11 +114,23 @@ class UserServiceTest {
 
     @Nested
     @DisplayName("회원 정보를 수정할 때")
-    class UpdateUserInfo{
+    class UpdateUserInfo {
 
         @Nested
         @DisplayName("수정하려는 회원이 존재한다면")
-        class WithExistedUser{
+        class WithExistedUser {
+
+            @BeforeEach
+            void setUp() {
+                given(userRepository.findByIdAndDeletedIsFalse(1L))
+                        .willReturn(Optional.of(
+                                User.builder()
+                                        .id(1L)
+                                        .email(EXISTED_EMAIL_ADDRESS)
+                                        .name(NAME_BEFORE_UPDATE)
+                                        .password("test")
+                                        .build()));
+            }
 
             @Test
             @DisplayName("회원의 정보를 수정한다.")
@@ -152,7 +153,16 @@ class UserServiceTest {
 
         @Nested
         @DisplayName("해당 회원이 존재하지 않으면")
-        class WithNotExistedUser{
+        class WithNotExistedUser {
+
+            @BeforeEach
+            void setUp() {
+                given(userRepository.findByIdAndDeletedIsFalse(100L))
+                        .willReturn(Optional.empty());
+
+                given(userRepository.findByIdAndDeletedIsFalse(DELETED_USER_ID))
+                        .willReturn(Optional.empty());
+            }
 
             @Test
             @DisplayName("예외를 던진다.")
@@ -188,11 +198,23 @@ class UserServiceTest {
 
     @Nested
     @DisplayName("회원을 삭제할 때")
-    class DeleteUser{
+    class DeleteUser {
 
         @Nested
         @DisplayName("존재하는 회원을 삭제한다면")
-        class WithExistedUser{
+        class WithExistedUser {
+
+            @BeforeEach
+            void setUp() {
+                given(userRepository.findByIdAndDeletedIsFalse(1L))
+                        .willReturn(Optional.of(
+                                User.builder()
+                                        .id(1L)
+                                        .email(EXISTED_EMAIL_ADDRESS)
+                                        .name(NAME_BEFORE_UPDATE)
+                                        .password("test")
+                                        .build()));
+            }
 
             @Test
             @DisplayName("정상적으로 삭제할 수 있다.")
@@ -208,7 +230,16 @@ class UserServiceTest {
 
         @Nested
         @DisplayName("존재하지 않는 회원을 삭제한다면")
-        class WithNotExistedUser{
+        class WithNotExistedUser {
+
+            @BeforeEach
+            void setUp() {
+                given(userRepository.findByIdAndDeletedIsFalse(100L))
+                        .willReturn(Optional.empty());
+
+                given(userRepository.findByIdAndDeletedIsFalse(DELETED_USER_ID))
+                        .willReturn(Optional.empty());
+            }
 
             @Test
             @DisplayName("예외를 던진다.")
