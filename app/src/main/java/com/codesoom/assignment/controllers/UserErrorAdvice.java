@@ -3,6 +3,7 @@ package com.codesoom.assignment.controllers;
 import com.codesoom.assignment.dto.ErrorResponse;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.errors.UserNotMatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -53,6 +54,13 @@ public class UserErrorAdvice {
     ) {
         String messageTemplate = getViolatedMessage(exception);
         return new ErrorResponse(messageTemplate);
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(UserNotMatchException.class)
+    public ErrorResponse handleUserNotMatch() {
+        return new ErrorResponse("자기 자신만 수정할 수 있습니다");
     }
 
     private String getViolatedMessage(ConstraintViolationException exception) {

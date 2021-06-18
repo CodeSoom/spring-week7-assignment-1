@@ -10,7 +10,6 @@ import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,10 +54,8 @@ public class ProductController {
     @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     public Product create(
             @RequestAttribute Long userId,
-            @RequestBody @Valid ProductData productData,
-            Authentication authentication
+            @RequestBody @Valid ProductData productData
     ) {
-        System.out.println(authentication);
         return productService.createProduct(productData);
     }
 
