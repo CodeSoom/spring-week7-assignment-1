@@ -36,7 +36,7 @@ class UserTest {
         user.changePassword("TEST", passwordEncoder);
 
         assertThat(user.getPassword()).isNotEmpty();
-        assertThat(user.getPassword()).isEqualTo(ENCODED_PASSWORD);
+        assertThat(passwordEncoder.matches("TEST", ENCODED_PASSWORD)).isTrue();
     }
 
     @Test

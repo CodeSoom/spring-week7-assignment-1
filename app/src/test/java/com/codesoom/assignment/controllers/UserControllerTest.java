@@ -54,8 +54,20 @@ class UserControllerTest {
                             invocation.getArgument(1);
                     return User.builder()
                             .id(id)
-                            .email("tester@example.com")
                             .name(modificationData.getName())
+                            .password(modificationData.getPassword())
+                            .build();
+                });
+
+        given(userService.updateUser(eq(2L), any(UserModificationData.class)))
+                .will(invocation -> {
+                    Long id = invocation.getArgument(0);
+                    UserModificationData modificationData =
+                            invocation.getArgument(1);
+                    return User.builder()
+                            .id(1L)
+                            .name(modificationData.getName())
+                            .password(modificationData.getPassword())
                             .build();
                 });
 
@@ -137,6 +149,16 @@ class UserControllerTest {
 
         verify(userService)
                 .updateUser(eq(100L), any(UserModificationData.class));
+    }
+
+    @Test
+    void updateOtherUser() throws Exception{
+        mockMvc.perform(
+                patch("/users/2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+        )
+                .andExpect(status().isForbidden());
     }
 
     @Test

@@ -38,5 +38,17 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .exceptionHandling()
                     .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+
+        http
+                .authorizeRequests()
+                    .antMatchers("/h2-console/**")
+                    .permitAll()
+                .and()
+                .csrf()
+                    .ignoringAntMatchers("/h2-console/**")
+                    .disable()
+                .headers()
+                    .frameOptions()
+                    .disable();
     }
 }
