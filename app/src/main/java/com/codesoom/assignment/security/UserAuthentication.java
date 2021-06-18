@@ -1,6 +1,7 @@
 package com.codesoom.assignment.security;
 
-import org.springframework.security.authentication.AbstractAuthenticationToken;
+import com.codesoom.assignment.domain.User;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -10,13 +11,10 @@ import java.util.List;
 /**
  * 인증된 사용자
  */
-public class UserAuthentication extends AbstractAuthenticationToken {
+public class UserAuthentication extends UsernamePasswordAuthenticationToken {
 
-    private final Long userId;
-
-    public UserAuthentication(Long userId) {
-        super(authorities());
-        this.userId = userId;
+    public UserAuthentication(User user) {
+        super(user, null, authorities());
     }
 
     private static List<GrantedAuthority> authorities() {
@@ -24,20 +22,4 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         authorities.add(new SimpleGrantedAuthority("USER"));
         return authorities;
     }
-
-    @Override
-    public Object getCredentials() {
-        return null;
-    }
-
-    @Override
-    public Object getPrincipal() {
-        return null;
-    }
-
-    @Override
-    public boolean isAuthenticated() { // @PreAuthorize("isAuthenticated()")
-        return true;
-    }
-
 }

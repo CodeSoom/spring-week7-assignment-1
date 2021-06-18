@@ -1,7 +1,9 @@
 package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.security.UserAuthentication;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -38,32 +40,45 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             return;
         }
 
-        String authorization = request.getHeader("Authorization");
-
-        if (authorization != null) {
-            String accessToken = authorization.substring("Bearer ".length());
-            Long userId = authenticationService.parseToken(accessToken);
-            Authentication authentication = new UserAuthentication(userId);
-
-            SecurityContext context = SecurityContextHolder.getContext();
-            context.setAuthentication(authentication);
-        }
+        setSecurityContext(request);
 
         chain.doFilter(request, response);
     }
 
+    private void setSecurityContext(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
+        if (authorization == null) {
+            return;
+        }
+
+        String accessToken = authorization.substring("Bearer ".length());
+        Long userId = authenticationService.parseToken(accessToken);
+        User user = User.builder().id(userId).build();
+        Authentication authentication = new UserAuthentication(user);
+
+        SecurityContext context = SecurityContextHolder.getContext();
+        if (context.getAuthentication() == null
+                || !context.getAuthentication()
+                           .isAuthenticated()) {
+            // Cannot set this token to trusted - use constructor which takes a GrantedAuthority list instead
+            // authentication.setAuthenticated(true);
+            context.setAuthentication(authentication);
+        }
+    }
+
     private boolean filterWithPathAndMethod(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (!path.startsWith("/products")) {
+        if (!path.startsWith("/products")
+                && !path.startsWith("/users")) {
             return true;
         }
 
         String method = request.getMethod();
-        if (method.equals("GET")) {
+        if (method.equals(HttpMethod.GET.name())) {
             return true;
         }
 
-        if (method.equals("OPTIONS")) {
+        if (method.equals(HttpMethod.OPTIONS.name())) {
             return true;
         }
 

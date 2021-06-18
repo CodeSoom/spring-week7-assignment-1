@@ -1,6 +1,7 @@
 package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.errors.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 
 import javax.servlet.FilterChain;
@@ -20,6 +21,8 @@ public class AuthenticationErrorFilter extends HttpFilter {
             super.doFilter(request, response, chain);
         } catch (InvalidTokenException ex) {
             response.sendError(HttpStatus.UNAUTHORIZED.value());
+        } catch (UserNotFoundException ex) {
+            response.sendError(HttpStatus.NOT_FOUND.value());
         }
     }
 }
