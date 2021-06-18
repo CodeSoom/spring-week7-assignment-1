@@ -13,6 +13,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * 요청에 포함된 JWT를 관리합니다.
@@ -41,16 +42,14 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                                     FilterChain chain)
             throws IOException, ServletException {
 
-        String authorization = request.getHeader("Authorization");
-
-        if (authorization != null) {
-            String accessToken = authorization.substring("Bearer ".length());
-            Long userId = authenticationService.parseToken(accessToken);
-            Authentication authentication = new UserAuthentication(userId);
-
-            SecurityContext context = SecurityContextHolder.getContext();
-            context.setAuthentication(authentication);
-        }
+        Optional.ofNullable(request.getHeader("Authorization"))
+                .map(authorization -> authorization.substring("Bearer ".length()))
+                .map(authenticationService::parseToken)
+                .map(UserAuthentication::new)
+                .ifPresent(authentication -> {
+                    SecurityContext context = SecurityContextHolder.getContext();
+                    context.setAuthentication(authentication);
+                });
 
         chain.doFilter(request, response);
     }
