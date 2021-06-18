@@ -39,12 +39,29 @@ class UserServiceTest {
 
     private final PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
 
+    private UserRegistrationData registrationData;
+
+    private UserModificationData userModificationData;
+
     @BeforeEach
     void setUp() {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
 
         userService = new UserService(mapper, userRepository, passwordEncoder);
+
+        registrationData = UserRegistrationData.builder()
+                .name(USER_NAME)
+                .email(USER_EMAIL)
+                .password(USER_RAW_PASSWORD)
+                .build();
+
+        userModificationData = UserModificationData.builder()
+                .name(UPDATE_PREFIX + USER_NAME)
+                .password(USER_RAW_PASSWORD)
+                .build();
     }
+
+
 
     @Nested
     @DisplayName("registerUser 메소드는")
@@ -54,20 +71,11 @@ class UserServiceTest {
         @DisplayName("유효한 사용자 등록 정보가 주어지면")
         class Context_with_valid_userRegistrationData {
 
-            UserRegistrationData registrationData;
-
             @BeforeEach
             void prepareUserRegistrationData() {
-                registrationData = UserRegistrationData.builder()
-                        .name(USER_NAME)
-                        .email(USER_EMAIL)
-                        .password(USER_RAW_PASSWORD)
-                        .build();
-
                 given(userRepository.save(any(User.class))).will(invocation -> {
                     User source = invocation.getArgument(0);
                     return User.builder()
-                            .id(EXISTED_USER_ID)
                             .email(source.getEmail())
                             .name(source.getName())
                             .build();
@@ -79,11 +87,11 @@ class UserServiceTest {
             void it_returns_new_user() {
                 User user = userService.registerUser(registrationData);
 
-                assertThat(user.getName()).isEqualTo(USER_NAME);
-                assertThat(user.getEmail()).isEqualTo(USER_EMAIL);
+                assertThat(user.getName()).isEqualTo(registrationData.getName());
+                assertThat(user.getEmail()).isEqualTo(registrationData.getEmail());
 
                 String encodedPassword = user.getPassword();
-                assertThat(encodedPassword).isNotEqualTo(USER_RAW_PASSWORD);
+                assertThat(encodedPassword).isNotEqualTo(registrationData.getPassword());
 
                 verify(userRepository).save(any(User.class));
             }
@@ -92,8 +100,6 @@ class UserServiceTest {
         @Nested
         @DisplayName("만약 존재하는 Email이 주어지면")
         class Describe_with_existed_email {
-
-            UserRegistrationData registrationData;
 
             @BeforeEach
             void prepareUserRegistrationData() {
@@ -125,14 +131,8 @@ class UserServiceTest {
         @DisplayName("만약 찾을 수 있는 사용자 id가 주어지면")
         class Context_with_can_find_userId {
 
-            UserModificationData userModificationData;
-
             @BeforeEach
             void prepareUserModificationData() {
-                userModificationData = UserModificationData.builder()
-                        .name(UPDATE_PREFIX + USER_NAME)
-                        .build();
-
                 given(userRepository.findByIdAndDeletedIsFalse(EXISTED_USER_ID))
                         .willReturn(Optional.of(
                                 User.builder()
@@ -146,7 +146,7 @@ class UserServiceTest {
             @Test
             @DisplayName("사용자 정보를 업데이트하고 리턴한다")
             void it_returns_updated_user() {
-                User user = userService.updateUser(EXISTED_USER_ID, userModificationData);
+                User user = userService.updateUser(EXISTED_USER_ID, EXISTED_USER_ID, userModificationData);
 
                 assertThat(user.getId()).isEqualTo(EXISTED_USER_ID);
                 assertThat(user.getName()).isEqualTo(UPDATE_PREFIX + USER_NAME);
@@ -159,15 +159,8 @@ class UserServiceTest {
         @DisplayName("만약 찾을 수 없는 사용자 id가 주어지면")
         class Context_with_not_found_userId {
 
-            UserModificationData userModificationData;
-
             @BeforeEach
             void prepareNotExistedUserId() {
-                userModificationData = UserModificationData.builder()
-                        .name(USER_NAME)
-                        .password(USER_RAW_PASSWORD)
-                        .build();
-
                 given(userRepository.findByIdAndDeletedIsFalse(NOT_EXISTED_USER_ID))
                         .willReturn(Optional.empty());
             }
@@ -175,7 +168,7 @@ class UserServiceTest {
             @Test
             @DisplayName("사용자를 찾을 수 없는 에러를 던진다")
             void it_returns_userNotFoundException() {
-                assertThatThrownBy(() -> userService.updateUser(NOT_EXISTED_USER_ID, userModificationData))
+                assertThatThrownBy(() -> userService.updateUser(NOT_EXISTED_USER_ID, NOT_EXISTED_USER_ID, userModificationData))
                         .isInstanceOf(UserNotFoundException.class);
 
                 verify(userRepository).findByIdAndDeletedIsFalse(NOT_EXISTED_USER_ID);
@@ -186,15 +179,8 @@ class UserServiceTest {
         @DisplayName("만약 삭제된 사용자 id가 주어지면")
         class Context_with_deleted_userId {
 
-            UserModificationData userModificationData;
-
             @BeforeEach
             void prepareDeletedUserId() {
-                userModificationData = UserModificationData.builder()
-                        .name(USER_NAME)
-                        .password(USER_RAW_PASSWORD)
-                        .build();
-
                 given(userRepository.findByIdAndDeletedIsFalse(DELETED_USER_ID))
                         .willReturn(Optional.empty());
             }
@@ -203,7 +189,7 @@ class UserServiceTest {
             @DisplayName("사용자를 찾을 수 없는 에러를 던진다")
             void it_returns_userNotFoundException() {
                 assertThatThrownBy(
-                        () -> userService.updateUser(DELETED_USER_ID, userModificationData)
+                        () -> userService.updateUser(DELETED_USER_ID, DELETED_USER_ID, userModificationData)
                 )
                         .isInstanceOf(UserNotFoundException.class);
 
@@ -235,7 +221,7 @@ class UserServiceTest {
             @Test
             @DisplayName("사용자를 삭제하고 리턴한다")
             void it_returns_deleted_user() {
-                User user = userService.deleteUser(EXISTED_USER_ID);
+                User user = userService.deleteUser(EXISTED_USER_ID, EXISTED_USER_ID);
 
                 assertThat(user.getId()).isEqualTo(EXISTED_USER_ID);
                 assertThat(user.isDeleted()).isTrue();
@@ -251,7 +237,7 @@ class UserServiceTest {
             @Test
             @DisplayName("사용자를 찾을 수 없는 에러를 던진다")
             void it_returns_userNotFoundException() {
-                assertThatThrownBy(() -> userService.deleteUser(NOT_EXISTED_USER_ID))
+                assertThatThrownBy(() -> userService.deleteUser(NOT_EXISTED_USER_ID, NOT_EXISTED_USER_ID))
                         .isInstanceOf(UserNotFoundException.class);
 
                 verify(userRepository).findByIdAndDeletedIsFalse(NOT_EXISTED_USER_ID);
@@ -265,7 +251,7 @@ class UserServiceTest {
             @Test
             @DisplayName("사용자를 찾을 수 없는 에러를 던진다")
             void it_returns_userNotFoundException() {
-                assertThatThrownBy(() -> userService.deleteUser(DELETED_USER_ID))
+                assertThatThrownBy(() -> userService.deleteUser(DELETED_USER_ID, DELETED_USER_ID))
                         .isInstanceOf(UserNotFoundException.class);
 
                 verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
