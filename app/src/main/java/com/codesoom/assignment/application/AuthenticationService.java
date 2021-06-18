@@ -32,7 +32,7 @@ public class AuthenticationService {
      * @param email    이메일
      * @param password 비밀번호
      * @return 토큰
-     * @throws LoginFailException 이메일을 찾을 수 없거나 비밀번호가 일치하지 않을 경우 던집니다.
+     * @throws LoginFailException 로그인에 실패하면 던집니다
      */
     @Transactional(readOnly = true)
     public String login(String email, String password) {
