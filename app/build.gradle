@@ -72,6 +72,9 @@ dependencies {
     // Spring Developer Tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
+    // Spring security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
     // Spring Boot Test
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
