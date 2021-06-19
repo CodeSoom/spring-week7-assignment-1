@@ -5,7 +5,9 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
+import com.codesoom.assignment.security.UserAuthentication;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -28,11 +30,15 @@ public class UserController {
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     UserResultData update(
             @PathVariable Long id,
-            @RequestBody @Valid UserModificationData modificationData
+            @RequestBody @Valid UserModificationData modificationData,
+            UserAuthentication authentication
     ) {
-        User user = userService.updateUser(id, modificationData);
+
+        Long userId = authentication.getUserId();
+        User user = userService.updateUser(id, modificationData, userId);
         return getUserResultData(user);
     }
 

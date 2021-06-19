@@ -38,7 +38,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(Long id, UserModificationData modificationData) {
+    public User updateUser(Long id, UserModificationData modificationData, Long userId) {
         User user = findUser(id);
 
         User source = mapper.map(modificationData, User.class);

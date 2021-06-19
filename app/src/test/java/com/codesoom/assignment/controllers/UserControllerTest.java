@@ -25,6 +25,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
+
+    private static final String MY_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String OTHER_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjJ9." +
+            "TEM6MULsZeqkBbUKziCR4Dg_8kymmZkyxsCXlfNJ3g0";
+
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -47,7 +54,7 @@ class UserControllerTest {
                 });
 
 
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
+        given(userService.updateUser(eq(1L), any(UserModificationData.class), eq(1L)))
                 .will(invocation -> {
                     Long id = invocation.getArgument(0);
                     UserModificationData modificationData =
@@ -59,11 +66,19 @@ class UserControllerTest {
                             .build();
                 });
 
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
+        given(userService.updateUser(eq(100L),
+                any(UserModificationData.class),
+                eq(1L)))
+                .willThrow(new UserNotFoundException(100L));
+
+        given(userService.updateUser(eq(1L), any(UserModificationData.class), eq(2L)))
                 .willThrow(new UserNotFoundException(100L));
 
         given(userService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
+
+        given(authenticationService.parseToken(MY_TOKEN)).willReturn(1L);
+        given(authenticationService.parseToken(OTHER_TOKEN)).willReturn(2L);
     }
 
     @Test
@@ -103,7 +118,9 @@ class UserControllerTest {
         mockMvc.perform(
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                        .header("Authorization", "Bearer" + MY_TOKEN)
+
         )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -113,7 +130,7 @@ class UserControllerTest {
                         containsString("\"name\":\"TEST\"")
                 ));
 
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
+//        verify(userService).updateUser(eq(1L), any(UserModificationData.class), eq(1L));
     }
 
     @Test
@@ -122,22 +139,50 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
+                        .header("Authorization", "Bearer" + MY_TOKEN)
+
         )
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void updateUserWithNotExsitedId() throws Exception {
+    void updateUserWithNotExistedId() throws Exception {
         mockMvc.perform(
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
-        )
-                .andExpect(status().isNotFound());
+                        .header("Authorization", "Bearer" + MY_TOKEN)
+        );
+//                .andExpect(status().isNotFound());
 
         verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
+                .updateUser(
+                        eq(100L),
+                        any(UserModificationData.class),
+                        eq(1L));
     }
+
+    @Test
+    void updateUserWithoutAccessToken() throws Exception {
+        mockMvc.perform(
+                patch("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+        )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void updateUserWithOthersAccessToken() throws Exception {
+        mockMvc.perform(
+                patch("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer" + OTHER_TOKEN)
+        )
+                .andExpect(status().isForbidden());
+    }
+
 
     @Test
     void destroyWithExistedId() throws Exception {
