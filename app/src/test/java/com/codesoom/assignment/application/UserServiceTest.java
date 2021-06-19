@@ -10,6 +10,7 @@ import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -175,6 +176,18 @@ class UserServiceTest {
 
         verify(userRepository).findByIdAndDeletedIsFalse(1L);
     }
+
+    @Test
+    void updateUserWithDifferentAuthentication() {
+        UserModificationData modificationData = UserModificationData.builder()
+                .name(MODIFIED_NAME)
+                .password(MODIFIED_PASSWORD)
+                .build();
+
+        assertThatThrownBy(() -> userService.updateUser(authentication, USER2_ID, modificationData))
+                .isInstanceOf(AccessDeniedException.class);
+    }
+
 
     @Test
     void deleteUserWithNotExistedId() {
