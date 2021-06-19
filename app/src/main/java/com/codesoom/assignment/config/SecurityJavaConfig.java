@@ -20,7 +20,7 @@ import javax.servlet.Filter;
  * 각종 spring security를 설정하는 클래스입니다.
  */
 @Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)  // 특정 주소 접근시 권한 및 인증을 pre(미리) 체킹
 public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -34,19 +34,22 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
          * (authenticationManager : Spring Security의 필터들이 인증을 수행하는 방법에 대한 명세를 정의해 놓은 인터페이스)
          */
         Filter authenticationFilter = new JwtAuthenticationFilter(authenticationManager(), authenticationService);
+
+        // 유저 인증 시 발생하는 에러처리 필터
         Filter authenticationErrorFilter = new AuthenticationErrorFilter();
 
 
         http
                 .csrf().disable()  // CSRF(Cross-Site Request Forgery) 비활성화
-                .addFilter(authenticationFilter)
-                .addFilterBefore(authenticationErrorFilter,
+                .addFilter(authenticationFilter) // Jwt가 유효한 토큰인지 확인
+                .addFilterBefore(authenticationErrorFilter, // addFilterBefore : authenticationErrorFilter를 JwtAuthenticationFilter보다 먼저 동작하게 등록함
                                 JwtAuthenticationFilter.class)
                 .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 스프링 시큐리티 인증 처리 관점에서 세션을 생성하지 않음과 동시에, 세션을 이용한 방식으로 인증을 처리하지 않겠다는 의미
             .and()
                 .exceptionHandling()
-                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
-        http.headers().frameOptions().disable();
+                .authenticationEntryPoint(  // 인증되지 않은 요청에 대해 UNAUTHORIZED로 처리
+                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+        http.headers().frameOptions().disable();  // h2-console을 사용할 수 없는 에러를 처리하기 위한 코드
     }
 }

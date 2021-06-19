@@ -30,6 +30,15 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         this.authenticationService = authenticationService;
     }
 
+    /**
+     * 주어진 요청으로 유저 인증을 수행합니다.
+     *
+     * @param request  요청 정보
+     * @param response 응답 정보
+     * @param chain    필터 체인
+     * @throws IOException
+     * @throws ServletException
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
