@@ -11,6 +11,8 @@ import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -45,7 +47,9 @@ class UserServiceTest {
     void setUp() {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
 
-        userService = new UserService(mapper, userRepository);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+        userService = new UserService(mapper, userRepository, passwordEncoder);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
                 .willReturn(true);
