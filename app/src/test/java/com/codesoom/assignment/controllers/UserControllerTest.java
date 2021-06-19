@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
@@ -35,10 +36,18 @@ class UserControllerTest {
     @MockBean
     private AuthenticationService authenticationService;
 
+    @MockBean
+    private Authentication authentication;
+
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+
+    private static final String TESTER_EMAIL = "tester@example.com";
+    private static final String TESTER_PASSWORD = "TEST";
+    private static final Long NOT_EXIST_USER_ID = 100L;
+    private static final Long USER1_ID = 1L;
 
     @BeforeEach
     void setUp() {
@@ -46,32 +55,28 @@ class UserControllerTest {
                 .will(invocation -> {
                     UserRegistrationData registrationData = invocation.getArgument(0);
                     return User.builder()
-                            .id(13L)
+                            .id(USER1_ID)
                             .email(registrationData.getEmail())
                             .name(registrationData.getName())
                             .build();
                 });
 
+        User user = User.builder()
+                .id(1L)
+                .email(TESTER_EMAIL)
+                .name(TESTER_PASSWORD)
+                .build();
 
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
-                .will(invocation -> {
-                    Long id = invocation.getArgument(0);
-                    UserModificationData modificationData =
-                            invocation.getArgument(1);
-                    return User.builder()
-                            .id(id)
-                            .email("tester@example.com")
-                            .name(modificationData.getName())
-                            .build();
-                });
+        given(userService.updateUser(any(Authentication.class), eq(USER1_ID), any(UserModificationData.class)))
+                .willReturn(user);
 
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
-                .willThrow(new UserNotFoundException(100L));
+        given(userService.updateUser(any(Authentication.class), eq(NOT_EXIST_USER_ID), any(UserModificationData.class)))
+                .willThrow(new UserNotFoundException(NOT_EXIST_USER_ID));
 
-        given(userService.deleteUser(100L))
-                .willThrow(new UserNotFoundException(100L));
+        given(userService.deleteUser(NOT_EXIST_USER_ID))
+                .willThrow(new UserNotFoundException(NOT_EXIST_USER_ID));
 
-        given(userService.updateUser(eq(9999L), any(UserModificationData.class)))
+        given(userService.updateUser(any(Authentication.class),eq(9999L), any(UserModificationData.class)))
                 .willThrow(new AccessDeniedException("9999L"));
     }
 
@@ -123,7 +128,7 @@ class UserControllerTest {
                         containsString("\"name\":\"TEST\"")
                 ));
 
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
+        verify(userService).updateUser(any(Authentication.class), eq(1L), any(UserModificationData.class));
     }
 
     @Test
@@ -148,7 +153,7 @@ class UserControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
+                .updateUser(any(Authentication.class), eq(100L), any(UserModificationData.class));
     }
 
     @Test

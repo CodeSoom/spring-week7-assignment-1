@@ -3,6 +3,7 @@ package com.codesoom.assignment.controllers;
 import com.codesoom.assignment.dto.ErrorResponse;
 import com.codesoom.assignment.errors.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -37,6 +38,12 @@ public class ControllerErrorAdvice {
     @ExceptionHandler(LoginFailException.class)
     public ErrorResponse handleLoginFailException() {
         return new ErrorResponse("Log-in failed");
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ErrorResponse handleUserIdNotMatchException() {
+        return new ErrorResponse("Access denied");
     }
 
     @ResponseBody
