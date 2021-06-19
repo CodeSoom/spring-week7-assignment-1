@@ -178,6 +178,9 @@ class UserControllerTest {
                         .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isForbidden());
+
+        verify(userService)
+                .updateUser(any(Authentication.class), eq(9999L), any(UserModificationData.class));
     }
 
     @Test
