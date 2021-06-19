@@ -1,6 +1,7 @@
 package com.codesoom.assignment.config;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.filters.AuthenticationErrorFilter;
 import com.codesoom.assignment.filters.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -28,10 +29,13 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
          * (authenticationManager : Spring Security의 필터들이 인증을 수행하는 방법에 대한 명세를 정의해 놓은 인터페이스)
          */
         Filter authenticationFilter = new JwtAuthenticationFilter(authenticationManager(), authenticationService);
+        Filter authenticationErrorFilter = new AuthenticationErrorFilter();
+
 
         http
                 .csrf().disable()  // CSRF(Cross-Site Request Forgery) 비활성화
-                .addFilter(authenticationFilter);
+                .addFilter(authenticationFilter)
+                .addFilterBefore(authenticationErrorFilter, JwtAuthenticationFilter.class);
 
     }
 }
