@@ -5,8 +5,12 @@ import com.codesoom.assignment.filters.AuthenticationErrorFilter;
 import com.codesoom.assignment.filters.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 import javax.servlet.Filter;
 
@@ -16,6 +20,7 @@ import javax.servlet.Filter;
  * 각종 spring security를 설정하는 클래스입니다.
  */
 @Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -35,7 +40,13 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()  // CSRF(Cross-Site Request Forgery) 비활성화
                 .addFilter(authenticationFilter)
-                .addFilterBefore(authenticationErrorFilter, JwtAuthenticationFilter.class);
+                .addFilterBefore(authenticationErrorFilter,
+                                JwtAuthenticationFilter.class)
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
 
     }
 }
