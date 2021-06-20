@@ -10,6 +10,7 @@ import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -103,7 +104,7 @@ class UserServiceTest {
                 .password("TEST")
                 .build();
 
-        User user = userService.updateUser(1L, modificationData);
+        User user = userService.updateUser(1L, modificationData, 1L);
 
         assertThat(user.getId()).isEqualTo(1L);
         assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
@@ -113,13 +114,24 @@ class UserServiceTest {
     }
 
     @Test
+    void updateUserByOtherAccess() {
+        UserModificationData modificationData = UserModificationData.builder()
+                .name("TEST")
+                .password("TEST")
+                .build();
+
+        assertThatThrownBy(() -> userService.updateUser(1L, modificationData, 2L))
+                .isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
     void updateUserWithNotExistedId() {
         UserModificationData modificationData = UserModificationData.builder()
                 .name("TEST")
                 .password("TEST")
                 .build();
 
-        assertThatThrownBy(() -> userService.updateUser(100L, modificationData))
+        assertThatThrownBy(() -> userService.updateUser(100L, modificationData, 100L))
                 .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(100L);
@@ -134,7 +146,7 @@ class UserServiceTest {
                 .build();
 
         assertThatThrownBy(
-                () -> userService.updateUser(DELETED_USER_ID, modificationData)
+                () -> userService.updateUser(DELETED_USER_ID, modificationData, DELETED_USER_ID)
         )
                 .isInstanceOf(UserNotFoundException.class);
 

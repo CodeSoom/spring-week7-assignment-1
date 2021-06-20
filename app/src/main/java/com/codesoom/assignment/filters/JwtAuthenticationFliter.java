@@ -39,6 +39,8 @@ public class JwtAuthenticationFliter extends BasicAuthenticationFilter {
         if (authorization != null) {
             String accessToken = authorization.substring("Bearer ".length());
             Long userId = authenticationService.parseToken(accessToken);
+
+
             Authentication authentication = new UserAuthentication(userId);
 
             SecurityContext context = SecurityContextHolder.getContext();
@@ -50,7 +52,7 @@ public class JwtAuthenticationFliter extends BasicAuthenticationFilter {
 
     private boolean filterWithPathAndMethod(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (!path.startsWith("/products")) {
+        if (!path.startsWith("/products") && !path.startsWith("/users")) {
             return true;
         }
 
