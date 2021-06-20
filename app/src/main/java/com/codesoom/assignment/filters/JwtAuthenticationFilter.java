@@ -60,3 +60,4 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         chain.doFilter(request, response);
     }
 }
+
