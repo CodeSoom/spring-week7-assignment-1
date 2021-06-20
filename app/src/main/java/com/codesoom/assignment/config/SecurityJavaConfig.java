@@ -53,3 +53,4 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
         http.headers().frameOptions().disable();  // h2-console을 사용할 수 없는 에러를 처리하기 위한 코드
     }
 }
+
