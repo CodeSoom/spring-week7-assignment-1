@@ -7,6 +7,7 @@ import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.Mapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,11 @@ public class UserService {
     }
 
     public User updateUser(Long id, UserModificationData modificationData, Long userId) {
+
+        if (!id.equals(userId)) {
+            throw new AccessDeniedException("Access Denied");
+        }
+
         User user = findUser(id);
 
         User source = mapper.map(modificationData, User.class);

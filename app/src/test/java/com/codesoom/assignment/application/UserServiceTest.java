@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -117,7 +118,7 @@ class UserServiceTest {
     class UpdateUserInfo {
 
         @Nested
-        @DisplayName("수정하려는 회원이 존재한다면")
+        @DisplayName("수정하려는 회원이 존재하면")
         class WithExistedUser {
 
             @BeforeEach
@@ -142,13 +143,37 @@ class UserServiceTest {
                         .build();
 
                 Long userId = 1L;
-                User user = userService.updateUser(1L, modificationData, userId);
+                User user = userService.updateUser(userId, modificationData, userId);
 
                 assertThat(user.getId()).isEqualTo(1L);
                 assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
                 assertThat(user.getName()).isEqualTo(NAME_AFTER_UPDATE);
 
                 verify(userRepository).findByIdAndDeletedIsFalse(1L);
+            }
+
+
+        }
+
+        @Nested
+        @DisplayName("작성자와 수정자가 일치하지 않으면")
+        class WithNotMatchingUser{
+
+            @Test
+            @DisplayName("예외를 던진다.")
+            void updateUserByOthersAccessed() {
+
+                UserModificationData modificationData = UserModificationData.builder()
+                        .name(NAME_AFTER_UPDATE)
+                        .password("TEST")
+                        .build();
+
+                Long targetUserId = 1L;
+                Long currentUserId = 2L;
+                assertThatThrownBy(() -> {
+                    userService.updateUser(targetUserId, modificationData, currentUserId);
+                }).isInstanceOf(AccessDeniedException.class);
+
             }
         }
 
@@ -174,7 +199,7 @@ class UserServiceTest {
                         .build();
 
                 Long userId = 100L;
-                assertThatThrownBy(() -> userService.updateUser(100L, modificationData, userId))
+                assertThatThrownBy(() -> userService.updateUser(userId, modificationData, userId))
                         .isInstanceOf(UserNotFoundException.class);
 
                 verify(userRepository).findByIdAndDeletedIsFalse(100L);

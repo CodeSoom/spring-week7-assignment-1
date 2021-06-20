@@ -13,8 +13,12 @@ class JwtUtilTest {
 
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+
+    private static final String ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjEwMDR9.3GV5ZH3flBf0cnaXQCNNZlT4mgyFyBUhn3LKzQohh1A";
 
     private JwtUtil jwtUtil;
 
@@ -25,9 +29,9 @@ class JwtUtilTest {
 
     @Test
     void encode() {
-        String token = jwtUtil.encode(1L);
+        String token = jwtUtil.encode(1004L);
 
-        assertThat(token).isEqualTo(VALID_TOKEN);
+        assertThat(token).isEqualTo(ADMIN_TOKEN);
     }
 
     @Test

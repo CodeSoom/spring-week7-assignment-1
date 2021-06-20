@@ -7,6 +7,7 @@ import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
 import com.codesoom.assignment.security.UserAuthentication;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,14 +36,14 @@ public class UserController {
             @PathVariable Long id,
             @RequestBody @Valid UserModificationData modificationData,
             UserAuthentication authentication
-    ) {
-
+    ) throws AccessDeniedException {
         Long userId = authentication.getUserId();
         User user = userService.updateUser(id, modificationData, userId);
         return getUserResultData(user);
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void destroy(@PathVariable Long id) {
         userService.deleteUser(id);

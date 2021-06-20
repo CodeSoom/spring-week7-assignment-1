@@ -11,13 +11,16 @@ public class UserAuthentication extends AbstractAuthenticationToken {
     private final Long userId;
 
     public UserAuthentication(Long userId) {
-        super(authorities());
+        super(authorities(userId));
         this.userId = userId;
     }
 
-    private static List<GrantedAuthority> authorities(){
+    private static List<GrantedAuthority> authorities(Long userId){
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("USER"));
+        if (userId == 1004L) {
+            authorities.add(new SimpleGrantedAuthority("ADMIN"));
+        }
         return authorities;
     }
 
