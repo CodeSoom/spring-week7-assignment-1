@@ -1,6 +1,7 @@
 package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.security.UserAuthentication;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 public class JwtAuthenticationFliter extends BasicAuthenticationFilter {
     private final AuthenticationService authenticationService;
@@ -40,8 +42,9 @@ public class JwtAuthenticationFliter extends BasicAuthenticationFilter {
             String accessToken = authorization.substring("Bearer ".length());
             Long userId = authenticationService.parseToken(accessToken);
 
+            List<Role> roles = authenticationService.roles(userId);
 
-            Authentication authentication = new UserAuthentication(userId);
+            Authentication authentication = new UserAuthentication(userId, roles);
 
             SecurityContext context = SecurityContextHolder.getContext();
             context.setAuthentication(authentication);

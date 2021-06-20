@@ -1,5 +1,7 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.Role;
+import com.codesoom.assignment.domain.RoleRepository;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
@@ -29,6 +31,7 @@ class UserServiceTest {
 
     private UserService userService;
     private final UserRepository userRepository = mock(UserRepository.class);
+    private final RoleRepository roleRepository = mock(RoleRepository.class);
 
 
     @BeforeEach
@@ -36,7 +39,7 @@ class UserServiceTest {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-        userService = new UserService(mapper, userRepository, passwordEncoder);
+        userService = new UserService(mapper, userRepository, passwordEncoder, roleRepository);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
                 .willReturn(true);
@@ -81,6 +84,7 @@ class UserServiceTest {
         assertThat(user.getName()).isEqualTo("Tester");
 
         verify(userRepository).save(any(User.class));
+        verify(roleRepository).save(any(Role.class));
     }
 
     @Test

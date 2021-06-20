@@ -1,5 +1,7 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.Role;
+import com.codesoom.assignment.domain.RoleRepository;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
@@ -19,12 +21,14 @@ public class UserService {
     private final Mapper mapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     public UserService(Mapper dozerMapper, UserRepository userRepository,
-                       PasswordEncoder passwordEncoder) {
+                       PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
         this.mapper = dozerMapper;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
     public User registerUser(UserRegistrationData registrationData) {
@@ -33,15 +37,16 @@ public class UserService {
             throw new UserEmailDuplicationException(email);
         }
 
-        User user = mapper.map(registrationData, User.class);
+        User user = userRepository.save(mapper.map(registrationData, User.class));
 
         user.changePassword(registrationData.getPassword(), passwordEncoder);
+        roleRepository.save(new Role(user.getId(), "USER"));
 
-        return userRepository.save(user);
+        return user;
     }
 
     public User updateUser(Long id, UserModificationData modificationData, Long userId) {
-        if(id != userId) {
+        if(!id.equals(userId)) {
             throw new AccessDeniedException("Access Denied");
         }
 
