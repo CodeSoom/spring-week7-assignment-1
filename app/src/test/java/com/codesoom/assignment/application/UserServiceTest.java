@@ -9,7 +9,12 @@ import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -20,9 +25,13 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+@Nested
 class UserServiceTest {
     private static final String EXISTED_EMAIL_ADDRESS = "existed@example.com";
     private static final Long DELETED_USER_ID = 200L;
+
+    private static final String NAME_BEFORE_UPDATE = "Tester";
+    private static final String NAME_AFTER_UPDATE = "UPDATE";
 
     private UserService userService;
 
@@ -31,136 +40,253 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-        userService = new UserService(mapper, userRepository);
-
-        given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
-                .willReturn(true);
-
-        given(userRepository.save(any(User.class))).will(invocation -> {
-            User source = invocation.getArgument(0);
-            return User.builder()
-                    .id(13L)
-                    .email(source.getEmail())
-                    .name(source.getName())
-                    .build();
-        });
-
-        given(userRepository.findByIdAndDeletedIsFalse(1L))
-                .willReturn(Optional.of(
-                        User.builder()
-                                .id(1L)
-                                .email(EXISTED_EMAIL_ADDRESS)
-                                .name("Tester")
-                                .password("test")
-                                .build()));
-
-        given(userRepository.findByIdAndDeletedIsFalse(100L))
-                .willReturn(Optional.empty());
-
-        given(userRepository.findByIdAndDeletedIsFalse(DELETED_USER_ID))
-                .willReturn(Optional.empty());
+        userService = new UserService(mapper, userRepository, passwordEncoder);
     }
 
-    @Test
-    void registerUser() {
-        UserRegistrationData registrationData = UserRegistrationData.builder()
-                .email("tester@example.com")
-                .name("Tester")
-                .password("test")
-                .build();
+    @Nested
+    @DisplayName("회원가입시")
+    class RegisterUser {
 
-        User user = userService.registerUser(registrationData);
+        @Nested
+        @DisplayName("사용할 수 있는 이메일이면")
+        class WithAvailableEmail {
 
-        assertThat(user.getId()).isEqualTo(13L);
-        assertThat(user.getEmail()).isEqualTo("tester@example.com");
-        assertThat(user.getName()).isEqualTo("Tester");
+            @BeforeEach
+            void setUp() {
+                given(userRepository.save(any(User.class))).will(invocation -> {
+                    User source = invocation.getArgument(0);
+                    return User.builder()
+                            .id(13L)
+                            .email(source.getEmail())
+                            .name(source.getName())
+                            .build();
+                });
+            }
 
-        verify(userRepository).save(any(User.class));
+            @Test
+            @DisplayName("사용자를 등록한다.")
+            void registerUser() {
+                UserRegistrationData registrationData = UserRegistrationData.builder()
+                        .email("tester@example.com")
+                        .name(NAME_BEFORE_UPDATE)
+                        .password("test")
+                        .build();
+
+                User user = userService.registerUser(registrationData);
+
+                assertThat(user.getId()).isEqualTo(13L);
+                assertThat(user.getEmail()).isEqualTo("tester@example.com");
+                assertThat(user.getName()).isEqualTo(NAME_BEFORE_UPDATE);
+                assertThat(user.getPassword()).isEqualTo("");
+
+                verify(userRepository).save(any(User.class));
+            }
+
+        }
+
+        @Nested
+        @DisplayName("이미 존재하는 이메일이면")
+        class WithExistedEmail {
+
+            @BeforeEach
+            void setUp() {
+                given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
+                        .willReturn(true);
+            }
+
+            @Test
+            @DisplayName("이메일 중복 예외를 던진다.")
+            void registerUserWithDuplicatedEmail() {
+                UserRegistrationData registrationData = UserRegistrationData.builder()
+                        .email(EXISTED_EMAIL_ADDRESS)
+                        .name(NAME_BEFORE_UPDATE)
+                        .password("test")
+                        .build();
+
+                assertThatThrownBy(() -> userService.registerUser(registrationData))
+                        .isInstanceOf(UserEmailDuplicationException.class);
+
+                verify(userRepository).existsByEmail(EXISTED_EMAIL_ADDRESS);
+            }
+        }
     }
 
-    @Test
-    void registerUserWithDuplicatedEmail() {
-        UserRegistrationData registrationData = UserRegistrationData.builder()
-                .email(EXISTED_EMAIL_ADDRESS)
-                .name("Tester")
-                .password("test")
-                .build();
+    @Nested
+    @DisplayName("회원 정보를 수정할 때")
+    class UpdateUserInfo {
 
-        assertThatThrownBy(() -> userService.registerUser(registrationData))
-                .isInstanceOf(UserEmailDuplicationException.class);
+        @Nested
+        @DisplayName("수정하려는 회원이 존재하면")
+        class WithExistedUser {
 
-        verify(userRepository).existsByEmail(EXISTED_EMAIL_ADDRESS);
+            @BeforeEach
+            void setUp() {
+                given(userRepository.findByIdAndDeletedIsFalse(1L))
+                        .willReturn(Optional.of(
+                                User.builder()
+                                        .id(1L)
+                                        .email(EXISTED_EMAIL_ADDRESS)
+                                        .name(NAME_BEFORE_UPDATE)
+                                        .password("test")
+                                        .build()));
+            }
+
+            @Test
+            @DisplayName("회원의 정보를 수정한다.")
+            void updateUserWithExistedId() {
+
+                UserModificationData modificationData = UserModificationData.builder()
+                        .name(NAME_AFTER_UPDATE)
+                        .password("TEST")
+                        .build();
+
+                Long userId = 1L;
+                User user = userService.updateUser(userId, modificationData, userId);
+
+                assertThat(user.getId()).isEqualTo(1L);
+                assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
+                assertThat(user.getName()).isEqualTo(NAME_AFTER_UPDATE);
+
+                verify(userRepository).findByIdAndDeletedIsFalse(1L);
+            }
+
+
+        }
+
+        @Nested
+        @DisplayName("작성자와 수정자가 일치하지 않으면")
+        class WithNotMatchingUser{
+
+            @Test
+            @DisplayName("예외를 던진다.")
+            void updateUserByOthersAccessed() {
+
+                UserModificationData modificationData = UserModificationData.builder()
+                        .name(NAME_AFTER_UPDATE)
+                        .password("TEST")
+                        .build();
+
+                Long targetUserId = 1L;
+                Long currentUserId = 2L;
+                assertThatThrownBy(() -> {
+                    userService.updateUser(targetUserId, modificationData, currentUserId);
+                }).isInstanceOf(AccessDeniedException.class);
+
+            }
+        }
+
+        @Nested
+        @DisplayName("해당 회원이 존재하지 않으면")
+        class WithNotExistedUser {
+
+            @BeforeEach
+            void setUp() {
+                given(userRepository.findByIdAndDeletedIsFalse(100L))
+                        .willReturn(Optional.empty());
+
+                given(userRepository.findByIdAndDeletedIsFalse(DELETED_USER_ID))
+                        .willReturn(Optional.empty());
+            }
+
+            @Test
+            @DisplayName("예외를 던진다.")
+            void updateUserWithNotExistedId() {
+                UserModificationData modificationData = UserModificationData.builder()
+                        .name(NAME_AFTER_UPDATE)
+                        .password("TEST")
+                        .build();
+
+                Long userId = 100L;
+                assertThatThrownBy(() -> userService.updateUser(userId, modificationData, userId))
+                        .isInstanceOf(UserNotFoundException.class);
+
+                verify(userRepository).findByIdAndDeletedIsFalse(100L);
+            }
+
+            @Test
+            @DisplayName("이미 삭제된 회원이기 때문에 예외를 던진다.")
+            void updateUserWithDeletedId() {
+                UserModificationData modificationData = UserModificationData.builder()
+                        .name(NAME_AFTER_UPDATE)
+                        .password("TEST")
+                        .build();
+
+                Long userId = 1L;
+
+                assertThatThrownBy(
+                        () -> userService.updateUser(userId, modificationData, userId)
+                )
+                        .isInstanceOf(UserNotFoundException.class);
+
+                verify(userRepository).findByIdAndDeletedIsFalse(userId);
+            }
+        }
     }
 
-    @Test
-    void updateUserWithExistedId() {
-        UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
+    @Nested
+    @DisplayName("회원을 삭제할 때")
+    class DeleteUser {
 
-        User user = userService.updateUser(1L, modificationData);
+        @Nested
+        @DisplayName("존재하는 회원을 삭제한다면")
+        class WithExistedUser {
 
-        assertThat(user.getId()).isEqualTo(1L);
-        assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
-        assertThat(user.getName()).isEqualTo("TEST");
+            @BeforeEach
+            void setUp() {
+                given(userRepository.findByIdAndDeletedIsFalse(1L))
+                        .willReturn(Optional.of(
+                                User.builder()
+                                        .id(1L)
+                                        .email(EXISTED_EMAIL_ADDRESS)
+                                        .name(NAME_BEFORE_UPDATE)
+                                        .password("test")
+                                        .build()));
+            }
 
-        verify(userRepository).findByIdAndDeletedIsFalse(1L);
-    }
+            @Test
+            @DisplayName("정상적으로 삭제할 수 있다.")
+            void deleteUserWithExistedId() {
+                User user = userService.deleteUser(1L);
 
-    @Test
-    void updateUserWithNotExistedId() {
-        UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
+                assertThat(user.getId()).isEqualTo(1L);
+                assertThat(user.isDeleted()).isTrue();
 
-        assertThatThrownBy(() -> userService.updateUser(100L, modificationData))
-                .isInstanceOf(UserNotFoundException.class);
+                verify(userRepository).findByIdAndDeletedIsFalse(1L);
+            }
+        }
 
-        verify(userRepository).findByIdAndDeletedIsFalse(100L);
-    }
+        @Nested
+        @DisplayName("존재하지 않는 회원을 삭제한다면")
+        class WithNotExistedUser {
 
+            @BeforeEach
+            void setUp() {
+                given(userRepository.findByIdAndDeletedIsFalse(100L))
+                        .willReturn(Optional.empty());
 
-    @Test
-    void updateUserWithDeletedId() {
-        UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
+                given(userRepository.findByIdAndDeletedIsFalse(DELETED_USER_ID))
+                        .willReturn(Optional.empty());
+            }
 
-        assertThatThrownBy(
-                () -> userService.updateUser(DELETED_USER_ID, modificationData)
-        )
-                .isInstanceOf(UserNotFoundException.class);
+            @Test
+            @DisplayName("예외를 던진다.")
+            void deleteUserWithNotExistedId() {
+                assertThatThrownBy(() -> userService.deleteUser(100L))
+                        .isInstanceOf(UserNotFoundException.class);
 
-        verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
-    }
+                verify(userRepository).findByIdAndDeletedIsFalse(100L);
+            }
 
-    @Test
-    void deleteUserWithExistedId() {
-        User user = userService.deleteUser(1L);
+            @Test
+            @DisplayName("이미 삭제된 회원이기 때문에 예외를 던진다.")
+            void deleteUserWithDeletedId() {
+                assertThatThrownBy(() -> userService.deleteUser(DELETED_USER_ID))
+                        .isInstanceOf(UserNotFoundException.class);
 
-        assertThat(user.getId()).isEqualTo(1L);
-        assertThat(user.isDeleted()).isTrue();
-
-        verify(userRepository).findByIdAndDeletedIsFalse(1L);
-    }
-
-    @Test
-    void deleteUserWithNotExistedId() {
-        assertThatThrownBy(() -> userService.deleteUser(100L))
-                .isInstanceOf(UserNotFoundException.class);
-
-        verify(userRepository).findByIdAndDeletedIsFalse(100L);
-    }
-
-    @Test
-    void deleteUserWithDeletedId() {
-        assertThatThrownBy(() -> userService.deleteUser(DELETED_USER_ID))
-                .isInstanceOf(UserNotFoundException.class);
-
-        verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
+                verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
+            }
+        }
     }
 }
