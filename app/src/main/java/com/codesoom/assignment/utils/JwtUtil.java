@@ -41,7 +41,7 @@ public class JwtUtil {
      *
      * @param token 토큰
      * @return 토큰에 포함된 정보
-     * @throws InvalidTokenException 토큰이 빈 값이거나 시그니처가 올바르지 않다면 던집니다.
+     * @throws InvalidTokenException 토큰이 빈 값이거나 시그니처가 올바르지 않을 경우
      */
     public Claims decode(String token) {
         if (token == null || token.isBlank()) {

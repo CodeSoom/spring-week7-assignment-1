@@ -32,7 +32,7 @@ public class AuthenticationService {
      * @param email    이메일
      * @param password 비밀번호
      * @return 토큰
-     * @throws LoginFailException 로그인에 실패하면 던집니다
+     * @throws LoginFailException 로그인에 실패했을 경우
      */
     @Transactional(readOnly = true)
     public String login(String email, String password) {
