@@ -46,7 +46,7 @@ public class UserController {
             @AuthenticationPrincipal User requester
             ) {
         if (!requester.getId().equals(id)) {
-            throw new ForbiddenApiRequestException();
+            throw new ForbiddenApiRequestException("타인의 정보를 수정할 수 없습니다.");
         }
         User user = userService.updateUser(id, modificationData);
         return getUserResultData(user);
