@@ -1,25 +1,23 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.dto.ErrorResponse;
-import com.codesoom.assignment.errors.*;
+import com.codesoom.assignment.errors.ForbiddenApiRequestException;
+import com.codesoom.assignment.errors.LoginFailException;
+import com.codesoom.assignment.errors.UserEmailDuplicationException;
+import com.codesoom.assignment.errors.UserNotFoundException;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.util.Set;
 
 @ResponseBody
-@ControllerAdvice
-public class ControllerErrorAdvice {
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(ProductNotFoundException.class)
-    public ErrorResponse handleProductNotFound() {
-        return new ErrorResponse("Product not found");
-    }
+@RestControllerAdvice
+public class UserControllerErrorAdvice {
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserNotFoundException.class)
@@ -39,12 +37,6 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Log-in failed");
     }
 
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(InvalidTokenException.class)
-    public ErrorResponse handleInvalidAccessTokenException() {
-        return new ErrorResponse("Invalid access token");
-    }
-
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
@@ -62,5 +54,11 @@ public class ControllerErrorAdvice {
             messageTemplate = violation.getMessageTemplate();
         }
         return messageTemplate;
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(ForbiddenApiRequestException.class)
+    public ErrorResponse handleForbiddenApiRequest(Exception ex) {
+        return new ErrorResponse(ex.getMessage());
     }
 }
