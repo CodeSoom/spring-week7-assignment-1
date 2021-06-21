@@ -42,7 +42,7 @@ public class UserControllerErrorAdvice {
     @ExceptionHandler(ConstraintViolationException.class)
     public ErrorResponse handleConstraintValidateError(
             ConstraintViolationException exception
-                                                      ) {
+    ) {
         String messageTemplate = getViolatedMessage(exception);
         return new ErrorResponse(messageTemplate);
     }
