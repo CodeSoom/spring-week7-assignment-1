@@ -7,6 +7,8 @@ import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -17,10 +19,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 class AuthenticationServiceTest {
-    private static final String SECRET = "12345678901234567890123456789012";
+    private static final String SECRET = "12345678901234567890123456789010";
 
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+            "eyJ1c2VySWQiOjF9.neCsyNLzy3lQ4o2yliotWT06FwSGZagaHpKdAkjnGGw";
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
 
@@ -28,15 +30,19 @@ class AuthenticationServiceTest {
 
     private UserRepository userRepository = mock(UserRepository.class);
 
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setUp() {
         JwtUtil jwtUtil = new JwtUtil(SECRET);
+        passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
         authenticationService = new AuthenticationService(
-                userRepository, jwtUtil);
+                userRepository, jwtUtil, passwordEncoder);
 
         User user = User.builder()
-                .password("test")
+                .id(1L)
+                .password(passwordEncoder.encode("test"))
                 .build();
 
         given(userRepository.findByEmail("tester@example.com"))
