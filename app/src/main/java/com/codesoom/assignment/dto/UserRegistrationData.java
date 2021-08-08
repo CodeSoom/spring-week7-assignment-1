@@ -9,6 +9,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Getter
+@lombok.Generated
 @Builder
 @AllArgsConstructor
 public class UserRegistrationData {

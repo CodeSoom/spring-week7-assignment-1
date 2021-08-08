@@ -5,13 +5,19 @@ import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
@@ -34,6 +40,19 @@ class UserControllerTest {
     @MockBean
     private AuthenticationService authenticationService;
 
+    @MockBean
+    private Authentication authentication;
+
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+
+    private static final String TESTER_EMAIL = "tester@example.com";
+    private static final String TESTER_PASSWORD = "TEST";
+    private static final Long NOT_EXIST_USER_ID = 100L;
+    private static final Long USER1_ID = 13L;
+
     @BeforeEach
     void setUp() {
         given(userService.registerUser(any(UserRegistrationData.class)))
@@ -45,25 +64,32 @@ class UserControllerTest {
                             .name(registrationData.getName())
                             .build();
                 });
-
-
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
-                .will(invocation -> {
-                    Long id = invocation.getArgument(0);
-                    UserModificationData modificationData =
-                            invocation.getArgument(1);
-                    return User.builder()
-                            .id(id)
-                            .email("tester@example.com")
-                            .name(modificationData.getName())
-                            .build();
-                });
-
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
+        User user = User.builder()
+                .id(1L)
+                .email("tester@example.com")
+                .name("TEST")
+                .build();
+        given(userService.updateUser(
+                any(Authentication.class), eq(1L), any(UserModificationData.class)))
+                .willReturn(user);
+        given(userService.updateUser(any(Authentication.class), eq(100L), any(UserModificationData.class)))
                 .willThrow(new UserNotFoundException(100L));
-
         given(userService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
+
+        given(userService.updateUser(any(Authentication.class), eq(9999L), any(UserModificationData.class)))
+                .willThrow(new AccessDeniedException("9999L"));
+
+        given(authenticationService.parseToken(INVALID_TOKEN))
+                .willThrow(new InvalidTokenException(INVALID_TOKEN));
+    }
+
+    @AfterEach
+    void after() {
+        Mockito.reset(mockMvc);
+        Mockito.reset(userService);
+        Mockito.reset(authenticationService);
+        Mockito.reset(authentication);
     }
 
     @Test
@@ -99,11 +125,25 @@ class UserControllerTest {
     }
 
     @Test
+    void registerUserWithExistedEmail() throws Exception {
+        given(userService.registerUser(any(UserRegistrationData.class)))
+                .willThrow(new UserEmailDuplicationException("tester@example.com"));
+
+        mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"tester@example.com\"," +
+                        "\"name\":\"Tester\",\"password\":\"test\"}")
+        )
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void updateUserWithValidAttributes() throws Exception {
         mockMvc.perform(
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -112,8 +152,6 @@ class UserControllerTest {
                 .andExpect(content().string(
                         containsString("\"name\":\"TEST\"")
                 ));
-
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
     }
 
     @Test
@@ -121,7 +159,8 @@ class UserControllerTest {
         mockMvc.perform(
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"password\":\"\"}")
+                        .content("{}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isBadRequest());
     }
@@ -132,11 +171,37 @@ class UserControllerTest {
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isNotFound());
 
         verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
+                .updateUser(any(Authentication.class), eq(100L), any(UserModificationData.class));
+    }
+
+    @Test
+    void updateUserWithAccessDeniedToken() throws Exception {
+        mockMvc.perform(
+                patch("/users/9999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+        )
+                .andExpect(status().isForbidden());
+
+        verify(userService)
+                .updateUser(any(Authentication.class), eq(9999L), any(UserModificationData.class));
+    }
+
+    @Test
+    void updateUserWithInvalidToken() throws Exception {
+        mockMvc.perform(
+                patch("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + INVALID_TOKEN)
+        )
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
