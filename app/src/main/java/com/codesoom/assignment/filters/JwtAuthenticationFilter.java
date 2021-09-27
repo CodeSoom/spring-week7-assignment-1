@@ -27,6 +27,10 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws IOException, ServletException {
+        if (filterWithPathAndMethod(request)) {
+            chain.doFilter(request, response);
+            return;
+        }
         // TODO : authentication
         String authorization = request.getHeader("Authorization");
 
@@ -35,8 +39,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             return;
         }
 
-        String accessToken = authorization.substring("Bearer ".length());
-
         try {
             authenticationService.parseToken(accessToken);
         } catch (InvalidTokenException e) {
@@ -44,6 +46,22 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             return;
         }
 
-        chain.doFilter(request, response);
+    }
+
+    private boolean filterWithPathAndMethod(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        if (!path.startsWith("/products")) {
+            return true;
+        }
+
+        if (method.equals("GET")) {
+            return true;
+        }
+
+        if (method.equals("OPTIONS")) {
+            return true;
+        }
+
+        return false;
     }
 }
