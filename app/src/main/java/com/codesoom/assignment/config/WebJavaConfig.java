@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebJavaConfig implements WebMvcConfigurer {
+
     @Autowired
     private AuthenticationInterceptor authenticationInterceptor;
 
