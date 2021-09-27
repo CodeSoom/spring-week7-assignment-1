@@ -11,9 +11,10 @@ import javax.servlet.Filter;
 public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        Filter authenticationFilter = new JwtAuthenticationFilter();
+        Filter authenticationFilter = new JwtAuthenticationFilter(
+                authenticationManager());
         http
                 .csrf().disable()
-                .addFilter(authenticationFilter)
+                .addFilter(authenticationFilter);
     }
 }
