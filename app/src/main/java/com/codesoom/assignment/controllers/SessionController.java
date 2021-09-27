@@ -26,10 +26,8 @@ public class SessionController {
     public SessionResponseData login(
             @RequestBody SessionRequestData sessionRequestData
     ) {
-        String email = sessionRequestData.getEmail();
-        String password = sessionRequestData.getPassword();
 
-        String accessToken = authenticationService.login(email, password);
+        String accessToken = authenticationService.login(sessionRequestData);
 
         return SessionResponseData.builder()
                 .accessToken(accessToken)
