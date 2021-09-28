@@ -12,7 +12,8 @@ import java.util.stream.Collectors;
 public class ProductList {
     private final List<Product> store = new ArrayList<>();
 
-    private ProductList() {}
+    private ProductList() {
+    }
 
     public static ProductList newInstance() {
         return new ProductList();

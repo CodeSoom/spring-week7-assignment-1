@@ -10,7 +10,8 @@ public class SessionRequestData implements Identifier {
     private String email;
     private String password;
 
-    public SessionRequestData() {}
+    public SessionRequestData() {
+    }
 
     public SessionRequestData(String email, String password) {
         this.email = email;

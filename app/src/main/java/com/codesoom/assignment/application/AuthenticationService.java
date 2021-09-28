@@ -5,7 +5,6 @@ import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.suppliers.Identifier;
 import com.codesoom.assignment.utils.JwtUtil;
-import io.jsonwebtoken.Claims;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
