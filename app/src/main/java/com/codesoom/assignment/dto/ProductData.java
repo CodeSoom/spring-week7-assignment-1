@@ -44,4 +44,14 @@ public class ProductData implements EntitySupplier<Product> {
                 .imageUrl(imageUrl)
                 .build();
     }
+
+    public static ProductData from(Product product) {
+        return ProductData.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .maker(product.getMaker())
+                .price(product.getPrice())
+                .imageUrl(product.getImageUrl())
+                .build();
+    }
 }

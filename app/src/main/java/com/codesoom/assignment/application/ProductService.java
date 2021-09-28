@@ -1,9 +1,13 @@
 package com.codesoom.assignment.application;
 
 import com.codesoom.assignment.domain.Product;
+import com.codesoom.assignment.domain.ProductList;
 import com.codesoom.assignment.domain.ProductRepository;
 import com.codesoom.assignment.dto.ProductData;
+import com.codesoom.assignment.errors.InvalidProductArgumentsException;
 import com.codesoom.assignment.errors.ProductNotFoundException;
+import com.codesoom.assignment.suppliers.EntitySupplier;
+import com.codesoom.assignment.validators.Validators;
 import com.github.dozermapper.core.Mapper;
 import org.springframework.stereotype.Service;
 
@@ -24,25 +28,38 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    public List<Product> getProducts() {
-        return productRepository.findAll();
+    public ProductList getProducts() {
+        return ProductList.from(productRepository.findAll());
     }
 
     public Product getProduct(Long id) {
         return findProduct(id);
     }
 
-    public Product createProduct(ProductData productData) {
-        Product product = mapper.map(productData, Product.class);
+    public Product createProduct(EntitySupplier<Product> supplier) {
+        validOrThrow(supplier);
+
+        final Product product = supplier.toEntity();
+
         return productRepository.save(product);
     }
 
-    public Product updateProduct(Long id, ProductData productData) {
+    public Product updateProduct(Long id, EntitySupplier<Product> supplier) {
+        validOrThrow(supplier);
+
         Product product = findProduct(id);
 
-        product.changeWith(mapper.map(productData, Product.class));
+        product.changeWith(supplier.toEntity());
 
         return product;
+    }
+
+    private void validOrThrow(EntitySupplier<Product> supplier) {
+        final List<String> validateResult = Validators.validate(supplier);
+
+        if (!validateResult.isEmpty()) {
+            throw new InvalidProductArgumentsException(String.join(",", validateResult));
+        }
     }
 
     public Product deleteProduct(Long id) {

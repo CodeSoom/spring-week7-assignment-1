@@ -32,9 +32,9 @@ class JwtUtilTest {
 
     @Test
     void decodeWithValidToken() {
-        Claims claims = jwtUtil.decode(VALID_TOKEN);
+        final Long decodedId = jwtUtil.decode(VALID_TOKEN);
 
-        assertThat(claims.get("userId", Long.class)).isEqualTo(1L);
+        assertThat(decodedId).isEqualTo(1L);
     }
 
     @Test

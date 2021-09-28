@@ -38,7 +38,6 @@ public class AuthenticationService {
     }
 
     public Long parseToken(String accessToken) {
-        Claims claims = jwtUtil.decode(accessToken);
-        return claims.get("userId", Long.class);
+        return jwtUtil.decode(accessToken);
     }
 }

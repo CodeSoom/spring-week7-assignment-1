@@ -3,9 +3,11 @@ package com.codesoom.assignment.controllers;
 import com.codesoom.assignment.dto.ErrorResponse;
 import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.errors.ProductNotFoundException;
+import com.codesoom.assignment.errors.UnAuthorizationException;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -30,6 +32,12 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("User not found");
     }
 
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ErrorResponse handleUserNotFound(AccessDeniedException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(UserEmailDuplicationException.class)
     public ErrorResponse handleUserEmailIsAlreadyExisted() {
@@ -50,6 +58,13 @@ public class ControllerErrorAdvice {
     ) {
         String messageTemplate = getViolatedMessage(exception);
         return new ErrorResponse(messageTemplate);
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(UnAuthorizationException.class)
+    public ErrorResponse handleUnAuthorizationException(RuntimeException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     private String getViolatedMessage(ConstraintViolationException exception) {
