@@ -6,6 +6,7 @@ package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.domain.Product;
+import com.codesoom.assignment.domain.ProductList;
 import com.codesoom.assignment.dto.ProductData;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,8 +36,9 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<Product> list() {
-        return productService.getProducts();
+    public List<ProductData> list() {
+        final ProductList products = productService.getProducts();
+        return products.convert(ProductData::from);
     }
 
     @GetMapping("{id}")

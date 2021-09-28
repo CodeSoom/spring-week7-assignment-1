@@ -7,6 +7,7 @@
 package com.codesoom.assignment.application;
 
 import com.codesoom.assignment.domain.Product;
+import com.codesoom.assignment.domain.ProductList;
 import com.codesoom.assignment.domain.ProductRepository;
 import com.codesoom.assignment.dto.ProductData;
 import com.codesoom.assignment.errors.ProductNotFoundException;
@@ -63,14 +64,14 @@ class ProductServiceTest {
     void getProductsWithNoProduct() {
         given(productRepository.findAll()).willReturn(List.of());
 
-        assertThat(productService.getProducts()).isEmpty();
+        assertThat(productService.getProducts().isEmpty()).isTrue();
     }
 
     @Test
     void getProducts() {
-        List<Product> products = productService.getProducts();
+        ProductList products = productService.getProducts();
 
-        assertThat(products).isNotEmpty();
+        assertThat(products.isEmpty()).isFalse();
 
         Product product = products.get(0);
 

@@ -5,8 +5,10 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
+import com.codesoom.assignment.errors.UnAuthorizationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -40,8 +42,13 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public UserResultData update(
             @PathVariable Long id,
-            @RequestBody @Valid UserModificationData modificationData
+            @RequestBody @Valid UserModificationData modificationData,
+            Authentication authentication
     ) {
+        if (id != authentication.getPrincipal()) {
+            throw new UnAuthorizationException();
+        }
+
         User user = userService.updateUser(id, modificationData);
         return getUserResultData(user);
     }
