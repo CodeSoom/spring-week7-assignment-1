@@ -75,7 +75,7 @@ class AuthenticationServiceTest {
         @DisplayName("잘못된 이메일로 요청하면")
         class WithWrongEmail {
             @Test
-            @DisplayName("에러를 던진다.")
+            @DisplayName("로그인에 실패했다는 내용의 예외를 던진다.")
             void throwLoginFailException() {
                 assertThatThrownBy(
                         () -> authenticationService.login("badguy@example.com", "test")
@@ -89,7 +89,7 @@ class AuthenticationServiceTest {
         @DisplayName("잘못된 비밀번호로 요청하면")
         class WithWrongPassword {
             @Test
-            @DisplayName("에러를 던진다.")
+            @DisplayName("로그인에 실패했다는 내용의 예외를 던진다.")
             void throwError() {
                 assertThatThrownBy(
                         () -> authenticationService.login("tester@example.com", "xxx")
@@ -107,7 +107,7 @@ class AuthenticationServiceTest {
         @DisplayName("유효한 토큰으로 요청하면")
         class WithValidToken {
             @Test
-            @DisplayName("User ID를 반환한다.")
+            @DisplayName("회원 식별번호를 반환한다.")
             void parseTokenWithValidToken() {
                 Long userId = authenticationService.parseToken(VALID_TOKEN);
 
@@ -119,7 +119,7 @@ class AuthenticationServiceTest {
         @DisplayName("유효하지 않은 토큰으로 요청하면")
         class WithInvalidToken {
             @Test
-            @DisplayName("에러를 반환한다.")
+            @DisplayName("유효하지 않은 토큰이라는 내용의 예외를 던진다.")
             void parseTokenWithInvalidToken() {
                 assertThatThrownBy(
                         () -> authenticationService.parseToken(INVALID_TOKEN)

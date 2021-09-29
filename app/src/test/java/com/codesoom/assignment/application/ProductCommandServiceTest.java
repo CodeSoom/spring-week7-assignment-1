@@ -93,7 +93,7 @@ class ProductCommandServiceTest {
         @DisplayName("해당 식별자의 상품을 찾을 수 없으면")
         class WithNonExistentId {
             @Test
-            @DisplayName("에러를 반환한다.")
+            @DisplayName("상품을 찾을수 없다는 내용의 예외를 던진다.")
             void returnError() {
                 assertThatThrownBy(() -> productService.updateProduct(1000L, productDataFixture))
                         .isInstanceOf(ProductNotFoundException.class);
@@ -122,7 +122,7 @@ class ProductCommandServiceTest {
         @DisplayName("해당 식별자의 상품을 찾을 수 없으면")
         class WithNonExistentId {
             @Test
-            @DisplayName("에러를 반환한다.")
+            @DisplayName("상품을 찾을수 없다는 내용의 예외를 던진다.")
             void returnError() {
                 assertThatThrownBy(() -> productService.deleteProduct(1000L))
                         .isInstanceOf(ProductNotFoundException.class);

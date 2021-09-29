@@ -51,7 +51,7 @@ class SessionControllerTest {
     }
 
     @Nested
-    @DisplayName("사용자가 존재하고 유효한 비밀번호를 입력한 경우")
+    @DisplayName("회원을 찾을 수 있고 유효한 비밀번호를 입력한 경우")
     class WithExistentUserAndValidPassword {
         @BeforeEach
         void setup() {
@@ -65,7 +65,7 @@ class SessionControllerTest {
         }
 
         @Test
-        @DisplayName("토큰과 201 Created 상태코드로 응답한다.")
+        @DisplayName("토큰과 201 Created HTTP 상태코드로 응답한다.")
         void responsesWithToken() throws Exception {
             mockMvc.perform(post("/session")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -76,7 +76,7 @@ class SessionControllerTest {
     }
 
     @Nested
-    @DisplayName("사용자는 존재하나 유효하지 않은 비밀번호를 입력한 경우")
+    @DisplayName("회원은 찾을 수 있으나 유효하지 않은 비밀번호를 입력한 경우")
     class WithInvalidPassword {
         @BeforeEach
         void setup() throws Exception {
@@ -100,7 +100,7 @@ class SessionControllerTest {
     }
 
     @Nested
-    @DisplayName("사용자가 존재하지 않는 경우")
+    @DisplayName("회원을 찾을 수 없는 경우")
     class WithNonExistentUser {
         @BeforeEach
         void setup() {

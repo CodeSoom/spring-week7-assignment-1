@@ -19,7 +19,7 @@ class UserAuthenticationTest {
     @DisplayName("getPrincipal")
     class GetPrincipal {
         @Test
-        @DisplayName("사용자 ID를 반환한다")
+        @DisplayName("회원 식별자를 반환한다")
         void getPrincipal() {
             assertThat(userAuthentication.getPrincipal()).isEqualTo(1L);
         }

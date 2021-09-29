@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-class ProductQueryServiceTest {
+class 환ProductQueryServiceTest {
     private ProductQueryService productService;
 
     private final ProductRepository productRepository =
@@ -77,7 +77,7 @@ class ProductQueryServiceTest {
         @DisplayName("해당 식별자의 상품을 찾을 수 없으면")
         class WithNotFoundId {
             @Test
-            @DisplayName("에러를 반환한다.")
+            @DisplayName("상품을 찾을 수 없다는 내용의 예외를 던진다.")
             void returnError() {
                 assertThatThrownBy(() -> productService.getProduct(1000L))
                         .isInstanceOf(ProductNotFoundException.class);

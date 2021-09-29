@@ -76,7 +76,7 @@ class UserServiceTest {
         @DisplayName("유효한 이메일과 비밀번호이면")
         class WithValidEmailAndPassword {
             @Test
-            @DisplayName("회원을 등록하고 등록된 회원을 리턴한다.")
+            @DisplayName("회원을 등록하고 등록된 회원을 반환한다.")
             void registerUser() {
                 User user = userService.registerUser(registrationDataFixture);
 
@@ -98,6 +98,7 @@ class UserServiceTest {
             }
 
             @Test
+            @DisplayName("중복된 이메일이라는 내용의 예외를 던진다.")
             void registerUserWithDuplicatedEmail() {
                 assertThatThrownBy(() -> userService.registerUser(registrationDataFixture))
                         .isInstanceOf(UserEmailDuplicationException.class);
@@ -140,7 +141,7 @@ class UserServiceTest {
         @DisplayName("해당 식별자의 회원을 찾을 수 없거나 삭제된 회원이면")
         class WithNotFoundUserId {
             @Test
-            @DisplayName("에러를 반환한다.")
+            @DisplayName("금지된 요청이라는 내용의 예외를 던진다.")
             void updateUserWithNotExistedId() {
                 assertThatThrownBy(() -> userService.updateUser(100L, modificationDataFixture))
                         .isInstanceOf(ForbiddenRequestException.class);
@@ -182,7 +183,7 @@ class UserServiceTest {
         @DisplayName("해당 식별자의 회원을 찾을 수 없거나 삭제된 회원이면")
         class WithNotFoundUserId {
             @Test
-            @DisplayName("에러를 반환한다.")
+            @DisplayName("회원을 찾을 수 없다는 내용의 예외를 던진다.")
             void updateUserWithNotExistedId() {
                 assertThatThrownBy(() -> userService.deleteUser(100L))
                         .isInstanceOf(UserNotFoundException.class);
