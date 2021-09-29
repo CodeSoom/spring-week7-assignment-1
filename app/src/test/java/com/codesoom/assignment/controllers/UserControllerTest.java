@@ -6,6 +6,7 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +24,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
+    private static final String SECRET = "12345678901234567890123456789012";
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
 
@@ -38,6 +41,9 @@ class UserControllerTest {
 
     @MockBean
     private AuthenticationService authenticationService;
+
+    @MockBean
+    private JwtUtil jwtUtil;
 
     @BeforeEach
     void setUp() {
@@ -69,6 +75,8 @@ class UserControllerTest {
 
         given(userService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
+
+        given(authenticationService.parseToken(any())).willReturn(1L);
     }
 
     @Test
@@ -108,6 +116,7 @@ class UserControllerTest {
         mockMvc.perform(
                         patch("/users/1")
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON_UTF8)
                                 .content("{\"name\":\"TEST\",\"password\":\"test\"}")
                                 .header("Authorization", "Bearer " + VALID_TOKEN)
 
@@ -139,13 +148,13 @@ class UserControllerTest {
         mockMvc.perform(
                         patch("/users/100")
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON_UTF8)
                                 .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
                                 .header("Authorization", "Bearer " + VALID_TOKEN)
                 )
-                .andExpect(status().isNotFound());
-
-        verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message")
+                        .value("접근 권한이 없습니다."));
     }
 
     @Test
