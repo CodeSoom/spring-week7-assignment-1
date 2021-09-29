@@ -6,6 +6,7 @@ import com.codesoom.assignment.dto.UserData;
 import com.codesoom.assignment.dto.UserUpdateData;
 import com.codesoom.assignment.errors.UserEmailDuplicateException;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,9 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -29,8 +32,8 @@ public class UserServiceImpl implements UserService {
         User user = User.builder()
                 .name(source.getName())
                 .email(source.getEmail())
-                .password(source.getPassword())
                 .build();
+        user.userUpdatePassword(source.getPassword());
 
         return userRepository.save(user);
 
@@ -48,7 +51,8 @@ public class UserServiceImpl implements UserService {
 
         User findUser = getUser(id);
 
-        findUser.userUpdate(userUpdateData.getName(),  userUpdateData.getPassword());
+        findUser.userUpdateName(userUpdateData.getName());
+        findUser.userUpdatePassword(userUpdateData.getPassword());
 
         return findUser;
 

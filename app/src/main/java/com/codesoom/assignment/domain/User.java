@@ -3,6 +3,8 @@ package com.codesoom.assignment.domain;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -27,13 +29,23 @@ public class User {
         this.password = password;
     }
 
-    public User userUpdate(String name, String password) {
+    public User userUpdateName(String name) {
 
         this.name = name;
-        this.password = password;
-
         return this;
 
+    }
+
+    public User userUpdatePassword(String password) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        this.password = passwordEncoder.encode(password);
+        return this;
+
+    }
+
+    public boolean authenticate(String password) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        return passwordEncoder.matches(password, this.password);
     }
 
 }
