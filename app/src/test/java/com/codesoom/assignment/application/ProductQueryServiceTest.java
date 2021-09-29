@@ -26,9 +26,7 @@ class 환ProductQueryServiceTest {
 
     @BeforeEach
     void setupInstance() {
-        Mapper mapper = DozerBeanMapperBuilder.buildDefault();
-
-        productService = new ProductQueryService(mapper, productRepository);
+        productService = new ProductQueryService(productRepository);
     }
 
     @BeforeEach
