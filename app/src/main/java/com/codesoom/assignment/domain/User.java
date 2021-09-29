@@ -1,6 +1,6 @@
 package com.codesoom.assignment.domain;
 
-import com.codesoom.assignment.suppliers.Identifier;
+import com.codesoom.assignment.suppliers.AuthenticationDataSupplier;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +16,7 @@ import javax.persistence.Id;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements Identifier {
+public class User implements AuthenticationDataSupplier {
     @Id
     @GeneratedValue
     private Long id;

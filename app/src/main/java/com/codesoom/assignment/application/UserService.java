@@ -2,11 +2,9 @@ package com.codesoom.assignment.application;
 
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
-import com.codesoom.assignment.dto.UserModificationData;
-import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
-import com.github.dozermapper.core.Mapper;
+import com.codesoom.assignment.suppliers.EntitySupplier;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,33 +13,31 @@ import javax.transaction.Transactional;
 @Service
 @Transactional
 public class UserService {
-    private final Mapper mapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(Mapper dozerMapper, UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.mapper = dozerMapper;
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User registerUser(UserRegistrationData registrationData) {
-        String email = registrationData.getEmail();
+    public User registerUser(EntitySupplier<User> supplier) {
+        final User registrationUser = supplier.toEntity();
+
+        String email = registrationUser.getEmail();
         if (userRepository.existsByEmail(email)) {
             throw new UserEmailDuplicationException(email);
         }
 
-        User user = mapper.map(registrationData, User.class);
+        registrationUser.changePassword(registrationUser.getPassword(), passwordEncoder);
 
-        user.changePassword(registrationData.getPassword(), passwordEncoder);
-
-        return userRepository.save(user);
+        return userRepository.save(registrationUser);
     }
 
-    public User updateUser(Long id, UserModificationData modificationData) {
+    public User updateUser(Long id, EntitySupplier<User> supplier) {
         User user = findUser(id);
 
-        User source = mapper.map(modificationData, User.class);
+        User source = supplier.toEntity();
         user.changeWith(source);
 
         return user;

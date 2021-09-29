@@ -1,12 +1,12 @@
 package com.codesoom.assignment.dto;
 
-import com.codesoom.assignment.suppliers.Identifier;
+import com.codesoom.assignment.suppliers.AuthenticationDataSupplier;
 import lombok.Getter;
 
 import java.util.Objects;
 
 @Getter
-public class SessionRequestData implements Identifier {
+public class SessionRequestData implements AuthenticationDataSupplier {
     private String email;
     private String password;
 

@@ -3,7 +3,7 @@ package com.codesoom.assignment.application;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.errors.LoginFailException;
-import com.codesoom.assignment.suppliers.Identifier;
+import com.codesoom.assignment.suppliers.AuthenticationDataSupplier;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,9 +22,9 @@ public class AuthenticationService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public String login(Identifier identifier) {
-        final String email = identifier.getEmail();
-        final String password = identifier.getPassword();
+    public String login(AuthenticationDataSupplier supplier) {
+        final String email = supplier.getEmail();
+        final String password = supplier.getPassword();
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new LoginFailException(email));
