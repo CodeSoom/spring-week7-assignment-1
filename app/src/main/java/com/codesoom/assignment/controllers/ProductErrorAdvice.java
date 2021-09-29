@@ -18,11 +18,11 @@ public class ProductErrorAdvice {
       return new ProductNotFoundException();
     }
 
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(NotValidTokenException.class)
-    public NotValidTokenException notValidTokenException() {
-        return new NotValidTokenException();
-    }
+//    @ResponseBody
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    @ExceptionHandler(NotValidTokenException.class)
+//    public NotValidTokenException notValidTokenException() {
+//        return new NotValidTokenException();
+//    }
 
 }
