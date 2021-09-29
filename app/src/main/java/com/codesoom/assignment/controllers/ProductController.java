@@ -6,6 +6,8 @@ import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
 import com.codesoom.assignment.errors.NotValidTokenException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,10 +35,8 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Product createProduct(@RequestHeader("Authorization") String authorization, @RequestBody @Valid ProductData source) {
-
-        System.out.println("authorization = " + authorization);
-        isValid(authorization);
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
+    public Product createProduct(Authentication authentication, @RequestBody @Valid ProductData source) {
 
         return productService.createProduct(source);
 
