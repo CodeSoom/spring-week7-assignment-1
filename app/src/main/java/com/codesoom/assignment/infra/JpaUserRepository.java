@@ -12,6 +12,8 @@ public interface JpaUserRepository
 
     boolean existsByEmail(String email);
 
+    boolean existsById(Long id);
+
     Optional<User> findById(Long id);
 
     Optional<User> findByIdAndDeletedIsFalse(Long id);
