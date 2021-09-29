@@ -47,7 +47,6 @@ public class ProductService {
 
     public Product deleteProduct(Long id) {
         Product product = findProduct(id);
-
         productRepository.delete(product);
 
         return product;
