@@ -1,157 +1,285 @@
 package com.codesoom.assignment.controllers;
 
-import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.application.UserService;
-import com.codesoom.assignment.domain.User;
+import com.codesoom.assignment.TestUtils;
+import com.codesoom.assignment.dto.SessionRequestData;
+import com.codesoom.assignment.dto.SessionResponseData;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
-import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.dto.UserResultData;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(UserController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private UserService userService;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
-    @MockBean
-    private AuthenticationService authenticationService;
+    private String email;
+    private UserRegistrationData userRegistrationData;
+    private UserRegistrationData invalidUserRegistrationData;
+    private UserModificationData userModificationData;
+    private UserModificationData invalidUserModificationData;
+
+    private UserResultData createUser(String email, String password) throws Exception {
+        var userData = UserRegistrationData.builder()
+                .email(email)
+                .password(password)
+                .name("nana")
+                .build();
+
+        var actions = mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userData)));
+
+        return TestUtils.content(actions, UserResultData.class);
+    }
+
+    private SessionResponseData login(String email, String password) throws Exception {
+        var sessionRequestData = SessionRequestData.builder()
+                .email(email)
+                .password(password)
+                .build();
+
+        var actions = mockMvc.perform(post("/session")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(sessionRequestData)));
+
+        return TestUtils.content(actions, SessionResponseData.class);
+    }
 
     @BeforeEach
-    void setUp() {
-        given(userService.registerUser(any(UserRegistrationData.class)))
-                .will(invocation -> {
-                    UserRegistrationData registrationData = invocation.getArgument(0);
-                    return User.builder()
-                            .id(13L)
-                            .email(registrationData.getEmail())
-                            .name(registrationData.getName())
-                            .build();
-                });
+    void setupFixtures() {
+        email = System.currentTimeMillis() + "test.com";
 
+        userRegistrationData = UserRegistrationData.builder()
+                .name("nana")
+                .email(email)
+                .password("password")
+                .build();
 
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
-                .will(invocation -> {
-                    Long id = invocation.getArgument(0);
-                    UserModificationData modificationData =
-                            invocation.getArgument(1);
-                    return User.builder()
-                            .id(id)
-                            .email("tester@example.com")
-                            .name(modificationData.getName())
-                            .build();
-                });
+        invalidUserRegistrationData = UserRegistrationData.builder()
+                .name("")
+                .password("password")
+                .build();
 
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
-                .willThrow(new UserNotFoundException(100L));
+        userModificationData = UserModificationData.builder()
+                .name("monika")
+                .password("password")
+                .build();
 
-        given(userService.deleteUser(100L))
-                .willThrow(new UserNotFoundException(100L));
+        invalidUserModificationData = UserModificationData.builder()
+                .name("")
+                .password("password")
+                .build();
     }
 
-    @Test
-    void registerUserWithValidAttributes() throws Exception {
-        mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"tester@example.com\"," +
-                                "\"name\":\"Tester\",\"password\":\"test\"}")
-        )
-                .andExpect(status().isCreated())
-                .andExpect(content().string(
-                        containsString("\"id\":13")
-                ))
-                .andExpect(content().string(
-                        containsString("\"email\":\"tester@example.com\"")
-                ))
-                .andExpect(content().string(
-                        containsString("\"name\":\"Tester\"")
-                ));
+    @Nested
+    @DisplayName("회원 생성 요청")
+    class PostRequest {
+        @Test
+        @DisplayName("생성된 회원정보와 201 Created HTTP 상태코드로 응답한다.")
+        void responsesWithCreatedUserAndCreatedStatusCode() throws Exception {
+            mockMvc.perform(post("/users")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(userRegistrationData))
+                    )
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.name", is("nana")))
+                    .andExpect(jsonPath("$.email", is(email)));
+        }
 
-        verify(userService).registerUser(any(UserRegistrationData.class));
+        @Nested
+        @DisplayName("유효하지 않은 값으로 요청하면")
+        class WithInvalidRequestBody {
+            @Test
+            @DisplayName("400 Bad Request 에러로 응답한다.")
+            void responsesWithBadRequestError() throws Exception {
+                mockMvc.perform(post("/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(invalidUserRegistrationData))
+                        )
+                        .andExpect(status().isBadRequest());
+            }
+        }
     }
 
-    @Test
-    void registerUserWithInvalidAttributes() throws Exception {
-        mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}")
-        )
-                .andExpect(status().isBadRequest());
+    @Nested
+    @DisplayName("회원 삭제 요청")
+    class DeleteRequest {
+        private UserResultData user;
+        private SessionResponseData session;
+
+        @BeforeEach
+        void setupForDeleteRequest() throws Exception {
+            user = createUser(email, "password");
+            session = login(user.getEmail(), "password");
+        }
+
+        @Test
+        @DisplayName("204 NoContent HTTP 상태코드로 응답한다.")
+        void responsesWithNoContentStatusCode() throws Exception {
+            mockMvc.perform(delete("/users/" + user.getId())
+                            .header(
+                                    "Authorization",
+                                    String.format("Bearer %s", session.getAccessToken())
+                            )
+                    )
+                    .andExpect(status().isNoContent());
+        }
+
+        @Nested
+        @DisplayName("토큰이 없으면")
+        class WithNoToken {
+            @Test
+            @DisplayName("401 Unauthorized 에러로 응답한다.")
+            void responsesWithUnauthorizedError() throws Exception {
+                mockMvc.perform(delete("/users/" + user.getId()))
+                        .andExpect(status().isUnauthorized());
+            }
+        }
+
+        @Nested
+        @DisplayName("유효하지 않은 토큰이면")
+        class WithInvalidToken {
+            @Test
+            @DisplayName("401 Unauthorized 에러로 응답한다.")
+            void responsesWithUnauthorizedError() throws Exception {
+                mockMvc.perform(delete("/users/" + user.getId())
+                                .header(
+                                        "Authorization",
+                                        String.format("Bearer %s", session.getAccessToken() + "123")
+                                )                          )
+                        .andExpect(status().isUnauthorized());
+            }
+        }
+
+        @Nested
+        @DisplayName("찾을 수 없는 회원번호로 요청하면")
+        class WithNonExistentId {
+            @Test
+            @DisplayName("404 NotFound 에러로 응답한다.")
+            void responsesWithNotFoundError() throws Exception {
+                mockMvc.perform(delete("/users/" + Long.MAX_VALUE)
+                                .header(
+                                        "Authorization",
+                                        String.format("Bearer %s", session.getAccessToken())
+                                )
+                        )
+                        .andExpect(status().isNotFound());
+            }
+        }
     }
 
-    @Test
-    void updateUserWithValidAttributes() throws Exception {
-        mockMvc.perform(
-                patch("/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
-        )
-                .andExpect(status().isOk())
-                .andExpect(content().string(
-                        containsString("\"id\":1")
-                ))
-                .andExpect(content().string(
-                        containsString("\"name\":\"TEST\"")
-                ));
+    @Nested
+    @DisplayName("회원 수정 요청")
+    class PutRequest {
+        private UserResultData user;
+        private SessionResponseData session;
 
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
-    }
+        @BeforeEach
+        void setupForPutRequest() throws Exception {
+            user = createUser(email, "password");
+            session = login(user.getEmail(), "password");
+        }
 
-    @Test
-    void updateUserWithInvalidAttributes() throws Exception {
-        mockMvc.perform(
-                patch("/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"password\":\"\"}")
-        )
-                .andExpect(status().isBadRequest());
-    }
+        @Test
+        @DisplayName("수정된 회원정보와 200 Ok HTTP 상태코드로 응답한다.")
+        void responsesWithOkStatusCode() throws Exception {
+            mockMvc.perform(patch("/users/" + user.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(userModificationData))
+                            .header(
+                                    "Authorization",
+                                    String.format("Bearer %s", session.getAccessToken())
+                            )
+                    )
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.name", is("monika")));
+        }
 
-    @Test
-    void updateUserWithNotExsitedId() throws Exception {
-        mockMvc.perform(
-                patch("/users/100")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
-        )
-                .andExpect(status().isNotFound());
+        @Nested
+        @DisplayName("유효하지 않은 값으로 요청하면")
+        class WithInvalidRequestBody {
+            @Test
+            @DisplayName("400 Bad Request 에러로 응답한다.")
+            void responsesWithBadRequestError() throws Exception {
+                mockMvc.perform(patch("/users/" + user.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(invalidUserModificationData))
+                                .header(
+                                        "Authorization",
+                                        String.format("Bearer %s", session.getAccessToken())
+                                )
+                        )
+                        .andExpect(status().isBadRequest());
+            }
+        }
 
-        verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
-    }
+        @Nested
+        @DisplayName("토큰이 없으면")
+        class WithNoToken {
+            @Test
+            @DisplayName("401 Unauthorized 에러로 응답한다.")
+            void responsesWithUnauthorizedError() throws Exception {
+                mockMvc.perform(patch("/users/" + user.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(userModificationData))
+                        )
+                        .andExpect(status().isUnauthorized());
+            }
+        }
 
-    @Test
-    void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
-                .andExpect(status().isNoContent());
+        @Nested
+        @DisplayName("유효하지 않은 토큰이면")
+        class WithInvalidToken {
+            @Test
+            @DisplayName("401 Unauthorized 에러로 응답한다.")
+            void responsesWithUnauthorizedError() throws Exception {
+                mockMvc.perform(patch("/users/" + user.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(userModificationData))
+                                .header(
+                                        "Authorization",
+                                        String.format("Bearer %s", session.getAccessToken() + "123")
+                                )                          )
+                        .andExpect(status().isUnauthorized());
+            }
+        }
 
-        verify(userService).deleteUser(1L);
-    }
-
-    @Test
-    void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
-                .andExpect(status().isNotFound());
-
-        verify(userService).deleteUser(100L);
+        // TODO: 해당 케이스가 통과하도록 구현할 것
+        @Disabled
+        @Nested
+        @DisplayName("요청한 사용자가 다른 사용자 정보를 변경하려고 하면")
+        class WithForbiddenRequest {
+            @Test
+            @DisplayName("403 Forbidden 에러로 응답한다.")
+            void responsesWithNotFoundError() throws Exception {
+                mockMvc.perform(patch("/users/" + (user.getId() - 1))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(userModificationData))
+                                .header(
+                                        "Authorization",
+                                        String.format("Bearer %s", session.getAccessToken())
+                                )                         )
+                        .andExpect(status().isForbidden());
+            }
+        }
     }
 }
