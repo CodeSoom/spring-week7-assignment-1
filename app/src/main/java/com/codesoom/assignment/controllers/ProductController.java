@@ -1,16 +1,12 @@
-// REST
-// /products -> Create, Read
-// /products/{id} -> Read, Update, Delete
-
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.application.ProductService;
+import com.codesoom.assignment.application.ProductCommandService;
+import com.codesoom.assignment.application.ProductQueryService;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -20,21 +16,26 @@ import java.util.List;
 @RequestMapping("/products")
 @CrossOrigin
 public class ProductController {
-    private final ProductService productService;
+    private final ProductQueryService productQueryService;
+    private final ProductCommandService productCommandService;
 
-    public ProductController(ProductService productService,
-                             AuthenticationService authenticationService) {
-        this.productService = productService;
+    public ProductController(
+            ProductQueryService productQueryService,
+            ProductCommandService productCommandService,
+            AuthenticationService authenticationService
+            ) {
+        this.productQueryService = productQueryService;
+        this.productCommandService = productCommandService;
     }
 
     @GetMapping
     public List<Product> list() {
-        return productService.getProducts();
+        return productQueryService.getProducts();
     }
 
     @GetMapping("{id}")
     public Product detail(@PathVariable Long id) {
-        return productService.getProduct(id);
+        return productQueryService.getProduct(id);
     }
 
     @PostMapping
@@ -43,7 +44,7 @@ public class ProductController {
     public Product create(
             @RequestBody @Valid ProductData productData
     ) {
-        return productService.createProduct(productData);
+        return productCommandService.createProduct(productData);
     }
 
     @PatchMapping("{id}")
@@ -52,7 +53,7 @@ public class ProductController {
             @PathVariable Long id,
             @RequestBody @Valid ProductData productData
     ) {
-        return productService.updateProduct(id, productData);
+        return productCommandService.updateProduct(id, productData);
     }
 
     @DeleteMapping("{id}")
@@ -61,6 +62,6 @@ public class ProductController {
     public void destroy(
             @PathVariable Long id
     ) {
-        productService.deleteProduct(id);
+        productCommandService.deleteProduct(id);
     }
 }
