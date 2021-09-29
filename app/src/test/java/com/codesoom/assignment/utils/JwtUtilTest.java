@@ -1,9 +1,11 @@
 package com.codesoom.assignment.utils;
 
 import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.errors.NotSupportedUserIdException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +31,14 @@ class JwtUtilTest {
         final Long decodedId = jwtUtil.decode(token);
 
         assertThat(decodedId).isEqualTo(id);
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(longs = {Long.MIN_VALUE, -1, -30, -123901238, -87827273, -99999})
+    void encodeWithInvalidData(Long id) {
+        assertThatThrownBy(() -> jwtUtil.encode(id))
+                .isInstanceOf(NotSupportedUserIdException.class);
     }
 
     @Test

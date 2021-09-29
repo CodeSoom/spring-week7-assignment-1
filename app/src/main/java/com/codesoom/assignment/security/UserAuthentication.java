@@ -1,11 +1,11 @@
 package com.codesoom.assignment.security;
 
+import lombok.Generated;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.List;
-import java.util.Objects;
 
 public class UserAuthentication extends AbstractAuthenticationToken {
 
@@ -16,6 +16,7 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         this.userId = userId;
     }
 
+    @Generated
     @Override
     public Object getCredentials() {
         return null;
@@ -35,30 +36,5 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         return List.of(
                 new SimpleGrantedAuthority("USER")
         );
-    }
-
-    @Override
-    public String toString() {
-        return "UserAuthentication{userId=" + userId + '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof UserAuthentication)) {
-            return false;
-        }
-        if (!super.equals(o)) {
-            return false;
-        }
-        UserAuthentication that = (UserAuthentication) o;
-        return Objects.equals(userId, that.userId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), userId);
     }
 }

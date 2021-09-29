@@ -73,7 +73,7 @@ public class ProductController {
     /**
      * 상품 정보를 수정한다.
      *
-     * @param id 상품 식별자
+     * @param id             상품 식별자
      * @param productData    수정 할 상품 정보
      * @param authentication 인증 정보
      * @return 수정된 상품 정보
@@ -91,7 +91,7 @@ public class ProductController {
     /**
      * 상품을 삭제한다.
      *
-     * @param id 상품 식별자
+     * @param id             상품 식별자
      * @param authentication 인증 정보
      */
     @DeleteMapping("{id}")

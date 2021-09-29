@@ -40,6 +40,7 @@ class AuthenticationServiceTest {
                 userRepository, jwtUtil, passwordEncoder);
 
         User user = User.builder()
+                .id(1L)
                 .password("test")
                 .build();
 
@@ -47,6 +48,7 @@ class AuthenticationServiceTest {
 
         given(userRepository.findByEmail("tester@example.com"))
                 .willReturn(Optional.of(user));
+
     }
 
     @Test

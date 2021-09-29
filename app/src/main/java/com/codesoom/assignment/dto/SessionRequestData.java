@@ -1,6 +1,7 @@
 package com.codesoom.assignment.dto;
 
 import com.codesoom.assignment.suppliers.AuthenticationDataSupplier;
+import lombok.Generated;
 import lombok.Getter;
 
 import java.util.Objects;
@@ -18,6 +19,7 @@ public class SessionRequestData implements AuthenticationDataSupplier {
         this.password = password;
     }
 
+    @Generated
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -31,6 +33,7 @@ public class SessionRequestData implements AuthenticationDataSupplier {
                 && Objects.equals(password, that.password);
     }
 
+    @Generated
     @Override
     public int hashCode() {
         return Objects.hash(email, password);

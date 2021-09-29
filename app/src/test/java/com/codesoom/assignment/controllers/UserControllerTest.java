@@ -5,6 +5,7 @@ import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,6 +56,9 @@ class UserControllerTest {
                             .email(registrationData.getEmail())
                             .name(registrationData.getName())
                             .build();
+                }).will(invocation -> {
+                    UserRegistrationData registrationData = invocation.getArgument(0);
+                    throw new UserEmailDuplicationException(registrationData.getEmail());
                 });
 
 
@@ -99,6 +103,32 @@ class UserControllerTest {
                 ));
 
         verify(userService).registerUser(any(UserRegistrationData.class));
+    }
+
+    @Test
+    void registerUserWithDuplicateEmail() throws Exception {
+        mockMvc.perform(
+                        post("/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"email\":\"tester@example.com\"," +
+                                        "\"name\":\"Tester\",\"password\":\"test\"}")
+                )
+                .andExpect(status().isCreated())
+                .andExpect(content().string(
+                        containsString("\"id\":13")
+                ))
+                .andExpect(content().string(
+                        containsString("\"email\":\"tester@example.com\"")
+                ));
+
+        mockMvc.perform(
+                        post("/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"email\":\"tester@example.com\"," +
+                                        "\"name\":\"TwoTester\",\"password\":\"q1w2e3\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("User's email address is already existed"));
     }
 
     @Test

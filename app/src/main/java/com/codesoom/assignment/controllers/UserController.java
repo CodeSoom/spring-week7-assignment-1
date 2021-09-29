@@ -50,9 +50,9 @@ public class UserController {
     /**
      * 회원 정보를 수정한다.
      *
-     * @param id 회원 식별자
+     * @param id               회원 식별자
      * @param modificationData 수정할 회원 정보
-     * @param authentication 인증 정보
+     * @param authentication   인증 정보
      * @return 수정된 회원 정보
      */
     @PatchMapping("{id}")
