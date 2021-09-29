@@ -2,7 +2,6 @@ package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.errors.InvalidTokenException;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -16,8 +15,8 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     private final AuthenticationService authenticationService;
 
     public JwtAuthenticationFilter(
-            AuthenticationManager authenticationManager,
-            AuthenticationService authenticationService) {
+            AuthenticationService authenticationService,
+            AuthenticationManager authenticationManager) {
         super(authenticationManager);
         this.authenticationService = authenticationService;
     }
@@ -31,20 +30,17 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
             return;
         }
-        // TODO : authentication
+
         String authorization = request.getHeader("Authorization");
 
-        if (authorization == null) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value());
-            return;
-        }
 
-        try {
-            authenticationService.parseToken(accessToken);
-        } catch (InvalidTokenException e) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value());
-            return;
+        if (authorization == null) {
+            throw new InvalidTokenException("");
         }
+        String accessToken = authorization.substring("Bearer ".length());
+        authenticationService.parseToken(accessToken);
+
+        chain.doFilter(request, response);
 
     }
 
@@ -54,14 +50,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             return true;
         }
 
-        if (method.equals("GET")) {
-            return true;
-        }
-
-        if (method.equals("OPTIONS")) {
-            return true;
-        }
-
-        return false;
+        String method = request.getMethod();
+        return method.equals("GET");
     }
 }
