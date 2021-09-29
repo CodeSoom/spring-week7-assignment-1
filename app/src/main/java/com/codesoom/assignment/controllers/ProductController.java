@@ -25,6 +25,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.List;
 
+/**
+ * 상품 정보에 관련된 HTTP Request를 처리한다.
+ */
 @RestController
 @RequestMapping("/products")
 @CrossOrigin
@@ -35,12 +38,23 @@ public class ProductController {
         this.productService = productService;
     }
 
+    /**
+     * 상품 목록을 조회한다.
+     *
+     * @return 상품 목록
+     */
     @GetMapping
     public List<ProductData> list() {
         final ProductList products = productService.getProducts();
         return products.convert(ProductData::from);
     }
 
+    /**
+     * 상품 정보를 조회한다.
+     *
+     * @param id 상품 식별자
+     * @return 상품 상세 정보
+     */
     @GetMapping("{id}")
     public Product detail(@PathVariable Long id) {
         return productService.getProduct(id);
@@ -56,6 +70,14 @@ public class ProductController {
         return productService.createProduct(productData);
     }
 
+    /**
+     * 상품 정보를 수정한다.
+     *
+     * @param id 상품 식별자
+     * @param productData    수정 할 상품 정보
+     * @param authentication 인증 정보
+     * @return 수정된 상품 정보
+     */
     @PatchMapping("{id}")
     @PreAuthorize("isAuthenticated()")
     public Product update(
@@ -66,6 +88,12 @@ public class ProductController {
         return productService.updateProduct(id, productData);
     }
 
+    /**
+     * 상품을 삭제한다.
+     *
+     * @param id 상품 식별자
+     * @param authentication 인증 정보
+     */
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("isAuthenticated()")

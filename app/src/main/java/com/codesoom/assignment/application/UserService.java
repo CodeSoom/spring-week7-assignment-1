@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
+/**
+ * 회원 정보를 관리한다.
+ */
 @Service
 @Transactional
 public class UserService {

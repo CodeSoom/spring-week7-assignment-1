@@ -8,6 +8,9 @@ import com.codesoom.assignment.utils.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * 인증을 관리한다.
+ */
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
