@@ -1,23 +1,25 @@
 package com.codesoom.assignment.session.service;
 
 import com.codesoom.assignment.session.exception.InvalidTokenException;
+import com.codesoom.assignment.session.exception.LoginFailException;
 import com.codesoom.assignment.session.utils.JwtUtil;
+import com.codesoom.assignment.user.domain.User;
+import com.codesoom.assignment.user.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.security.SignatureException;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class AuthenticationService {
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
     private static final String SECRET = "12345678901234567890123456789012";
 
-    public AuthenticationService(JwtUtil jwtUtil) {
+    public AuthenticationService(JwtUtil jwtUtil, UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
-    }
-
-    public String login(Long id) {
-        JwtUtil jwtUtil = new JwtUtil(SECRET);
-        return jwtUtil.encode(id);
+        this.userRepository = userRepository;
     }
 
     public Long parseToken(String token) {
@@ -31,5 +33,17 @@ public class AuthenticationService {
         } catch (SignatureException e) {
             throw new InvalidTokenException(token);
         }
+    }
+
+    public String login(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new LoginFailException(email));
+
+        if (!user.authenticate(password)) {
+            throw new LoginFailException(email);
+        }
+
+        JwtUtil jwtUtil = new JwtUtil(SECRET);
+        return jwtUtil.encode(user.getId());
     }
 }

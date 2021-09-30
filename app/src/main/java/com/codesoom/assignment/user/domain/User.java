@@ -25,6 +25,9 @@ public class User {
     @NotBlank
     private String password;
 
+    @Builder.Default
+    private boolean deleted = false;
+
     public User() {
     }
 
@@ -39,5 +42,9 @@ public class User {
         this.name = user.getName();
         this.email = user.getEmail();
         this.password = user.getPassword();
+    }
+
+    public boolean authenticate(String password) {
+        return !deleted && password.equals(this.password);
     }
 }
