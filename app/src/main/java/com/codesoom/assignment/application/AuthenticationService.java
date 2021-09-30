@@ -26,9 +26,10 @@ public class AuthenticationService {
     }
 
     /**
-     * 로그인을 검증합니다.
-     * @param loginData 로그인 데이터
-     * @return 로그인에 성공할 경우 토큰발급
+     * 로그인 요청 정보를 받아 로그인 처리 후, 인증 토큰을 리턴합니다.
+     * @param loginData 로그인 요청
+     * @return 인증 토큰
+     * @throws LoginInconsistencyException 로그인 실패할 경우
      */
     public String login(UserLoginData loginData) {
 
@@ -41,9 +42,10 @@ public class AuthenticationService {
     }
 
     /**
-     * 토큰을 데이터로 변환합니다.
-     * @param accessToken 토큰값
+     * 유저 토큰 정보를 받아 복호화 처리 후, 유저 아이디를 리턴합니다.
+     * @param accessToken 토큰 요청
      * @return 유저 아이디
+     * @throws UnauthorizedException 유효하지 않은 토큰일 경우
      */
     public Long parseToken(String accessToken) {
 
@@ -62,10 +64,10 @@ public class AuthenticationService {
      }
 
     /**
-     * 이메일이 존재하는지 확인합니다.
-     * @param loginData 로그인 데이터
-     * @return 이메일이 존재할 경우 해당 User 정보를 리턴합니다.
-     * @throws UserNotFoundException 찾지 못할경우 예외발생
+     * 로그인 요청에 들어온 유저가 존재하는지 확인 후, 유저 정보를 리턴합니다.
+     * @param loginData 로그인 요청
+     * @return 유저 정보
+     * @throws UserNotFoundException 유저를 찾지 못할 경우
      */
     public User findUser(UserLoginData loginData) {
 
