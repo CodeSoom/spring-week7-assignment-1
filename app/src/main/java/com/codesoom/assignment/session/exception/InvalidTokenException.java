@@ -1,4 +1,4 @@
-package com.codesoom.assignment.session.errors;
+package com.codesoom.assignment.session.exception;
 
 public class InvalidTokenException extends RuntimeException {
     public InvalidTokenException(String token) {

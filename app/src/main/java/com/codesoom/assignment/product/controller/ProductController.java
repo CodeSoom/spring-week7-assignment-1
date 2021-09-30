@@ -3,7 +3,7 @@ package com.codesoom.assignment.product.controller;
 import com.codesoom.assignment.product.domain.Product;
 import com.codesoom.assignment.product.dto.ProductData;
 import com.codesoom.assignment.product.service.ProductService;
-import com.codesoom.assignment.session.errors.InvalidTokenException;
+import com.codesoom.assignment.session.exception.InvalidTokenException;
 import com.codesoom.assignment.session.service.AuthenticationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MissingRequestHeaderException;

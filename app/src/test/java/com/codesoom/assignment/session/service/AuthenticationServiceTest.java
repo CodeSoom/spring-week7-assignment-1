@@ -1,6 +1,6 @@
 package com.codesoom.assignment.session.service;
 
-import com.codesoom.assignment.session.errors.InvalidTokenException;
+import com.codesoom.assignment.session.exception.InvalidTokenException;
 import com.codesoom.assignment.session.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
