@@ -40,6 +40,7 @@ public class ProductController {
         return productService.getProduct(id);
     }
 
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
