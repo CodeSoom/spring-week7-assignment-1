@@ -31,11 +31,12 @@ public class User {
     public User() {
     }
 
-    public User(Long id, String name, String email, String password) {
+    public User(Long id, String name, String email, String password, boolean deleted) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
+        this.deleted = deleted;
     }
 
     public void change(User user) {

@@ -71,8 +71,6 @@ public class ProductController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Product registerProduct(@RequestHeader("Authorization") String authorization, @Valid @RequestBody ProductData productData) {
-        String accessToken = authorization.substring("Bearer ".length());
-        Long userId = authenticationService.parseToken(accessToken);
 
         return productService.addProduct(productData);
     }
@@ -88,7 +86,7 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     public Product updateProduct(@RequestHeader("Authorization") String authorization, @PathVariable Long id,
                                  @Valid @RequestBody ProductData productData) {
-        validTokenById(authorization, id);
+
         return productService.updateProduct(id, productData);
     }
 
@@ -100,7 +98,6 @@ public class ProductController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProduct(@RequestHeader("Authorization") String authorization, @PathVariable Long id) {
-        validTokenById(authorization, id);
         productService.deleteProductById(id);
     }
 
@@ -108,13 +105,5 @@ public class ProductController {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public void handleMissingRequestHeaderException() {
 
-    }
-
-    private void validTokenById(String authorization, Long id) {
-        String accessToken = authorization.substring("Bearer ".length());
-        Long userId = authenticationService.parseToken(accessToken);
-        if (userId != id) {
-            throw new InvalidTokenException(accessToken);
-        }
     }
 }
