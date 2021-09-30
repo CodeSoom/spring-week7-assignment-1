@@ -15,7 +15,7 @@ public class Validators {
     private Validators() {
     }
 
-    public static List<String> validate(Object target) {
+    public static List<String> getValidateResults(Object target) {
         final Set<ConstraintViolation<Object>> violations = validator.validate(target);
 
         if (violations.isEmpty()) {

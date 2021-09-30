@@ -33,15 +33,15 @@ public class ProductService {
     }
 
     public Product createProduct(EntitySupplier<Product> supplier) {
-        validOrThrow(supplier);
+        checkValidOrThrow(supplier);
 
         final Product product = supplier.toEntity();
 
         return productRepository.save(product);
     }
 
-    public Product updateProduct(Long id, EntitySupplier<Product> supplier) {
-        validOrThrow(supplier);
+    public Product updateProduct(Long id, EntitySupplier<Product> supplier) throws InvalidProductArgumentsException{
+        checkValidOrThrow(supplier);
 
         Product product = findProduct(id);
 
@@ -50,8 +50,8 @@ public class ProductService {
         return product;
     }
 
-    private void validOrThrow(EntitySupplier<Product> supplier) {
-        final List<String> validateResult = Validators.validate(supplier);
+    private void checkValidOrThrow(EntitySupplier<Product> supplier) {
+        final List<String> validateResult = Validators.getValidateResults(supplier);
 
         if (!validateResult.isEmpty()) {
             throw new InvalidProductArgumentsException(String.join(",", validateResult));
