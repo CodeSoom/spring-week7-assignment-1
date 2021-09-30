@@ -13,6 +13,7 @@ public class WebJavaConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(authenticationInterceptor);
+        // 인터셉터를 추가해 준다. 사용 안 함. remind용.
+        //registry.addInterceptor(authenticationInterceptor);
     }
 }

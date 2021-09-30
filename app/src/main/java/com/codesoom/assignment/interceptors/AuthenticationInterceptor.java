@@ -61,4 +61,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
         return true;
     }
+    // 인터셉터 결론
+    // 인터셉터를 이용하면 스프링 컨트롤러에서 처리되는 애들을 좀 모아서 깔끔하게 정리할 수 있다.
+    // 인터셉터의 처리 위치는 스프링 웹 MVC
+    // 스프링 시큐리티의 처리 위치는 서블릿 필터
 }
