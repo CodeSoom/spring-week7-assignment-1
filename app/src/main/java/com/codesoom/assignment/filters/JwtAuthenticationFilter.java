@@ -13,10 +13,10 @@ import java.io.IOException;
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     private final AuthenticationService authenticationService;
+    private String method;
 
-    public JwtAuthenticationFilter(
-            AuthenticationService authenticationService,
-            AuthenticationManager authenticationManager) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager,
+                                   AuthenticationService authenticationService) {
         super(authenticationManager);
         this.authenticationService = authenticationService;
     }
@@ -50,7 +50,10 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             return true;
         }
 
-        String method = request.getMethod();
-        return method.equals("GET");
+        if (method.equals("GET")) {
+            return true;
+        }
+
+        return method.equals("OPTIONS");
     }
 }

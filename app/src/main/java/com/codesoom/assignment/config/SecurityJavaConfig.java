@@ -21,7 +21,7 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         Filter authenticationFilter = new JwtAuthenticationFilter(
-                authenticationService, authenticationManager());
+                authenticationManager(), );
         Filter authenticationErrorFilter = new AuthenticationErrorFilter();
         http
                 .csrf().disable()
