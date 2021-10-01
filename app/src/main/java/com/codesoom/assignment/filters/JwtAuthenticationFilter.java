@@ -15,8 +15,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     private final AuthenticationService authenticationService;
     private String method;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager,
-                                   AuthenticationService authenticationService) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
         this.authenticationService = authenticationService;
     }
@@ -32,11 +31,10 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         }
 
         String authorization = request.getHeader("Authorization");
-
-
         if (authorization == null) {
             throw new InvalidTokenException("");
         }
+
         String accessToken = authorization.substring("Bearer ".length());
         authenticationService.parseToken(accessToken);
 

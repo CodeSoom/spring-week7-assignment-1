@@ -40,6 +40,8 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    // 데이터 변경 -> 누가 하는가? : Authentication
+    // 로그인을 해야 데이터 변경이 가능하다 : Authorization
     public Product create(
             @RequestAttribute Long userId,
             @RequestBody @Valid ProductData productData
@@ -48,6 +50,8 @@ public class ProductController {
     }
 
     @PatchMapping("{id}")
+    // 데이터 변경 -> 누가 하는가? : Authentication
+    // 로그인을 해야 데이터 변경이 가능하다 : Authorization
     public Product update(
             @RequestAttribute Long userId,
             @PathVariable Long id,
@@ -57,6 +61,8 @@ public class ProductController {
     }
 
     @DeleteMapping("{id}")
+    // 데이터 변경 -> 누가 하는가? : Authentication
+    // 로그인을 해야 데이터 변경이 가능하다 : Authorization
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void destroy(
             @RequestAttribute Long userId,
