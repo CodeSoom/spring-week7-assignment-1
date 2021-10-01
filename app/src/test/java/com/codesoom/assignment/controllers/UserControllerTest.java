@@ -5,8 +5,11 @@ import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.UserForbiddenException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -70,6 +73,10 @@ class UserControllerTest {
 
         given(userService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
+
+
+        given(userService.updateUser( eq(9999L), any(UserModificationData.class),any(Authentication.class)))
+                .willThrow(new UserForbiddenException(9999L));
     }
 
     @Test
@@ -165,5 +172,26 @@ class UserControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
+    }
+
+
+    @Nested
+    @DisplayName("사용자가 자신외의 사용자 정보를 변경하려 할때")
+    class WithForbiddenRequest {
+        @Test
+        @DisplayName("403 Forbidden 에러로 응답한다.")
+        void It_responsesWithForbiddenError() throws Exception {
+            mockMvc.perform(
+                    patch("/users/9999")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                    .header("Authorization", String.format("Bearer "+VALID_TOKEN))
+            )
+                    .andExpect(status().isForbidden());
+
+            verify(userService)
+                    .updateUser(eq(9999L), any(UserModificationData.class),any(Authentication.class));
+
+        }
     }
 }
