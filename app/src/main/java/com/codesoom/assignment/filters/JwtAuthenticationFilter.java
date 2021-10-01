@@ -32,8 +32,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         }
 
         String authorization = request.getHeader("Authorization");
-
-
         if (authorization == null) {
             throw new InvalidTokenException("");
         }
