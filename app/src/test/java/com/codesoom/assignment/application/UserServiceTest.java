@@ -4,7 +4,9 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
-import com.codesoom.assignment.errors.UserEmailDuplicationException;import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.errors.UserEmailDuplicationException;
+import com.codesoom.assignment.errors.UserForbiddenException;
+import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -118,6 +120,18 @@ class UserServiceTest {
     }
 
     @Test
+    void updateUserWithNotMyId() {
+        UserModificationData modificationData = UserModificationData.builder()
+                .name("TEST")
+                .password("TEST")
+                .build();
+
+        assertThatThrownBy(() -> userService.updateUser(999L, modificationData,authentication))
+                .isInstanceOf(UserForbiddenException.class);
+
+    }
+
+    @Test
     void updateUserWithNotExistedId() {
         given(authentication.getPrincipal())
                 .willReturn(NOT_EXIST_USER_ID);
@@ -133,7 +147,6 @@ class UserServiceTest {
 
         verify(userRepository).findByIdAndDeletedIsFalse(100L);
     }
-
 
     @Test
     void updateUserWithDeletedId() {
