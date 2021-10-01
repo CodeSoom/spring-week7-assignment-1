@@ -79,6 +79,10 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
+
+    // Spring Security Test
+    testImplementation group: 'org.springframework.security', name: 'spring-security-test', version: '5.3.11.RELEASE'
+
 }
 
 application {
