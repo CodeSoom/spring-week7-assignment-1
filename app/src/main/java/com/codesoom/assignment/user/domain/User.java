@@ -2,11 +2,11 @@ package com.codesoom.assignment.user.domain;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.validation.constraints.NotBlank;
 
 @Getter
 @Entity
@@ -16,14 +16,14 @@ public class User {
     @GeneratedValue
     Long id;
 
-    @NotBlank
-    private String name;
+    @Builder.Default
+    private String name = "";
 
-    @NotBlank
-    private String email;
+    @Builder.Default
+    private String email = "";
 
-    @NotBlank
-    private String password;
+    @Builder.Default
+    private String password = "";
 
     @Builder.Default
     private boolean deleted = false;
@@ -39,13 +39,21 @@ public class User {
         this.deleted = deleted;
     }
 
-    public void change(User user) {
-        this.name = user.getName();
-        this.email = user.getEmail();
-        this.password = user.getPassword();
+    public void change(User source) {
+        this.name = source.getName();
+        this.email = source.getEmail();
+        this.password = source.getPassword();
     }
 
-    public boolean authenticate(String password) {
+    public void destroy() {
+        deleted = true;
+    }
+
+    public boolean authenticate(String password, PasswordEncoder passwordEncoder) {
         return !deleted && password.equals(this.password);
+    }
+
+    public void changePassword(String password, PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(password);
     }
 }

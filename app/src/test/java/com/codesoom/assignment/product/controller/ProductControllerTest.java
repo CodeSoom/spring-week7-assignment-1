@@ -161,5 +161,16 @@ class ProductControllerTest {
             mockMvc.perform(delete("/products/a"))
                     .andExpect(status().isBadRequest());
         }
+
+        @Test
+        @DisplayName("엑세스 토큰이 없는 경우 예외를 반환한다.")
+        void deleteWithoutAccessToken() throws Exception {
+            mockMvc.perform(delete("/products/1")
+                    .accept(MediaType.APPLICATION_PROBLEM_JSON_UTF8)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"name\" : \"쥐순이\", \"maker\": \"냥이월드\", \"price\" : 5000}")
+            )
+                    .andExpect(status().isUnauthorized());
+        }
     }
 }

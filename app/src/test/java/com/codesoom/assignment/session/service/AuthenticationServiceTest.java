@@ -6,6 +6,8 @@ import com.codesoom.assignment.user.domain.User;
 import com.codesoom.assignment.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -22,12 +24,13 @@ class AuthenticationServiceTest {
 
     private AuthenticationService authenticationService;
     private UserRepository userRepository = mock(UserRepository.class);
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @BeforeEach
     void setUp() {
         JwtUtil jwtUtil = new JwtUtil(SECRET);
 
-        authenticationService = new AuthenticationService(jwtUtil, userRepository);
+        authenticationService = new AuthenticationService(jwtUtil, userRepository, passwordEncoder);
 
         User user = User.builder()
                 .password("test")

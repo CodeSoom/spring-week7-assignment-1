@@ -6,6 +6,7 @@ import com.codesoom.assignment.product.service.ProductService;
 import com.codesoom.assignment.session.exception.InvalidTokenException;
 import com.codesoom.assignment.session.service.AuthenticationService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -70,7 +71,9 @@ public class ProductController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Product registerProduct(@RequestHeader("Authorization") String authorization, @Valid @RequestBody ProductData productData) {
+    @PreAuthorize("isAuthenticated()")
+    public Product registerProduct(@RequestHeader("Authorization") String authorization,
+                                   @Valid @RequestBody ProductData productData) {
 
         return productService.addProduct(productData);
     }

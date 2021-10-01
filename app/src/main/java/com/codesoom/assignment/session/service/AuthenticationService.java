@@ -7,19 +7,21 @@ import com.codesoom.assignment.user.domain.User;
 import com.codesoom.assignment.user.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.security.SignatureException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class AuthenticationService {
-    private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
     private static final String SECRET = "12345678901234567890123456789012";
 
-    public AuthenticationService(JwtUtil jwtUtil, UserRepository userRepository) {
+    private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public AuthenticationService(JwtUtil jwtUtil, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Long parseToken(String token) {
@@ -39,7 +41,7 @@ public class AuthenticationService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new LoginFailException(email));
 
-        if (!user.authenticate(password)) {
+        if (!user.authenticate(password, passwordEncoder)) {
             throw new LoginFailException(email);
         }
 
