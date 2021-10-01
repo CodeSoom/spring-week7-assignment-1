@@ -4,8 +4,7 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
-import com.codesoom.assignment.errors.UserEmailDuplicationException;
-import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.errors.UserEmailDuplicationException;import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +25,7 @@ import static org.mockito.Mockito.verify;
 class UserServiceTest {
     private static final String EXISTED_EMAIL_ADDRESS = "existed@example.com";
     private static final Long DELETED_USER_ID = 200L;
+    private static final Object NOT_EXIST_USER_ID = 100L;
 
     private UserService userService;
 
@@ -65,6 +65,9 @@ class UserServiceTest {
 
         given(userRepository.findByIdAndDeletedIsFalse(DELETED_USER_ID))
                 .willReturn(Optional.empty());
+
+        given(authentication.getPrincipal()).willReturn(1L);
+
     }
 
     @Test
@@ -116,6 +119,10 @@ class UserServiceTest {
 
     @Test
     void updateUserWithNotExistedId() {
+        given(authentication.getPrincipal())
+                .willReturn(NOT_EXIST_USER_ID);
+
+
         UserModificationData modificationData = UserModificationData.builder()
                 .name("TEST")
                 .password("TEST")
@@ -130,6 +137,9 @@ class UserServiceTest {
 
     @Test
     void updateUserWithDeletedId() {
+        given(authentication.getPrincipal()).willReturn(DELETED_USER_ID);
+
+
         UserModificationData modificationData = UserModificationData.builder()
                 .name("TEST")
                 .password("TEST")

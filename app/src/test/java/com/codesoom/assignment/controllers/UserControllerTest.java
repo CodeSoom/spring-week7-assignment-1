@@ -38,6 +38,8 @@ class UserControllerTest {
     @MockBean
     private Authentication authentication;
 
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
     @BeforeEach
     void setUp() {
         given(userService.registerUser(any(UserRegistrationData.class)))
@@ -108,6 +110,8 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+
         )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -126,6 +130,8 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+
         )
                 .andExpect(status().isBadRequest());
     }
@@ -136,6 +142,8 @@ class UserControllerTest {
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+
         )
                 .andExpect(status().isNotFound());
 
