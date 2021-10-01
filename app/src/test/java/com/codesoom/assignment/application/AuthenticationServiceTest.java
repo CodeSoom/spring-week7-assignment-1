@@ -37,7 +37,13 @@ class AuthenticationServiceTest {
         authenticationService = new AuthenticationService(
                 userRepository, jwtUtil, passwordEncoder);
 
-        User user = User.builder().build();
+        User user = User.builder()
+                .id(1L)
+                .email("tester@example.com")
+                .password("test")
+                .deleted(false)
+                .build();
+
         user.changePassword("test", passwordEncoder);
 
         given(userRepository.findByEmail("tester@example.com"))
