@@ -31,6 +31,11 @@ public class UserAuthentication extends AbstractAuthenticationToken {
     }
 
     @Override
+    public boolean isAuthenticated() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return this.getClass().getSimpleName() + ":" + userId;
     }

@@ -27,45 +27,10 @@ public class AuthenticationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
         FilterChain chain) throws IOException, ServletException {
-        if (!isRequireAuthenticate(request)) {
-            chain.doFilter(request, response);
-            return;
-        }
 
         authenticate(request);
 
-        String authorization = request.getHeader("Authorization");
-        String accessToken = getAccessToken(authorization);
-        Long userId = authenticationService.parseToken(accessToken);
-
-        Authentication authentication = new UserAuthentication(userId);
-
-        SecurityContext context = SecurityContextHolder.getContext();
-        context.setAuthentication(authentication);
-
         chain.doFilter(request, response);
-    }
-
-    private boolean isRequireAuthenticate(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        if (!isRequireAuthenticatePath(path)) {
-            return false;
-        }
-
-        String method = request.getMethod();
-        if (!isRequireAuthenticateMethod(method)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean isRequireAuthenticatePath(String path) {
-        return path.startsWith("/products");
-    }
-
-    private boolean isRequireAuthenticateMethod(String method) {
-        return !(method.equals("GET") || method.equals("OPTIONS"));
     }
 
     /**
@@ -77,14 +42,17 @@ public class AuthenticationFilter extends BasicAuthenticationFilter {
     private void authenticate(HttpServletRequest request) {
         String authorization = request.getHeader("Authorization");
 
-        if (authorization == null) {
-            throw new InvalidTokenException("");
+        if (authorization != null) {
+            String accessToken = getAccessToken(authorization);
+            Long userId = authenticationService.parseToken(accessToken);
+
+            request.setAttribute("userId", userId);
+
+            Authentication authentication = new UserAuthentication(userId);
+
+            SecurityContext context = SecurityContextHolder.getContext();
+            context.setAuthentication(authentication);
         }
-
-        String accessToken = getAccessToken(authorization);
-        Long userId = authenticationService.parseToken(accessToken);
-
-        request.setAttribute("userId", userId);
     }
 
     private String getAccessToken(String authorization) {
