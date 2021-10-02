@@ -1,12 +1,12 @@
 package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.errors.InvalidTokenException;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -28,7 +28,7 @@ public class AuthenticationFilter extends BasicAuthenticationFilter {
             return;
         }
 
-        authenticate(request, response);
+        authenticate(request);
 
         chain.doFilter(request, response);
     }
@@ -55,22 +55,22 @@ public class AuthenticationFilter extends BasicAuthenticationFilter {
         return !(method.equals("GET") || method.equals("OPTIONS"));
     }
 
-    private boolean authenticate(HttpServletRequest request,
-        HttpServletResponse response)
-        throws IOException {
+    /**
+     * 요청 정보를 통해 인증이 되었는지 확인합니다.
+     * @param request 요청 정보
+     * @throws InvalidTokenException 토큰이 올바르지 않은 경우
+     */
+    private void authenticate(HttpServletRequest request) {
         String authorization = request.getHeader("Authorization");
 
         if (authorization == null) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value());
-            return false;
+            throw new InvalidTokenException("");
         }
 
         String accessToken = getAccessToken(authorization);
         Long userId = authenticationService.parseToken(accessToken);
 
         request.setAttribute("userId", userId);
-
-        return true;
     }
 
     private String getAccessToken(String authorization) {
