@@ -11,6 +11,11 @@ public class WebJavaConfig implements WebMvcConfigurer {
     @Autowired
     private AuthenticationInterceptor authenticationInterceptor;
 
+    // Todo 주석 작성
+    /**
+     *
+     * @param registry
+     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 인터셉터를 추가해 준다. 사용 안 함. remind용.

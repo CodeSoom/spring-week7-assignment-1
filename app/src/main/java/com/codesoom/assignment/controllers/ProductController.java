@@ -50,16 +50,17 @@ public class ProductController {
             @RequestBody @Valid ProductData productData,
             Authentication authentication
     ) {
-        return productService.createProduct(productData);
+        return productService.createProduct(productData, authentication);
     }
 
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("{id}")
     public Product update(
             @PathVariable Long id,
-            @RequestBody @Valid ProductData productData
+            @RequestBody @Valid ProductData productData,
+            Authentication authentication
     ) {
-        return productService.updateProduct(id, productData);
+        return productService.updateProduct(id, productData, authentication);
     }
 
     @PreAuthorize("isAuthenticated()")

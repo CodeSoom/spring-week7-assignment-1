@@ -45,6 +45,12 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Invalid access token");
     }
 
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(InvalidRoleException.class)
+    public ErrorResponse handleInvalidRoleException(InvalidRoleException exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
+
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
