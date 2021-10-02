@@ -3,27 +3,25 @@ package com.codesoom.assignment.validators;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
-
-import static java.util.stream.Collectors.toList;
+import java.util.stream.Collectors;
 
 public class Validators {
     private static final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    public static final String EMPTY_STR = "";
 
     private Validators() {
     }
 
-    public static List<String> getValidateResults(Object target) {
+    public static String getValidateResults(Object target) {
         final Set<ConstraintViolation<Object>> violations = validator.validate(target);
 
         if (violations.isEmpty()) {
-            return Collections.emptyList();
+            return EMPTY_STR;
         }
 
         return violations.stream()
                 .map(ConstraintViolation::getMessage)
-                .collect(toList());
+                .collect(Collectors.joining(","));
     }
 }

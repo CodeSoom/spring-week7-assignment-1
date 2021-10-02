@@ -51,10 +51,10 @@ public class ProductService {
     }
 
     private void checkValidOrThrow(EntitySupplier<Product> supplier) {
-        final List<String> validateResult = Validators.getValidateResults(supplier);
+        final String exceptionMessage = Validators.getValidateResults(supplier);
 
-        if (!validateResult.isEmpty()) {
-            throw new InvalidProductArgumentsException(String.join(",", validateResult));
+        if (!exceptionMessage.isBlank()) {
+            throw new InvalidProductArgumentsException(exceptionMessage);
         }
     }
 
