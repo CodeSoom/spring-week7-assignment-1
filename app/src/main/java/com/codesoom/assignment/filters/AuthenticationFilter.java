@@ -23,7 +23,7 @@ public class AuthenticationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
         FilterChain chain) throws IOException, ServletException {
-        if (filterWithPathAndMethod(request)) {
+        if (!isRequireAuthenticate(request)) {
             chain.doFilter(request, response);
             return;
         }
@@ -33,22 +33,26 @@ public class AuthenticationFilter extends BasicAuthenticationFilter {
         chain.doFilter(request, response);
     }
 
-    private boolean filterWithPathAndMethod(HttpServletRequest request) {
+    private boolean isRequireAuthenticate(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (!path.startsWith("/products")) {
-            return true;
+        if (!isRequireAuthenticatePath(path)) {
+            return false;
         }
 
         String method = request.getMethod();
-        if (method.equals("GET")) {
-            return true;
+        if (!isRequireAuthenticateMethod(method)) {
+            return false;
         }
 
-        if (method.equals("OPTIONS")) {
-            return true;
-        }
+        return true;
+    }
 
-        return false;
+    private boolean isRequireAuthenticatePath(String path) {
+        return path.startsWith("/products");
+    }
+
+    private boolean isRequireAuthenticateMethod(String method) {
+        return !(method.equals("GET") || method.equals("OPTIONS"));
     }
 
     private boolean doAuthentication(HttpServletRequest request,
