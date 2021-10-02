@@ -3,6 +3,9 @@ package com.codesoom.assignment.filters;
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -13,7 +16,6 @@ import java.io.IOException;
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     private final AuthenticationService authenticationService;
-    private String method;
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
@@ -36,7 +38,12 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         }
 
         String accessToken = authorization.substring("Bearer ".length());
-        authenticationService.parseToken(accessToken);
+        Long userId = authenticationService.parseToken(accessToken);
+        // TODO : userID 넘겨주기
+
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = null;
+        context.setAuthentication(authentication);
 
         chain.doFilter(request, response);
 
@@ -48,10 +55,11 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             return true;
         }
 
+        String method = request.getMethod();
         if (method.equals("GET")) {
             return true;
         }
 
-        return method.equals("OPTIONS");
+        return false;
     }
 }

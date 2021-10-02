@@ -1,9 +1,16 @@
+// 암호화 : 평문 -> 암호
+// 복호화 : 암호 -> 평문
+// 복호화가 불가능한 암호화
+
+
 package com.codesoom.assignment.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,11 +26,14 @@ public class User {
     @GeneratedValue
     private Long id;
 
-    private String email;
+    @Builder.Default
+    private String email ="";
 
-    private String name;
+    @Builder.Default
+    private String name ="";
 
-    private String password;
+    @Builder.Default
+    private String password ="";
 
     @Builder.Default
     private boolean deleted = false;
@@ -31,6 +41,11 @@ public class User {
     public void changeWith(User source) {
         name = source.name;
         password = source.password;
+    }
+
+    public void changePassword(String password) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        this.password = passwordEncoder.encode(password);
     }
 
     public void destroy() {

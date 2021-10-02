@@ -9,6 +9,7 @@ import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -55,8 +56,11 @@ public class ProductController {
     public Product update(
             @RequestAttribute Long userId,
             @PathVariable Long id,
-            @RequestBody @Valid ProductData productData
+            @RequestBody @Valid ProductData productData,
+            Authentication authentication
+
     ) {
+        System.out.println(authentication);
         return productService.updateProduct(id, productData);
     }
 
