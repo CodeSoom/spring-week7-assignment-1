@@ -43,8 +43,8 @@ public class User {
         password = source.password;
     }
 
-    public void changePassword(String password) {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    public void changePassword(String password,
+                               PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(password);
     }
 
@@ -52,8 +52,8 @@ public class User {
         deleted = true;
     }
 
-    public boolean authenticate(String password) {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    public boolean authenticate(String password,
+                                PasswordEncoder passwordEncoder) {
         return !deleted && passwordEncoder.matches(password, this.password);
     }
 }
