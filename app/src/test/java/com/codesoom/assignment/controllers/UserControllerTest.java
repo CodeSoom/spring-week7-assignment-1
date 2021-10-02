@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -66,7 +68,7 @@ class UserControllerTest {
 
     @BeforeEach
     void setupFixtures() {
-        email = System.currentTimeMillis() + "test.com";
+        email = System.currentTimeMillis() + "@test.com";
 
         userRegistrationData = UserRegistrationData.builder()
                 .name("nana")
@@ -106,11 +108,57 @@ class UserControllerTest {
         }
 
         @Nested
-        @DisplayName("유효하지 않은 값으로 요청하면")
-        class WithInvalidRequestBody {
-            @Test
-            @DisplayName("400 Bad Request 에러로 응답한다.")
-            void responsesWithBadRequestError() throws Exception {
+        @DisplayName("유효하지 않은 이름으로 요청하면")
+        class WhenNameIsInvalid {
+            @ParameterizedTest(name = "400 Bad Request 에러로 응답한다.")
+            @ValueSource(strings = {" ", ""})
+            void responsesWith400Error(String name) throws Exception {
+                invalidUserRegistrationData = UserRegistrationData.builder()
+                        .name(name)
+                        .email("valid@email.com")
+                        .password("valid-password")
+                        .build();
+
+                mockMvc.perform(post("/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(invalidUserRegistrationData))
+                        )
+                        .andExpect(status().isBadRequest());
+            }
+        }
+
+        @Nested
+        @DisplayName("유효하지 않은 이메일로 요청하면")
+        class WhenEmailIsInvalid {
+            @ParameterizedTest(name = "400 Bad Request 에러로 응답한다.")
+            @ValueSource(strings = {" ", "", "222", "email", "@"})
+            void responsesWith400Error(String email) throws Exception {
+                invalidUserRegistrationData = UserRegistrationData.builder()
+                        .name("valid-name")
+                        .email(email)
+                        .password("valid-password")
+                        .build();
+
+                mockMvc.perform(post("/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(invalidUserRegistrationData))
+                        )
+                        .andExpect(status().isBadRequest());
+            }
+        }
+
+        @Nested
+        @DisplayName("유효하지 않은 비밀번호로 요청하면")
+        class WhenPasswordIsInvalid {
+            @ParameterizedTest(name = "400 Bad Request 에러로 응답한다.")
+            @ValueSource(strings = {" ", "", "2", "22", "222"})
+            void responsesWith400Error(String password) throws Exception {
+                invalidUserRegistrationData = UserRegistrationData.builder()
+                        .name("valid-name")
+                        .email("valid@email.com")
+                        .password(password)
+                        .build();
+
                 mockMvc.perform(post("/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(invalidUserRegistrationData))
@@ -185,6 +233,7 @@ class UserControllerTest {
                         .andExpect(status().isNotFound());
             }
         }
+
     }
 
     @Nested
@@ -214,12 +263,41 @@ class UserControllerTest {
                     .andExpect(jsonPath("$.name", is("monika")));
         }
 
+
         @Nested
-        @DisplayName("유효하지 않은 값으로 요청하면")
-        class WithInvalidRequestBody {
-            @Test
-            @DisplayName("400 Bad Request 에러로 응답한다.")
-            void responsesWithBadRequestError() throws Exception {
+        @DisplayName("유효하지 않은 이름으로 요청하면")
+        class WhenNameIsInvalid {
+            @ParameterizedTest(name = "400 Bad Request 에러로 응답한다.")
+            @ValueSource(strings = {" ", ""})
+            void responsesWith400Error(String name) throws Exception {
+                invalidUserModificationData = UserModificationData.builder()
+                        .name(name)
+                        .password("valid-password")
+                        .build();
+
+                mockMvc.perform(patch("/users/" + user.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(invalidUserModificationData))
+                                .header(
+                                        "Authorization",
+                                        String.format("Bearer %s", session.getAccessToken())
+                                )
+                        )
+                        .andExpect(status().isBadRequest());
+            }
+        }
+
+        @Nested
+        @DisplayName("유효하지 않은 비밀번호로 요청하면")
+        class WhenPasswordIsInvalid {
+            @ParameterizedTest(name = "400 Bad Request 에러로 응답한다.")
+            @ValueSource(strings = {" ", "", "2", "22", "222"})
+            void responsesWith400Error(String password) throws Exception {
+                invalidUserModificationData = UserModificationData.builder()
+                        .name("valid name")
+                        .password(password)
+                        .build();
+
                 mockMvc.perform(patch("/users/" + user.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(invalidUserModificationData))

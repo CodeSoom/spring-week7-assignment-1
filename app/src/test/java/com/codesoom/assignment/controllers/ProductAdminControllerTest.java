@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -115,18 +117,62 @@ class ProductAdminControllerTest {
         }
 
         @Nested
-        @DisplayName("유효하지 않은 파라미터로 요청하면")
-        class WithInvalidRequestBody {
-            @DisplayName("400 Bad Request 에러로 응답한다.")
-            @Test
-            void responsesWithBadRequest() throws Exception {
+        @DisplayName("유효하지 않은 이름으로 요청하면")
+        class WhenNameIsInvalid {
+            @ParameterizedTest(name = "400 Bad Request 에러로 응답한다.")
+            @ValueSource(strings = {" ", ""})
+            void responsesWith400Error(String name) throws Exception {
+                invalidProductDataFixture = ProductData.builder()
+                        .name(name)
+                        .maker("valid-maker")
+                        .price(10000)
+                        .build();
+
                 mockMvc.perform(post("/products")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(invalidProductDataFixture))
                                 .header("Authorization", authorizationFixture)
                         )
-                        .andExpect(status().isBadRequest());
-            }
+                        .andExpect(status().isBadRequest());}
+        }
+
+        @Nested
+        @DisplayName("유효하지 않은 제조사로 요청하면")
+        class WhenMakerIsInvalid {
+            @ParameterizedTest(name = "400 Bad Request 에러로 응답한다.")
+            @ValueSource(strings = {" ", ""})
+            void responsesWith400Error(String maker) throws Exception {
+                invalidProductDataFixture = ProductData.builder()
+                        .name("valid-name")
+                        .maker(maker)
+                        .price(10000)
+                        .build();
+
+                mockMvc.perform(post("/products")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(invalidProductDataFixture))
+                                .header("Authorization", authorizationFixture)
+                        )
+                        .andExpect(status().isBadRequest());}
+        }
+
+        @Nested
+        @DisplayName("유효하지 않은 가격으로 요청하면")
+        class WhenPriceIsInvalid {
+            @Test
+            @DisplayName("400 Bad Request 에러로 응답한다.")
+            void responsesWith400Error() throws Exception {
+                invalidProductDataFixture = ProductData.builder()
+                        .name("valid-name")
+                        .maker("valid-maker")
+                        .build();
+
+                mockMvc.perform(post("/products")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(invalidProductDataFixture))
+                                .header("Authorization", authorizationFixture)
+                        )
+                        .andExpect(status().isBadRequest());}
         }
     }
 
@@ -165,11 +211,75 @@ class ProductAdminControllerTest {
         }
 
         @Nested
+        @DisplayName("유효하지 않은 이름으로 요청하면")
+        class WhenNameIsInvalid {
+            @ParameterizedTest(name = "400 Bad Request 에러로 응답한다.")
+            @ValueSource(strings = {" ", ""})
+            void responsesWithBadRequest(String name) throws Exception {
+                invalidProductDataFixture = ProductData.builder()
+                        .name(name)
+                        .maker("maker")
+                        .price(10000)
+                        .build();
+
+                mockMvc.perform(patch("/products/" + product.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(invalidProductDataFixture))
+                                .header("Authorization", authorizationFixture))
+                        .andExpect(status().isBadRequest());
+            }
+        }
+
+        @Nested
+        @DisplayName("유효하지 않은 제조사로 요청하면")
+        class WhenMakerIsInvalid {
+            @ParameterizedTest(name = "400 Bad Request 에러로 응답한다.")
+            @ValueSource(strings = {" ", ""})
+            void responsesWithBadRequest(String maker) throws Exception {
+                invalidProductDataFixture = ProductData.builder()
+                        .name("name")
+                        .maker(maker)
+                        .price(10000)
+                        .build();
+
+                mockMvc.perform(patch("/products/" + product.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(invalidProductDataFixture))
+                                .header("Authorization", authorizationFixture))
+                        .andExpect(status().isBadRequest());
+            }
+        }
+
+        @Nested
+        @DisplayName("유효하지 않은 가격으로 요청하면")
+        class WhenPriceIsInvalid {
+            @DisplayName("400 Bad Request 에러로 응답한다.")
+            @Test
+            void responsesWithBadRequest() throws Exception {
+                invalidProductDataFixture = ProductData.builder()
+                        .name("mouse")
+                        .maker("maker")
+                        .build();
+
+                mockMvc.perform(patch("/products/" + product.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(invalidProductDataFixture))
+                                .header("Authorization", authorizationFixture))
+                        .andExpect(status().isBadRequest());
+            }
+        }
+
+        @Nested
         @DisplayName("유효하지 않은 값으로 요청하면")
         class WithInvalidRequestBody {
             @DisplayName("400 Bad Request 에러로 응답한다.")
             @Test
             void responsesWithBadRequest() throws Exception {
+                invalidProductDataFixture = ProductData.builder()
+                        .name("mouse")
+                        .maker("maker")
+                        .build();
+
                 mockMvc.perform(patch("/products/" + product.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(invalidProductDataFixture))

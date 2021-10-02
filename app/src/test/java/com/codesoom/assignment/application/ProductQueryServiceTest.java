@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-class 환ProductQueryServiceTest {
+class ProductQueryServiceTest {
     private ProductQueryService productService;
 
     private final ProductRepository productRepository =
