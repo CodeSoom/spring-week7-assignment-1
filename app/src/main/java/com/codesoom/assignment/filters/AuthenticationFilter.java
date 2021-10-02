@@ -1,7 +1,6 @@
 package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.errors.InvalidTokenException;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -29,18 +28,7 @@ public class AuthenticationFilter extends BasicAuthenticationFilter {
             return;
         }
 
-        String authorization = request.getHeader("Authorization");
-
-        try {
-            if (authorization == null) {
-                throw new InvalidTokenException("");
-            }
-            doAuthentication(request, response);
-        } catch (InvalidTokenException e) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value());
-            chain.doFilter(request, response);
-            return;
-        }
+        doAuthentication(request, response);
 
         chain.doFilter(request, response);
     }
