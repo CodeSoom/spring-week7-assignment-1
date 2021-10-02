@@ -4,7 +4,8 @@ import com.codesoom.assignment.convertors.ViewSupplier;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * 상품 정보 일급 컬렉션
@@ -37,9 +38,9 @@ public class ProductList {
         store.add(product);
     }
 
-    public <R> List<R> convert(ViewSupplier<Product, R> supplier) {
+    public <R> List<R> map(ViewSupplier<Product, R> supplier) {
         return store.stream().map(supplier::supply)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     public List<Product> getAll() {

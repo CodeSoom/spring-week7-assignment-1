@@ -93,7 +93,7 @@ class ProductListTest {
     void convert(ViewSupplier<Product, ?> supplier, Class<?> type) {
         final ProductList productList = ProductList.from(products);
 
-        final List<?> convertedList = productList.convert(supplier);
+        final List<?> convertedList = productList.map(supplier);
 
         for (Object obj : convertedList) {
             assertThat(obj).isInstanceOf(type);
