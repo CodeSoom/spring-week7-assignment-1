@@ -28,7 +28,7 @@ public class AuthenticationFilter extends BasicAuthenticationFilter {
             return;
         }
 
-        doAuthentication(request, response);
+        authenticate(request, response);
 
         chain.doFilter(request, response);
     }
@@ -55,7 +55,7 @@ public class AuthenticationFilter extends BasicAuthenticationFilter {
         return !(method.equals("GET") || method.equals("OPTIONS"));
     }
 
-    private boolean doAuthentication(HttpServletRequest request,
+    private boolean authenticate(HttpServletRequest request,
         HttpServletResponse response)
         throws IOException {
         String authorization = request.getHeader("Authorization");
