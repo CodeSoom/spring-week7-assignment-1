@@ -44,9 +44,8 @@ class UserTest {
 
     @Test
     void authenticate() {
-        User user = User.builder()
-                .password("test")
-                .build();
+        User user = User.builder().build();
+        user.changePassword("test");
 
         assertThat(user.authenticate("test")).isTrue();
         assertThat(user.authenticate("xxx")).isFalse();
@@ -55,9 +54,10 @@ class UserTest {
     @Test
     void authenticateWithDeletedUser() {
         User user = User.builder()
-                .password("test")
                 .deleted(true)
                 .build();
+
+        user.changePassword("test");
 
         assertThat(user.authenticate("test")).isFalse();
         assertThat(user.authenticate("xxx")).isFalse();
