@@ -7,6 +7,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+/**
+ * 상품 정보를 저장하고 처리합니다.
+ */
 @Entity
 @Getter
 public class Product {
@@ -33,6 +36,10 @@ public class Product {
         this.imageUrl = imageUrl;
     }
 
+    /**
+     * 상품 정보를 수정합니다.
+     * @param source 상품 수정 정보
+     */
     public void changeWith(Product source) {
         this.name = source.name;
         this.maker = source.maker;

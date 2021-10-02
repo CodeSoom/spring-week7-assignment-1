@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
+/**
+ * 인증된 사용자의 상품에 대한 HTTP 요청을 처리합니다.
+ */
 @RestController
 @RequestMapping("/products")
 @CrossOrigin
@@ -27,6 +30,11 @@ public class ProductAdminController {
         this.productCommandService = productCommandService;
     }
 
+    /**
+     * 상품을 생성하고 리턴합니다.
+     * @param productData 상품 생성 정보
+     * @return 생성된 상품
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
@@ -36,6 +44,12 @@ public class ProductAdminController {
         return productCommandService.createProduct(productData);
     }
 
+    /**
+     * 요청한 상품을 수정하고 리턴합니다.
+     * @param id 상품 식별자
+     * @param productData 상품 수정 정보
+     * @return 수정된 상품
+     */
     @PatchMapping("{id}")
     @PreAuthorize("isAuthenticated()")
     public Product update(
@@ -45,6 +59,10 @@ public class ProductAdminController {
         return productCommandService.updateProduct(id, productData);
     }
 
+    /**
+     * 요청한 상품을 삭제합니다.
+     * @param id 상품 식별자
+     */
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("isAuthenticated()")
