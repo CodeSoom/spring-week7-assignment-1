@@ -10,7 +10,9 @@ import com.github.dozermapper.core.Mapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.Access;
 import javax.transaction.Transactional;
+import java.nio.file.AccessDeniedException;
 
 @Service
 @Transactional
@@ -36,7 +38,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(Long id, UserModificationData modificationData) {
+    public User updateUser(Long id, UserModificationData modificationData, Long userId)
+    throws AccessDeniedException {
+        if (id != userId){
+            throw new AccessDeniedException("Access denied");
+        }
         User user = findUser(id);
 
         User source = mapper.map(modificationData, User.class);

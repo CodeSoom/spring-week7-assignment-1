@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -96,13 +97,28 @@ class UserServiceTest {
     }
 
     @Test
-    void updateUserWithExistedId() {
+    void updateUserByOtherAccess() throws AccessDeniedException {
         UserModificationData modificationData = UserModificationData.builder()
                 .name("TEST")
                 .password("TEST")
                 .build();
 
-        User user = userService.updateUser(1L, modificationData);
+        Long targetUserId = 1L;
+        Long currentUserId = 2L;
+        User user = userService.updateUser(targetUserId, modificationData, currentUserId);
+        assertThatThrownBy(() -> {
+                    userService.updateUser(targetUserId, modificationData, currentUserId);
+                }).isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    void updateUserWithExistedId() throws AccessDeniedException {
+        UserModificationData modificationData = UserModificationData.builder()
+                .name("TEST")
+                .password("TEST")
+                .build();
+        Long userId = 1L;
+        User user = userService.updateUser(1L, modificationData, userId);
 
         assertThat(user.getId()).isEqualTo(1L);
         assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
@@ -117,8 +133,8 @@ class UserServiceTest {
                 .name("TEST")
                 .password("TEST")
                 .build();
-
-        assertThatThrownBy(() -> userService.updateUser(100L, modificationData))
+        Long userId = 1L;
+        assertThatThrownBy(() -> userService.updateUser(100L, modificationData, userId))
                 .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(100L);
@@ -131,9 +147,9 @@ class UserServiceTest {
                 .name("TEST")
                 .password("TEST")
                 .build();
-
+        Long userId = 1L;
         assertThatThrownBy(
-                () -> userService.updateUser(DELETED_USER_ID, modificationData)
+                () -> userService.updateUser(DELETED_USER_ID, modificationData, userId)
         )
                 .isInstanceOf(UserNotFoundException.class);
 
