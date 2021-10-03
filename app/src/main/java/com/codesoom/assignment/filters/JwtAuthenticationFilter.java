@@ -2,6 +2,7 @@ package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.security.UserAuthentication;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -30,40 +31,19 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws IOException, ServletException {
-        // 경로나 메서드에 따른 요청을 처리방식에서 따로 방식을 변경한다.
-        if (filterWithPathAndMethod(request)) {
-            chain.doFilter(request, response);
-            return;
-        }
-
         String authorization = request.getHeader("Authorization");
-        if (authorization == null) {
-            throw new InvalidTokenException("");
+
+        if (authorization != null) {
+            String accessToken = authorization.substring("Bearer ".length());
+            Long userId = authenticationService.parseToken(accessToken);
+            Authentication authentication = new UserAuthentication(userId);
+
+            SecurityContext context = SecurityContextHolder.getContext();
+            context.setAuthentication(authentication);
         }
-
-        String accessToken = authorization.substring("Bearer ".length());
-        Long userId = authenticationService.parseToken(accessToken);
-        // TODO : userID 넘겨주기
-
-        Authentication authentication = null;
-        SecurityContext context = SecurityContextHolder.getContext();
-        context.setAuthentication(authentication);
 
         chain.doFilter(request, response);
 
     }
 
-    private boolean filterWithPathAndMethod(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        if (!path.startsWith("/products")) {
-            return true;
-        }
-
-        String method = request.getMethod();
-        if (method.equals("GET")) {
-            return true;
-        }
-
-        return false;
-    }
 }

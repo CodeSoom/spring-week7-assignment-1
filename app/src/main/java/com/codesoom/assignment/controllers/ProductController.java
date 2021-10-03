@@ -9,6 +9,7 @@ import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,19 +42,19 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    // 데이터 변경 -> 누가 하는가? : Authentication
-    // 로그인을 해야 데이터 변경이 가능하다 : Authorization
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     public Product create(
             @RequestBody @Valid ProductData productData,
             Authentication authentication
     ) {
+        System.out.println("-------------");
         System.out.println(authentication);
+        System.out.println("-------------");
         return productService.createProduct(productData);
     }
 
     @PatchMapping("{id}")
-    // 데이터 변경 -> 누가 하는가? : Authentication
-    // 로그인을 해야 데이터 변경이 가능하다 : Authorization
+    @PreAuthorize("isAuthenticated()")
     public Product update(
             @PathVariable Long id,
             @RequestBody @Valid ProductData productData
@@ -63,13 +64,8 @@ public class ProductController {
     }
 
     @DeleteMapping("{id}")
-    // 데이터 변경 -> 누가 하는가? : Authentication
-    // 로그인을 해야 데이터 변경이 가능하다 : Authorization
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void destroy(
-            @RequestAttribute Long userId,
-            @PathVariable Long id
-    ) {
+    @PreAuthorize("isAuthenticated()")
+    public void destroy(@PathVariable Long id) {
         productService.deleteProduct(id);
     }
 }
