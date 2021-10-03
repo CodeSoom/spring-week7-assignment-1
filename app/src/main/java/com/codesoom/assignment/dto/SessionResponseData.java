@@ -8,5 +8,7 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class SessionResponseData {
+
     private String accessToken;
+
 }
