@@ -7,16 +7,15 @@ import com.codesoom.assignment.errors.ProductNotFoundException;
 import com.github.dozermapper.core.Mapper;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.util.List;
-
+/**
+ * 상품을 추가, 수정, 삭제하는 기능을 제공합니다.
+ */
 @Service
-@Transactional
-public class ProductService {
+public class ProductCommandService {
     private final Mapper mapper;
     private final ProductRepository productRepository;
 
-    public ProductService(
+    public ProductCommandService(
             Mapper dozerMapper,
             ProductRepository productRepository
     ) {
@@ -24,19 +23,22 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    public List<Product> getProducts() {
-        return productRepository.findAll();
-    }
-
-    public Product getProduct(Long id) {
-        return findProduct(id);
-    }
-
+    /**
+     * 상품을 생성하고 리턴합니다.
+     * @param productData 상품 생성 정보
+     * @return 생성된 상품
+     */
     public Product createProduct(ProductData productData) {
         Product product = mapper.map(productData, Product.class);
         return productRepository.save(product);
     }
 
+    /**
+     * 해당 식별자의 상품을 수정하고 리턴합니다.
+     * @param id 상품 식별자
+     * @param productData 상품 수정 정보
+     * @return 수정된 상품
+     */
     public Product updateProduct(Long id, ProductData productData) {
         Product product = findProduct(id);
 
@@ -45,6 +47,11 @@ public class ProductService {
         return product;
     }
 
+    /**
+     * 해당 식별자의 상품을 삭제하고 리턴합니다.
+     * @param id 상품 식별자
+     * @return 삭제된 상품
+     */
     public Product deleteProduct(Long id) {
         Product product = findProduct(id);
 
@@ -53,6 +60,12 @@ public class ProductService {
         return product;
     }
 
+    /**
+     * 해당 식별자의 상품을 리턴합니다.
+     * @param id 상품 식별자
+     * @return 상품
+     * @throws ProductNotFoundException 해당 식별자의 상품을 찾지 못한 경우
+     */
     private Product findProduct(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
