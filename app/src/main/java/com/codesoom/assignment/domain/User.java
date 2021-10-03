@@ -6,7 +6,6 @@ import javax.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
@@ -46,13 +45,11 @@ public class User {
         deleted = true;
     }
 
-    public void changePassword(String password) {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    public void changePassword(String password, PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(password);
     }
 
-    public boolean authenticate(String password) {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    public boolean authenticate(String password, PasswordEncoder passwordEncoder) {
         return !deleted && passwordEncoder.matches(password, this.password);
     }
 }

@@ -2,9 +2,19 @@ package com.codesoom.assignment.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 class UserTest {
+
+    private PasswordEncoder passwordEncoder;
+
+    @BeforeEach
+    void setUp() {
+        passwordEncoder = new BCryptPasswordEncoder();
+    }
 
     @Test
     void changeWith() {
@@ -22,7 +32,7 @@ class UserTest {
     void changePassword() {
         User user = User.builder().build();
 
-        user.changePassword("TEST");
+        user.changePassword("TEST", passwordEncoder);
 
         assertThat(user.getPassword()).isNotEmpty();
         assertThat(user.getPassword()).isNotEqualTo("TEST");
@@ -44,10 +54,10 @@ class UserTest {
         User user = User.builder()
             .build();
 
-        user.changePassword("test");
+        user.changePassword("test", passwordEncoder);
 
-        assertThat(user.authenticate("test")).isTrue();
-        assertThat(user.authenticate("xxx")).isFalse();
+        assertThat(user.authenticate("test", passwordEncoder)).isTrue();
+        assertThat(user.authenticate("xxx", passwordEncoder)).isFalse();
     }
 
     @Test
@@ -56,9 +66,9 @@ class UserTest {
             .deleted(true)
             .build();
 
-        user.changePassword("test");
+        user.changePassword("test", passwordEncoder);
 
-        assertThat(user.authenticate("test")).isFalse();
-        assertThat(user.authenticate("xxx")).isFalse();
+        assertThat(user.authenticate("test", passwordEncoder)).isFalse();
+        assertThat(user.authenticate("xxx", passwordEncoder)).isFalse();
     }
 }
