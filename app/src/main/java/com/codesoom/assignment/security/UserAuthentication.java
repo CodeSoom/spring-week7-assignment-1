@@ -16,6 +16,17 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         this.userId = userId;
     }
 
+    private static List<GrantedAuthority> authorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("USER"));
+        return authorities;
+    }
+
+    @Override
+    public boolean isAuthenticated() {
+        return true;
+    }
+
     @Override
     public Object getCredentials() {
         return null;
@@ -26,19 +37,4 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         return userId;
     }
 
-    @Override
-    public boolean isAuthenticated() {
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "Authentication(" + userId + ")";
-    }
-
-    private static List<GrantedAuthority> authorities() {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("USER"));
-        return authorities;
-    }
 }

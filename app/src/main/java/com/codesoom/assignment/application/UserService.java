@@ -7,7 +7,6 @@ import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserForbiddenException;
 import com.codesoom.assignment.errors.UserNotFoundException;
-import com.codesoom.assignment.security.UserAuthentication;
 import com.github.dozermapper.core.Mapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,8 +36,7 @@ public class UserService {
             throw new UserEmailDuplicationException(email);
         }
 
-        User user = userRepository.save(
-                mapper.map(registrationData, User.class));
+        User user = mapper.map(registrationData, User.class);
         user.changePassword(registrationData.getPassword(), passwordEncoder);
         return userRepository.save(user);
     }

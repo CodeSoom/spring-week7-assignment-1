@@ -139,7 +139,9 @@ class UserControllerTest {
                         containsString("\"name\":\"TEST\"")
                 ));
 
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class), authentication);
+        verify(userService).updateUser(eq(1L),
+                any(UserModificationData.class),
+                any(Authentication.class));
     }
 
     @Test
@@ -197,13 +199,7 @@ class UserControllerTest {
                                     .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
                                     .header("Authorization", "Bearer " + VALID_TOKEN)
                     )
-                    .andExpect(status().isOk())
-                    .andExpect(content().string(
-                            containsString("\"id\":1")
-                    ))
-                    .andExpect(content().string(
-                            containsString("\"name\":\"TEST\"")
-                    ));
+                    .andExpect(status().isForbidden());
 
             verify(userService).updateUser(eq(999L),
                     any(UserModificationData.class),
