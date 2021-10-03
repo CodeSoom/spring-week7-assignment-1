@@ -36,13 +36,13 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         if (authorization != null) {
             String accessToken = authorization.substring("Bearer ".length());
             Long userId = authenticationService.parseToken(accessToken);
-            Authentication authentication = new UserAuthentication(userId);
+            final Authentication authentication = new UserAuthentication(userId);
 
-            SecurityContext context = SecurityContextHolder.getContext();
+            final SecurityContext context = SecurityContextHolder.getContext();
             context.setAuthentication(authentication);
         }
 
-        chain.doFilter(request, response);
+        super.doFilter(request, response, chain);
 
     }
 

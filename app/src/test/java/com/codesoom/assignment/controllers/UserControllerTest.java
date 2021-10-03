@@ -85,10 +85,10 @@ class UserControllerTest {
                 .willThrow(new UserNotFoundException(100L));
 
         given(userService.updateUser(
-                eq(999L),
+                eq(8080L),
                 any(UserModificationData.class),
                 any(Authentication.class)))
-                .willThrow(new UserForbiddenException(999L));
+                .willThrow(new UserForbiddenException(8080L));
     }
 
     @Test
@@ -194,14 +194,14 @@ class UserControllerTest {
         @DisplayName("403 Forbidden 에러를 리턴한다.")
         void sendForbiddenResponse() throws Exception {
             mockMvc.perform(
-                            patch("/users/999")
+                            patch("/users/8080")
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
                                     .header("Authorization", "Bearer " + VALID_TOKEN)
                     )
                     .andExpect(status().isForbidden());
 
-            verify(userService).updateUser(eq(999L),
+            verify(userService).updateUser(eq(8080L),
                     any(UserModificationData.class),
                     any(Authentication.class));
 
