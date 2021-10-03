@@ -64,7 +64,7 @@ class ProductControllerTest {
                     Long id = invocation.getArgument(0);
                     ProductData productData = invocation.getArgument(1);
                     return Product.builder()
-                            .id(id)
+                            .id(productData.getId())
                             .name(productData.getName())
                             .maker(productData.getMaker())
                             .price(productData.getPrice())

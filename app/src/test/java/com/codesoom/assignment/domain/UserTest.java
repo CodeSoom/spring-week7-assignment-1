@@ -62,14 +62,16 @@ class UserTest {
 
     @Test
     void authenticateWithDeletedUser() {
-        User user = User.builder()
-                .password("test")
-                .deleted(true)
-                .build();
-
+        User user = User.builder().build();
         user.changePassword("test", passwordEncoder);
+
+        assertThat(user.authenticate("test", passwordEncoder)).isTrue();
+        assertThat(user.authenticate("xxx", passwordEncoder)).isFalse();
+
+        user.destroy();
 
         assertThat(user.authenticate("test", passwordEncoder)).isFalse();
         assertThat(user.authenticate("xxx", passwordEncoder)).isFalse();
+
     }
 }
