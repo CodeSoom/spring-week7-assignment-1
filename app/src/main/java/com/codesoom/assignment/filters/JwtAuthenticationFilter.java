@@ -2,7 +2,9 @@ package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.securities.Roles;
 import com.codesoom.assignment.securities.UserAuthentication;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -29,17 +31,42 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             HttpServletResponse response,
             FilterChain chain
     ) throws IOException, ServletException {
+        try {
+            String accessToken = parseAuthorizationHeaderFrom(request);
+
+            if(!accessToken.isBlank()) {
+                Authentication authResult = this.getAuthenticationManager().authenticate(
+                        new UserAuthentication(Roles.ANONYMOUS, accessToken)
+                );
+
+                onSuccessfulAuthentication(request, response, authResult);
+            }
+
+            chain.doFilter(request, response);
+        } catch (InvalidTokenException e){
+            response.sendError(HttpStatus.UNAUTHORIZED.value());
+        }
+    }
+
+    @Override
+    protected void onSuccessfulAuthentication(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authResult
+    ) {
+        authResult.setAuthenticated(true);
+
+        SecurityContext context = SecurityContextHolder.getContext();
+        context.setAuthentication(authResult);
+    }
+
+    private String parseAuthorizationHeaderFrom(HttpServletRequest request) {
         String authorization = request.getHeader("Authorization");
 
-        if (authorization != null) {
-            String accessToken = authorization.substring("Bearer ".length());
-            Long userId = authenticationService.parseToken(accessToken);
-
-            Authentication authentication = new UserAuthentication(userId);
-            SecurityContext context = SecurityContextHolder.getContext();
-            context.setAuthentication(authentication);
+        if (authorization == null) {
+            return "";
         }
 
-        chain.doFilter(request, response);
+        return authorization.substring("Bearer ".length());
     }
 }

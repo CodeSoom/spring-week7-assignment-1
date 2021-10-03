@@ -12,14 +12,14 @@ class UserAuthenticationTest {
 
     @BeforeEach
     void setup() {
-        userAuthentication = new UserAuthentication(1L);
+        userAuthentication = new UserAuthentication(Roles.USER, 1L,"aaa.bbb.ccc");
     }
 
     @Nested
     @DisplayName("getPrincipal")
     class GetPrincipal {
         @Test
-        @DisplayName("회원 식별자를 반환한다")
+        @DisplayName("회원 식별자를 반환한다.")
         void getPrincipal() {
             assertThat(userAuthentication.getPrincipal()).isEqualTo(1L);
         }
@@ -29,19 +29,9 @@ class UserAuthenticationTest {
     @DisplayName("getCredentials")
     class GetCredentials {
         @Test
-        @DisplayName("null 을 반환한다.")
+        @DisplayName("회원 인증 키를 리턴한다.")
         void getPrincipal() {
-            assertThat(userAuthentication.getCredentials()).isNull();
-        }
-    }
-
-    @Nested
-    @DisplayName("isAuthenticated")
-    class Authorities {
-        @Test
-        @DisplayName("true 를 반환한다.")
-        void getPrincipal() {
-            assertThat(userAuthentication.isAuthenticated()).isTrue();
+            assertThat(userAuthentication.getCredentials()).isEqualTo("aaa.bbb.ccc");
         }
     }
 }
