@@ -30,6 +30,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws IOException, ServletException {
+        // 경로나 메서드에 따른 요청을 처리방식에서 따로 방식을 변경한다.
         if (filterWithPathAndMethod(request)) {
             chain.doFilter(request, response);
             return;
@@ -44,8 +45,8 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         Long userId = authenticationService.parseToken(accessToken);
         // TODO : userID 넘겨주기
 
-        SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = null;
+        SecurityContext context = SecurityContextHolder.getContext();
         context.setAuthentication(authentication);
 
         chain.doFilter(request, response);

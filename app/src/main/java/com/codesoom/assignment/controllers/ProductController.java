@@ -44,9 +44,10 @@ public class ProductController {
     // 데이터 변경 -> 누가 하는가? : Authentication
     // 로그인을 해야 데이터 변경이 가능하다 : Authorization
     public Product create(
-            @RequestAttribute Long userId,
-            @RequestBody @Valid ProductData productData
+            @RequestBody @Valid ProductData productData,
+            Authentication authentication
     ) {
+        System.out.println(authentication);
         return productService.createProduct(productData);
     }
 
@@ -54,13 +55,10 @@ public class ProductController {
     // 데이터 변경 -> 누가 하는가? : Authentication
     // 로그인을 해야 데이터 변경이 가능하다 : Authorization
     public Product update(
-            @RequestAttribute Long userId,
             @PathVariable Long id,
-            @RequestBody @Valid ProductData productData,
-            Authentication authentication
+            @RequestBody @Valid ProductData productData
 
     ) {
-        System.out.println(authentication);
         return productService.updateProduct(id, productData);
     }
 
