@@ -8,6 +8,8 @@ import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserForbiddenException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -38,6 +40,9 @@ class UserControllerTest {
 
     @MockBean
     private Authentication authentication;
+
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
 
 
     @BeforeEach
@@ -124,6 +129,7 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -142,6 +148,7 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isBadRequest());
     }
@@ -152,11 +159,14 @@ class UserControllerTest {
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isNotFound());
 
         verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class), authentication);
+                .updateUser(eq(100L),
+                        any(UserModificationData.class),
+                        any(Authentication.class));
     }
 
     @Test
@@ -173,5 +183,32 @@ class UserControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
+    }
+
+    @Nested
+    @DisplayName("내 정보를 다른 사용자가 변경하려고 할 때")
+    class sendForbiddenRequest {
+        @Test
+        @DisplayName("403 Forbidden 에러를 리턴한다.")
+        void sendForbiddenResponse() throws Exception {
+            mockMvc.perform(
+                            patch("/users/999")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                                    .header("Authorization", "Bearer " + VALID_TOKEN)
+                    )
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(
+                            containsString("\"id\":1")
+                    ))
+                    .andExpect(content().string(
+                            containsString("\"name\":\"TEST\"")
+                    ));
+
+            verify(userService).updateUser(eq(999L),
+                    any(UserModificationData.class),
+                    any(Authentication.class));
+
+        }
     }
 }
