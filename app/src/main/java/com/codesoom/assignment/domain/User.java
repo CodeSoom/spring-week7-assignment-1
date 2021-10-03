@@ -52,6 +52,7 @@ public class User {
     }
 
     public boolean authenticate(String password) {
-        return !deleted && password.equals(this.password);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        return !deleted && passwordEncoder.matches(password, this.password);
     }
 }
