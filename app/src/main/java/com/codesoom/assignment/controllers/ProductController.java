@@ -11,7 +11,17 @@ import com.codesoom.assignment.dto.ProductData;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -44,12 +54,8 @@ public class ProductController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     public Product create(
-            @RequestBody @Valid ProductData productData,
-            Authentication authentication
+            @RequestBody @Valid final ProductData productData
     ) {
-        System.out.println("-------------");
-        System.out.println(authentication);
-        System.out.println("-------------");
         return productService.createProduct(productData);
     }
 
@@ -65,7 +71,11 @@ public class ProductController {
 
     @DeleteMapping("{id}")
     @PreAuthorize("isAuthenticated()")
-    public void destroy(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void destroy(
+            @RequestAttribute Long userId,
+            @PathVariable Long id
+    ) {
         productService.deleteProduct(id);
     }
 }
