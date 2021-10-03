@@ -7,9 +7,8 @@ import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.Mapper;
-import org.springframework.stereotype.Service;
-
 import javax.transaction.Transactional;
+import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
@@ -29,6 +28,9 @@ public class UserService {
         }
 
         User user = mapper.map(registrationData, User.class);
+
+        user.changePassword(registrationData.getPassword());
+
         return userRepository.save(user);
     }
 
