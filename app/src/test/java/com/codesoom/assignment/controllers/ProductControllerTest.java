@@ -4,18 +4,18 @@ import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
+import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.ProductNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +24,18 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.ArgumentMatchers.any;
 
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ProductController.class)
-@DisplayName("ProductController의 ")
+@DisplayName("Product Controller의 ")
 class ProductControllerTest {
+
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String INVALID_TOKEN = VALID_TOKEN + "wrong";
 
     @Autowired
     private MockMvc mvc;
@@ -45,7 +51,7 @@ class ProductControllerTest {
     class Describe_getProductList {
 
         @Nested
-        @DisplayName("장난감 리스트가 없으면")
+        @DisplayName("상품 리스트가 없으면")
         class Context_with_no_product {
             private List<Product> productList = new ArrayList<>();
 
@@ -67,7 +73,7 @@ class ProductControllerTest {
         }
 
         @Nested
-        @DisplayName("장난감 리스트가 있으면")
+        @DisplayName("상품 리스트가 있으면")
         class Context_with_product {
             private List<Product> productList = new ArrayList<>();
 
@@ -160,18 +166,144 @@ class ProductControllerTest {
     class Describe_createProduct {
 
         @Nested
-        @DisplayName("인증이 되지 않으면")
+        @DisplayName("인증이 되지 않은 경우")
         class Context_with_Not_Authentication {
 
+            @BeforeEach
+            void setUp() {
+                given(authenticationService.parseToken(INVALID_TOKEN))
+                        .willThrow(new InvalidTokenException(INVALID_TOKEN));
+            }
+
             @Test
-            @WithAnonymousUser
-            @DisplayName("상태코드 401을 응답한다.")
+            @DisplayName("토큰이 유효하지 않으면 상태코드 401을 응답한다.")
             void createProductWithoutAuthentication() throws Exception {
+                mvc.perform(
+                        post("/products")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
+                                        "\"price\":5000}")
+                                .header("Authorization", "Bearer " + INVALID_TOKEN)
+                )
+                        .andDo(print())
+                        .andExpect(status().isUnauthorized());
+            }
+        }
+
+        @Nested
+        @DisplayName("인증이 된 경우")
+        class Context_with_Authentication {
+
+            @BeforeEach
+            void setUp() {
+                Product product = Product.builder()
+                        .id(1L)
+                        .name("쥐돌이")
+                        .maker("냥이월드")
+                        .price(5000)
+                        .build();
+
+                given(productService.createProduct(any(ProductData.class))).willReturn(product);
+                given(authenticationService.parseToken(VALID_TOKEN)).willReturn(1L);
+
+            }
+
+            @Test
+            @DisplayName("전달 값이 유효하면 상품을 등록하고 상태코드 201을 응답한다.")
+            void createProductWithAuthentication() throws Exception {
                 mvc.perform(post("/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}"))
-                        .andExpect(status().isUnauthorized());
+                                "\"price\":5000}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                        .andDo(print())
+                        .andExpect(status().isCreated());
+
+                verify(productService).createProduct(any(ProductData.class));
+            }
+
+            @Test
+            @DisplayName("전달 값이 유효하지 않으면 상태코드 401을 응답한다.")
+            void createProductWithAuthenticationWithWrongAttributes() throws Exception {
+                mvc.perform(post("/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"\",\"maker\":\"\"," +
+                                "\"price\":5000}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                        .andExpect(status().isBadRequest());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("update 메소드는")
+    class Describe_updateProduct {
+
+        @Nested
+        @DisplayName("인증이 된 경우")
+        class Context_with_Authentication {
+
+            @Test
+            @DisplayName("전달 값이 유효하고 상품이 존재하면 상품을 수정하고 200을 응답한다.")
+            void updateProductWithExistedProduct() {
+
+            }
+
+            @Test
+            @DisplayName("상품을 찾을 수 없으면 400을 응답한다.")
+            void updateProductWithNotExistedProduct() {
+
+            }
+
+            @Test
+            @DisplayName("전달 값이 유효하지 않으면 400을 응답한다.")
+            void updateProductWithWrongAttributes() {
+
+            }
+        }
+
+        @Nested
+        @DisplayName("인증이 되지 않은 경우")
+        class Context_without_Authentication {
+
+            @Test
+            @DisplayName("토큰이 유효하지 않으면 상태코드 401을 응답한다.")
+            void updateWithInvalidToken() {
+
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("delete 메소드는")
+    class Describe_deleteProduct {
+
+        @Nested
+        @DisplayName("인증이 된 경우")
+        class Context_with_Authentication {
+
+            @Test
+            @DisplayName("전달 값이 유효하고 상품이 존재하면 상품을 삭제하고 200을 응답한다.")
+            void deleteProductWithExistedProduct() {
+
+            }
+
+            @Test
+            @DisplayName("상품을 찾을 수 없으면 400을 응답한다.")
+            void deleteProductWithNotExistedProduct() {
+
+            }
+        }
+
+        @Nested
+        @DisplayName("인증이 되지 않은 경우")
+        class Context_without_Authentication {
+
+            @Test
+            @DisplayName("토큰이 유효하지 않으면 상태코드 401을 응답한다.")
+            void deleteWithInvalidToken() {
+
             }
         }
     }
