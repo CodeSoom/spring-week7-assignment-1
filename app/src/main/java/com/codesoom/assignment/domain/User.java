@@ -59,7 +59,7 @@ public class User {
      * 회원 정보를 인증하고 리턴합니다.
      * @param password 비밀번호
      * @param passwordEncoder 비밀번호 인코더
-     * @return 인증결 과
+     * @return 인증결과
      */
     public boolean authenticate(String password, PasswordEncoder passwordEncoder) {
         return !deleted && passwordEncoder.matches(password, this.password);

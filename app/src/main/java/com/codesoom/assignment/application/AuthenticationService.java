@@ -45,9 +45,9 @@ public class AuthenticationService {
     }
 
     /**
-     * 요청한 토큰의 유효성 여부를 확인합니다.
-     * @param accessToken 요청한 토큰
-     * @return 인증된 회원 식별자
+     * 인증 토큰으로 회원 식별자를 얻어서 리턴합니다.
+     * @param accessToken 인증 토큰
+     * @return 회원 식별자
      */
     public Long parseToken(String accessToken) {
         Claims claims = jwtUtil.decode(accessToken);

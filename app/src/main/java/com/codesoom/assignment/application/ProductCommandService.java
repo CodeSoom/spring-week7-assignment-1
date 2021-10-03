@@ -8,7 +8,7 @@ import com.github.dozermapper.core.Mapper;
 import org.springframework.stereotype.Service;
 
 /**
- * 상품을 추가, 수정, 삭제합니다.
+ * 상품을 추가, 수정, 삭제하는 기능을 제공합니다.
  */
 @Service
 public class ProductCommandService {

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * 상품을 반환합니다.
+ * 상품 조회 기능을 제공합니다.
  */
 @Service
 public class ProductQueryService {
