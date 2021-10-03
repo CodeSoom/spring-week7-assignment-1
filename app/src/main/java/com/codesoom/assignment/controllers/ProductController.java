@@ -73,7 +73,6 @@ public class ProductController {
     @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void destroy(
-            @RequestAttribute Long userId,
             @PathVariable Long id
     ) {
         productService.deleteProduct(id);
