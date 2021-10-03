@@ -26,7 +26,7 @@ class UserTest {
                 .build());
 
         assertThat(user.getName()).isEqualTo("TEST");
-        assertThat(user.getPassword()).isEqualTo("");
+        assertThat(user.getPassword()).isEqualTo("TEST");
     }
 
     @Test
@@ -63,6 +63,7 @@ class UserTest {
     @Test
     void authenticateWithDeletedUser() {
         User user = User.builder()
+                .password("test")
                 .deleted(true)
                 .build();
 
