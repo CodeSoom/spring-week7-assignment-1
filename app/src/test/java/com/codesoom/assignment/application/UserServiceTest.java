@@ -104,8 +104,7 @@ class UserServiceTest {
             .password("TEST")
             .build();
 
-        Long userId = 1L;
-        User user = userService.updateUser(1L, modificationData, userId);
+        User user = userService.updateUser(1L, modificationData, 1L);
 
         assertThat(user.getId()).isEqualTo(1L);
         assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
