@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -27,6 +28,13 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
+
+    private static final String MY_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+        "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String OTHER_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjJ9.i-iHszAs6H2JFTdm3vOVuN18tb_w6n2FqEYIRtr6gaU";
+
+    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+        "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
 
     @Autowired
     private MockMvc mockMvc;
@@ -101,11 +109,37 @@ class UserControllerTest {
     }
 
     @Test
+    void updateWithoutAccessToken() throws Exception {
+        mockMvc.perform(
+            patch("/users/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+        )
+            .andExpect(status().isUnauthorized());
+
+        verify(userService, never()).updateUser(eq(1L), any(UserModificationData.class));
+    }
+
+    @Test
+    void updateWithNotMyAccessToken() throws Exception {
+        mockMvc.perform(
+            patch("/users/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                .header("Authorization", "Bearer " + OTHER_TOKEN)
+        )
+            .andExpect(status().isForbidden());
+
+        verify(userService, never()).updateUser(eq(1L), any(UserModificationData.class));
+    }
+
+    @Test
     void updateUserWithValidAttributes() throws Exception {
         mockMvc.perform(
             patch("/users/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                .header("Authorization", "Bearer " + MY_TOKEN)
         )
             .andExpect(status().isOk())
             .andExpect(content().string(
@@ -124,6 +158,7 @@ class UserControllerTest {
             patch("/users/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"\",\"password\":\"\"}")
+                .header("Authorization", "Bearer " + MY_TOKEN)
         )
             .andExpect(status().isBadRequest());
     }
@@ -134,6 +169,7 @@ class UserControllerTest {
             patch("/users/100")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                .header("Authorization", "Bearer " + MY_TOKEN)
         )
             .andExpect(status().isNotFound());
 
