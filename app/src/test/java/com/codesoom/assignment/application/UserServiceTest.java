@@ -98,11 +98,12 @@ class UserServiceTest {
     @Test
     void updateUserWithExistedId() {
         UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
+            .name("TEST")
+            .password("TEST")
+            .build();
 
-        User user = userService.updateUser(1L, modificationData);
+        Long userId = 1L;
+        User user = userService.updateUser(1L, modificationData, userId);
 
         assertThat(user.getId()).isEqualTo(1L);
         assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
@@ -114,12 +115,13 @@ class UserServiceTest {
     @Test
     void updateUserWithNotExistedId() {
         UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
+            .name("TEST")
+            .password("TEST")
+            .build();
 
-        assertThatThrownBy(() -> userService.updateUser(100L, modificationData))
-                .isInstanceOf(UserNotFoundException.class);
+        Long userId = 1L;
+        assertThatThrownBy(() -> userService.updateUser(100L, modificationData, userId))
+            .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(100L);
     }
@@ -133,7 +135,7 @@ class UserServiceTest {
                 .build();
 
         assertThatThrownBy(
-                () -> userService.updateUser(DELETED_USER_ID, modificationData)
+            () -> userService.updateUser(DELETED_USER_ID, modificationData, DELETED_USER_ID)
         )
                 .isInstanceOf(UserNotFoundException.class);
 

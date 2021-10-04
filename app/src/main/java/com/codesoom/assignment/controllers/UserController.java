@@ -5,6 +5,7 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
+import com.codesoom.assignment.security.UserAuthentication;
 import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/users")
 @CrossOrigin
 public class UserController {
+
     private final UserService userService;
 
     public UserController(UserService userService) {
@@ -38,10 +40,12 @@ public class UserController {
     @PatchMapping("{id}")
     @PreAuthorize("isAuthenticated()")
     UserResultData update(
-            @PathVariable Long id,
-            @RequestBody @Valid UserModificationData modificationData
+        @PathVariable Long id,
+        @RequestBody @Valid UserModificationData modificationData,
+        UserAuthentication userAuthentication
     ) {
-        User user = userService.updateUser(id, modificationData);
+        Long userId = userAuthentication.getUserId();
+        User user = userService.updateUser(id, modificationData, userId);
         return getUserResultData(user);
     }
 
@@ -53,9 +57,9 @@ public class UserController {
 
     private UserResultData getUserResultData(User user) {
         return UserResultData.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .build();
+            .id(user.getId())
+            .email(user.getEmail())
+            .name(user.getName())
+            .build();
     }
 }

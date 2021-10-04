@@ -20,6 +20,10 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         return null;
     }
 
+    public Long getUserId() {
+        return userId;
+    }
+
     @Override
     public Object getCredentials() {
         return null;

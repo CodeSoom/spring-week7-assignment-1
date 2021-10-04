@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(UserController.class)
@@ -57,7 +58,7 @@ class UserControllerTest {
                     .build();
             });
 
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
+        given(userService.updateUser(eq(1L), any(UserModificationData.class), eq(1L)))
             .will(invocation -> {
                 Long id = invocation.getArgument(0);
                 UserModificationData modificationData =
@@ -69,11 +70,20 @@ class UserControllerTest {
                     .build();
             });
 
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
+        given(userService.updateUser(eq(100L), any(UserModificationData.class), eq(1L)))
             .willThrow(new UserNotFoundException(100L));
 
         given(userService.deleteUser(100L))
             .willThrow(new UserNotFoundException(100L));
+
+        given(authenticationService.parseToken(MY_TOKEN))
+            .willReturn(1L);
+
+        given(authenticationService.parseToken(OTHER_TOKEN))
+            .willReturn(2L);
+
+        given(userService.updateUser(eq(1L), any(UserModificationData.class), eq(2L)))
+            .willThrow(new AccessDeniedException("Access denied"));
     }
 
     @Test
@@ -117,11 +127,13 @@ class UserControllerTest {
         )
             .andExpect(status().isUnauthorized());
 
-        verify(userService, never()).updateUser(eq(1L), any(UserModificationData.class));
+        Long userId = 1L;
+        verify(userService, never())
+            .updateUser(eq(1L), any(UserModificationData.class), eq(userId));
     }
 
     @Test
-    void updateWithNotMyAccessToken() throws Exception {
+    void updateWithOthersAccessToken() throws Exception {
         mockMvc.perform(
             patch("/users/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -130,7 +142,7 @@ class UserControllerTest {
         )
             .andExpect(status().isForbidden());
 
-        verify(userService, never()).updateUser(eq(1L), any(UserModificationData.class));
+        verify(userService).updateUser(eq(1L), any(UserModificationData.class), eq(2L));
     }
 
     @Test
@@ -149,7 +161,8 @@ class UserControllerTest {
                 containsString("\"name\":\"TEST\"")
             ));
 
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
+        Long userId = 1L;
+        verify(userService).updateUser(eq(1L), any(UserModificationData.class), eq(userId));
     }
 
     @Test
@@ -172,9 +185,10 @@ class UserControllerTest {
                 .header("Authorization", "Bearer " + MY_TOKEN)
         )
             .andExpect(status().isNotFound());
+        ;
 
         verify(userService)
-            .updateUser(eq(100L), any(UserModificationData.class));
+            .updateUser(eq(100L), any(UserModificationData.class), eq(1L));
     }
 
     @Test
