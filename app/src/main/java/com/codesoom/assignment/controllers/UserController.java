@@ -38,7 +38,7 @@ public class UserController {
     }
 
     @PatchMapping("{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     UserResultData update(
         @PathVariable Long id,
         @RequestBody @Valid UserModificationData modificationData,
@@ -50,6 +50,7 @@ public class UserController {
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void destroy(@PathVariable Long id) {
         userService.deleteUser(id);

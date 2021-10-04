@@ -1,9 +1,11 @@
 package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.security.UserAuthentication;
 import java.io.IOException;
+import java.util.List;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -46,9 +48,9 @@ public class AuthenticationFilter extends BasicAuthenticationFilter {
             String accessToken = getAccessToken(authorization);
             Long userId = authenticationService.parseToken(accessToken);
 
-            request.setAttribute("userId", userId);
+            List<Role> roles = authenticationService.roles(userId);
 
-            Authentication authentication = new UserAuthentication(userId);
+            Authentication authentication = new UserAuthentication(userId, roles);
 
             SecurityContext context = SecurityContextHolder.getContext();
             context.setAuthentication(authentication);

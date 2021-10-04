@@ -14,10 +14,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
+import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +35,10 @@ class UserControllerTest {
     private static final String MY_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
         "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
     private static final String OTHER_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjJ9.i-iHszAs6H2JFTdm3vOVuN18tb_w6n2FqEYIRtr6gaU";
+    private static final String ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEwMDR9.3GV5ZH3flBf0cnaXQCNNZlT4mgyFyBUhn3LKzQohh1A";
 
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
         "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -82,8 +84,20 @@ class UserControllerTest {
         given(authenticationService.parseToken(OTHER_TOKEN))
             .willReturn(2L);
 
+        given(authenticationService.parseToken(ADMIN_TOKEN))
+            .willReturn(1004L);
+
         given(userService.updateUser(eq(1L), any(UserModificationData.class), eq(2L)))
             .willThrow(new AccessDeniedException("Access denied"));
+
+        given(authenticationService.roles(1L))
+            .willReturn(Arrays.asList(new Role("USER")));
+
+        given(authenticationService.roles(2L))
+            .willReturn(Arrays.asList(new Role("USER")));
+
+        given(authenticationService.roles(1004L))
+            .willReturn(Arrays.asList(new Role("USER"), new Role("ADMIN")));
     }
 
     @Test
@@ -185,7 +199,6 @@ class UserControllerTest {
                 .header("Authorization", "Bearer " + MY_TOKEN)
         )
             .andExpect(status().isNotFound());
-        ;
 
         verify(userService)
             .updateUser(eq(100L), any(UserModificationData.class), eq(1L));
@@ -193,7 +206,10 @@ class UserControllerTest {
 
     @Test
     void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
+        mockMvc.perform(
+            delete("/users/1")
+                .header("Authorization", "Bearer " + ADMIN_TOKEN)
+        )
             .andExpect(status().isNoContent());
 
         verify(userService).deleteUser(1L);
@@ -201,9 +217,29 @@ class UserControllerTest {
 
     @Test
     void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
+        mockMvc.perform(
+            delete("/users/100")
+                .header("Authorization", "Bearer " + ADMIN_TOKEN)
+        )
             .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
+    }
+
+    @Test
+    void destroyWithoutAccessToken() throws Exception {
+        mockMvc.perform(
+            delete("/users/1")
+        )
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void destroyWithoutAdminRole() throws Exception {
+        mockMvc.perform(
+            delete("/users/1")
+                .header("Authorization", "Bearer " + MY_TOKEN)
+        )
+            .andExpect(status().isForbidden());
     }
 }
