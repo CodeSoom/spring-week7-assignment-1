@@ -1,6 +1,6 @@
 package com.codesoom.assignment.interceptors;
 
-import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.session.service.AuthenticationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -13,40 +13,32 @@ import java.io.IOException;
 public class AuthenticationInterceptor implements HandlerInterceptor {
     private AuthenticationService authenticationService;
 
-    public AuthenticationInterceptor(
-            AuthenticationService authenticationService) {
+    public AuthenticationInterceptor(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request,
-                             HttpServletResponse response,
-                             Object handler) throws Exception {
-        return filterWithPathAndMethod(request) ||
-                doAuthentication(request, response);
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object Handler) throws Exception {
+        return filterWithPathAndMethod(request) || doAuthentication(request, response);
     }
 
     private boolean filterWithPathAndMethod(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (!path.startsWith("/products")) {
-            return true;
-        }
-
         String method = request.getMethod();
-        if (method.equals("GET")) {
+
+        if ("/products".equals(path)) {
             return true;
         }
 
-        if (method.equals("OPTIONS")) {
+        if ("GET".equals(method)) {
             return true;
         }
 
         return false;
     }
 
-    private boolean doAuthentication(HttpServletRequest request,
-                                     HttpServletResponse response)
-            throws IOException {
+
+    private boolean doAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String authorization = request.getHeader("Authorization");
 
         if (authorization == null) {
@@ -55,9 +47,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         }
 
         String accessToken = authorization.substring("Bearer ".length());
-        Long userId = authenticationService.parseToken(accessToken);
-
-        request.setAttribute("userId", userId);
+        authenticationService.parseToken(accessToken);
 
         return true;
     }
