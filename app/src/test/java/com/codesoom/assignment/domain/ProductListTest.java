@@ -167,6 +167,7 @@ class ProductListTest {
     @Test
     void removeWithNotExistsProduct() {
         final ProductList productList = ProductList.from(products);
+        final int productSize = productList.size();
 
         final Product notExistsProduct = Product.builder()
                 .name("테스트")
@@ -174,6 +175,9 @@ class ProductListTest {
 
         assertThatCode(() -> productList.remove(notExistsProduct))
                 .doesNotThrowAnyException();
+
+        assertThat(productList.size()).isEqualTo(productSize);
+
     }
 
     @Test
