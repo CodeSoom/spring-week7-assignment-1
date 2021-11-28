@@ -5,13 +5,17 @@ import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.UserForbiddenException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
@@ -34,6 +38,11 @@ class UserControllerTest {
     @MockBean
     private AuthenticationService authenticationService;
 
+    @MockBean
+    private Authentication authentication;
+
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
     @BeforeEach
     void setUp() {
         given(userService.registerUser(any(UserRegistrationData.class)))
@@ -47,7 +56,7 @@ class UserControllerTest {
                 });
 
 
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
+        given(userService.updateUser(eq(1L), any(UserModificationData.class),any(Authentication.class)))
                 .will(invocation -> {
                     Long id = invocation.getArgument(0);
                     UserModificationData modificationData =
@@ -59,11 +68,15 @@ class UserControllerTest {
                             .build();
                 });
 
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
+        given(userService.updateUser(eq(100L), any(UserModificationData.class),any(Authentication.class)))
                 .willThrow(new UserNotFoundException(100L));
 
         given(userService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
+
+
+        given(userService.updateUser( eq(9999L), any(UserModificationData.class),any(Authentication.class)))
+                .willThrow(new UserForbiddenException(9999L));
     }
 
     @Test
@@ -104,6 +117,8 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+
         )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -113,7 +128,7 @@ class UserControllerTest {
                         containsString("\"name\":\"TEST\"")
                 ));
 
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
+        verify(userService).updateUser(eq(1L), any(UserModificationData.class),any(Authentication.class));
     }
 
     @Test
@@ -122,6 +137,8 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+
         )
                 .andExpect(status().isBadRequest());
     }
@@ -132,11 +149,13 @@ class UserControllerTest {
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+
         )
                 .andExpect(status().isNotFound());
 
         verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
+                .updateUser(eq(100L), any(UserModificationData.class),any(Authentication.class));
     }
 
     @Test
@@ -153,5 +172,26 @@ class UserControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
+    }
+
+
+    @Nested
+    @DisplayName("사용자가 자신외의 사용자 정보를 변경하려 할때")
+    class WithForbiddenRequest {
+        @Test
+        @DisplayName("403 Forbidden 에러로 응답한다.")
+        void It_responsesWithForbiddenError() throws Exception {
+            mockMvc.perform(
+                    patch("/users/9999")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                    .header("Authorization", String.format("Bearer "+VALID_TOKEN))
+            )
+                    .andExpect(status().isForbidden());
+
+            verify(userService)
+                    .updateUser(eq(9999L), any(UserModificationData.class),any(Authentication.class));
+
+        }
     }
 }

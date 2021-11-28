@@ -27,6 +27,13 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("User not found");
     }
 
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(UserForbiddenException.class)
+    public ErrorResponse handleUserForbidden() {
+        return new ErrorResponse("user forbidden");
+    }
+
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(UserEmailDuplicationException.class)
     public ErrorResponse handleUserEmailIsAlreadyExisted() {
@@ -39,11 +46,6 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Log-in failed");
     }
 
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(InvalidTokenException.class)
-    public ErrorResponse handleInvalidAccessTokenException() {
-        return new ErrorResponse("Invalid access token");
-    }
 
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
