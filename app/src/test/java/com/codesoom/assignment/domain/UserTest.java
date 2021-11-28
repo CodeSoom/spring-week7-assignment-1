@@ -1,21 +1,42 @@
 package com.codesoom.assignment.domain;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UserTest {
+    private static final String TEST_STRING = "TEST";
+
+    private PasswordEncoder passwordEncoder;
+
+    @BeforeEach
+    void setup() {
+        passwordEncoder = new BCryptPasswordEncoder();
+    }
+
     @Test
     void changeWith() {
         User user = User.builder().build();
 
         user.changeWith(User.builder()
-                .name("TEST")
-                .password("TEST")
+                .name(TEST_STRING)
                 .build());
 
-        assertThat(user.getName()).isEqualTo("TEST");
-        assertThat(user.getPassword()).isEqualTo("TEST");
+        assertThat(user.getName()).isEqualTo(TEST_STRING);
+        assertThat(user.getPassword()).isEmpty();
+    }
+
+    @Test
+    void changePassword() {
+        User user = User.builder().name(TEST_STRING).build();
+
+        user.changePassword(TEST_STRING, passwordEncoder);
+
+        assertThat(user.getName()).isEqualTo(TEST_STRING);
+        assertThat(user.getPassword()).isNotEqualTo(TEST_STRING);
     }
 
     @Test
@@ -31,22 +52,23 @@ class UserTest {
 
     @Test
     void authenticate() {
+        String password = passwordEncoder.encode(TEST_STRING);
         User user = User.builder()
-                .password("test")
+                .password(password)
                 .build();
 
-        assertThat(user.authenticate("test")).isTrue();
-        assertThat(user.authenticate("xxx")).isFalse();
+        assertThat(user.authenticate(TEST_STRING, passwordEncoder)).isTrue();
+        assertThat(user.authenticate("xxx", passwordEncoder)).isFalse();
     }
 
     @Test
     void authenticateWithDeletedUser() {
         User user = User.builder()
-                .password("test")
+                .password(TEST_STRING)
                 .deleted(true)
                 .build();
 
-        assertThat(user.authenticate("test")).isFalse();
-        assertThat(user.authenticate("xxx")).isFalse();
+        assertThat(user.authenticate(TEST_STRING, passwordEncoder)).isFalse();
+        assertThat(user.authenticate("xxx", passwordEncoder)).isFalse();
     }
 }
