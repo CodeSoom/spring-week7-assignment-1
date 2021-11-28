@@ -64,7 +64,7 @@ class ProductControllerTest {
                     Long id = invocation.getArgument(0);
                     ProductData productData = invocation.getArgument(1);
                     return Product.builder()
-                            .id(id)
+                            .id(productData.getId())
                             .name(productData.getName())
                             .maker(productData.getMaker())
                             .price(productData.getPrice())
@@ -263,6 +263,18 @@ class ProductControllerTest {
                                 "\"price\":5000}")
                         .header("Authorization", "Bearer " + INVALID_TOKEN)
         )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void destroyWithoutAccessToken() throws Exception {
+        mockMvc.perform(
+                        patch("/products/1")
+                                .accept(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
+                                        "\"price\":5000}")
+                )
                 .andExpect(status().isUnauthorized());
     }
 }

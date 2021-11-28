@@ -39,7 +39,6 @@ public class ProductService {
 
     public Product updateProduct(Long id, ProductData productData) {
         Product product = findProduct(id);
-
         product.changeWith(mapper.map(productData, Product.class));
 
         return product;
@@ -47,7 +46,6 @@ public class ProductService {
 
     public Product deleteProduct(Long id) {
         Product product = findProduct(id);
-
         productRepository.delete(product);
 
         return product;

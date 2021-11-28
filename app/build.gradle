@@ -11,8 +11,8 @@ plugins {
     id 'application'
 
     // Spring
-    id 'org.springframework.boot' version '2.3.5.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+    id 'org.springframework.boot' version '2.5.5'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 
     // Jacoco
     id 'jacoco'
@@ -26,14 +26,10 @@ configurations {
 }
 
 repositories {
-    // Use JCenter for resolving dependencies.
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
-    // Use JUnit Jupiter API for testing.
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
-
     // AssertJ
     testImplementation 'org.assertj:assertj-core:3.18.1'
 
@@ -48,16 +44,16 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.3'
 
     // Lombok
-    compileOnly 'org.projectlombok:lombok:1.18.16'
-    annotationProcessor 'org.projectlombok:lombok:1.18.16'
+    compileOnly 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
     // DozerMapper
     implementation 'com.github.dozermapper:dozer-core:6.4.0'
 
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
-    runtime 'io.jsonwebtoken:jjwt-impl:0.11.2'
-    runtime 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.2'
 
     // Spring Web
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -76,6 +72,9 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
+
+    // Spring Boot Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 application {
@@ -118,7 +117,8 @@ jacocoTestCoverageVerification {
                     "com.codesoom.assignment.dto.*",
                     "com.codesoom.assignment.controllers.ControllerErrorAdvice",
                     "com.codesoom.assignment.controllers",
-                    "com.codesoom.assignment.interceptors.AuthenticationInterceptor"
+                    "com.codesoom.assignment.interceptors.AuthenticationInterceptor",
+                    "com.codesoom.assignment.domain.User.UserBuilder"
             ]
         }
     }
