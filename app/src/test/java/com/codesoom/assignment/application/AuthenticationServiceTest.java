@@ -2,11 +2,14 @@ package com.codesoom.assignment.application;
 
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
+import com.codesoom.assignment.dto.SessionRequestData;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -31,22 +34,26 @@ class AuthenticationServiceTest {
     @BeforeEach
     void setUp() {
         JwtUtil jwtUtil = new JwtUtil(SECRET);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
         authenticationService = new AuthenticationService(
-                userRepository, jwtUtil);
+                userRepository, jwtUtil, passwordEncoder);
 
         User user = User.builder()
+                .id(1L)
                 .password("test")
                 .build();
 
+        user.changePassword("test", passwordEncoder);
+
         given(userRepository.findByEmail("tester@example.com"))
                 .willReturn(Optional.of(user));
+
     }
 
     @Test
     void loginWithRightEmailAndPassword() {
-        String accessToken = authenticationService.login(
-                "tester@example.com", "test");
+        String accessToken = authenticationService.login(new SessionRequestData("tester@example.com", "test"));
 
         assertThat(accessToken).isEqualTo(VALID_TOKEN);
 
@@ -56,7 +63,7 @@ class AuthenticationServiceTest {
     @Test
     void loginWithWrongEmail() {
         assertThatThrownBy(
-                () -> authenticationService.login("badguy@example.com", "test")
+                () -> authenticationService.login(new SessionRequestData("badguy@example.com", "test"))
         ).isInstanceOf(LoginFailException.class);
 
         verify(userRepository).findByEmail("badguy@example.com");
@@ -65,7 +72,7 @@ class AuthenticationServiceTest {
     @Test
     void loginWithWrongPassword() {
         assertThatThrownBy(
-                () -> authenticationService.login("tester@example.com", "xxx")
+                () -> authenticationService.login(new SessionRequestData("tester@example.com", "xxx"))
         ).isInstanceOf(LoginFailException.class);
 
         verify(userRepository).findByEmail("tester@example.com");

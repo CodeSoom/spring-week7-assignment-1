@@ -13,4 +13,5 @@ public class UserResultData {
     private String email;
 
     private String name;
+
 }

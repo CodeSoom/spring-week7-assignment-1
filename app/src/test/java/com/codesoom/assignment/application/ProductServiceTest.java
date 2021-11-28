@@ -6,12 +6,12 @@
 
 package com.codesoom.assignment.application;
 
-import com.codesoom.assignment.errors.ProductNotFoundException;
 import com.codesoom.assignment.domain.Product;
+import com.codesoom.assignment.domain.ProductList;
 import com.codesoom.assignment.domain.ProductRepository;
 import com.codesoom.assignment.dto.ProductData;
-import com.github.dozermapper.core.DozerBeanMapperBuilder;
-import com.github.dozermapper.core.Mapper;
+import com.codesoom.assignment.errors.InvalidProductArgumentsException;
+import com.codesoom.assignment.errors.ProductNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,9 +33,7 @@ class ProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        Mapper mapper = DozerBeanMapperBuilder.buildDefault();
-
-        productService = new ProductService(mapper, productRepository);
+        productService = new ProductService(productRepository);
 
         Product product = Product.builder()
                 .id(1L)
@@ -63,14 +61,14 @@ class ProductServiceTest {
     void getProductsWithNoProduct() {
         given(productRepository.findAll()).willReturn(List.of());
 
-        assertThat(productService.getProducts()).isEmpty();
+        assertThat(productService.getProducts().isEmpty()).isTrue();
     }
 
     @Test
     void getProducts() {
-        List<Product> products = productService.getProducts();
+        ProductList products = productService.getProducts();
 
-        assertThat(products).isNotEmpty();
+        assertThat(products.isEmpty()).isFalse();
 
         Product product = products.get(0);
 
@@ -132,6 +130,18 @@ class ProductServiceTest {
 
         assertThatThrownBy(() -> productService.updateProduct(1000L, productData))
                 .isInstanceOf(ProductNotFoundException.class);
+    }
+
+    @Test
+    void updateProductWithInvalidData() {
+        ProductData productData = ProductData.builder()
+                .name(null)
+                .maker("")
+                .price(5000)
+                .build();
+
+        assertThatThrownBy(() -> productService.updateProduct(1L, productData))
+                .isInstanceOf(InvalidProductArgumentsException.class);
     }
 
     @Test

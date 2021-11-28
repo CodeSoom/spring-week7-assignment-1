@@ -25,6 +25,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+/**
+ * 상품 정보
+ */
 @Entity
 @Getter
 @Builder
@@ -42,6 +45,13 @@ public class Product {
     private Integer price;
 
     private String imageUrl;
+
+    public Product(String name, String maker, Integer price, String imageUrl) {
+        this.name = name;
+        this.maker = maker;
+        this.price = price;
+        this.imageUrl = imageUrl;
+    }
 
     public void changeWith(Product source) {
         this.name = source.name;
