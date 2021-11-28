@@ -1,5 +1,12 @@
 package com.codesoom.assignment.application;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
@@ -8,19 +15,15 @@ import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 class UserServiceTest {
+
     private static final String EXISTED_EMAIL_ADDRESS = "existed@example.com";
     private static final Long DELETED_USER_ID = 200L;
 
@@ -31,44 +34,45 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-        userService = new UserService(mapper, userRepository);
+        userService = new UserService(mapper, userRepository, passwordEncoder);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
-                .willReturn(true);
+            .willReturn(true);
 
         given(userRepository.save(any(User.class))).will(invocation -> {
             User source = invocation.getArgument(0);
             return User.builder()
-                    .id(13L)
-                    .email(source.getEmail())
-                    .name(source.getName())
-                    .build();
+                .id(13L)
+                .email(source.getEmail())
+                .name(source.getName())
+                .build();
         });
 
         given(userRepository.findByIdAndDeletedIsFalse(1L))
-                .willReturn(Optional.of(
-                        User.builder()
-                                .id(1L)
-                                .email(EXISTED_EMAIL_ADDRESS)
-                                .name("Tester")
-                                .password("test")
-                                .build()));
+            .willReturn(Optional.of(
+                User.builder()
+                    .id(1L)
+                    .email(EXISTED_EMAIL_ADDRESS)
+                    .name("Tester")
+                    .password("test")
+                    .build()));
 
         given(userRepository.findByIdAndDeletedIsFalse(100L))
-                .willReturn(Optional.empty());
+            .willReturn(Optional.empty());
 
         given(userRepository.findByIdAndDeletedIsFalse(DELETED_USER_ID))
-                .willReturn(Optional.empty());
+            .willReturn(Optional.empty());
     }
 
     @Test
     void registerUser() {
         UserRegistrationData registrationData = UserRegistrationData.builder()
-                .email("tester@example.com")
-                .name("Tester")
-                .password("test")
-                .build();
+            .email("tester@example.com")
+            .name("Tester")
+            .password("test")
+            .build();
 
         User user = userService.registerUser(registrationData);
 
@@ -82,13 +86,13 @@ class UserServiceTest {
     @Test
     void registerUserWithDuplicatedEmail() {
         UserRegistrationData registrationData = UserRegistrationData.builder()
-                .email(EXISTED_EMAIL_ADDRESS)
-                .name("Tester")
-                .password("test")
-                .build();
+            .email(EXISTED_EMAIL_ADDRESS)
+            .name("Tester")
+            .password("test")
+            .build();
 
         assertThatThrownBy(() -> userService.registerUser(registrationData))
-                .isInstanceOf(UserEmailDuplicationException.class);
+            .isInstanceOf(UserEmailDuplicationException.class);
 
         verify(userRepository).existsByEmail(EXISTED_EMAIL_ADDRESS);
     }
@@ -96,11 +100,11 @@ class UserServiceTest {
     @Test
     void updateUserWithExistedId() {
         UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
+            .name("TEST")
+            .password("TEST")
+            .build();
 
-        User user = userService.updateUser(1L, modificationData);
+        User user = userService.updateUser(1L, modificationData, 1L);
 
         assertThat(user.getId()).isEqualTo(1L);
         assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
@@ -110,30 +114,44 @@ class UserServiceTest {
     }
 
     @Test
+    void updateUserByOthersAccess() {
+        UserModificationData modificationData = UserModificationData.builder()
+            .name("TEST")
+            .password("TEST")
+            .build();
+
+        Long targetUserId = 1L;
+        Long currentUserId = 2L;
+
+        assertThatThrownBy(() -> {
+            userService.updateUser(targetUserId, modificationData, currentUserId);
+        }).isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
     void updateUserWithNotExistedId() {
         UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
+            .name("TEST")
+            .password("TEST")
+            .build();
 
-        assertThatThrownBy(() -> userService.updateUser(100L, modificationData))
-                .isInstanceOf(UserNotFoundException.class);
+        assertThatThrownBy(() -> userService.updateUser(100L, modificationData, 100L))
+            .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(100L);
     }
 
-
     @Test
     void updateUserWithDeletedId() {
         UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
+            .name("TEST")
+            .password("TEST")
+            .build();
 
         assertThatThrownBy(
-                () -> userService.updateUser(DELETED_USER_ID, modificationData)
+            () -> userService.updateUser(DELETED_USER_ID, modificationData, DELETED_USER_ID)
         )
-                .isInstanceOf(UserNotFoundException.class);
+            .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
     }
@@ -151,7 +169,7 @@ class UserServiceTest {
     @Test
     void deleteUserWithNotExistedId() {
         assertThatThrownBy(() -> userService.deleteUser(100L))
-                .isInstanceOf(UserNotFoundException.class);
+            .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(100L);
     }
@@ -159,7 +177,7 @@ class UserServiceTest {
     @Test
     void deleteUserWithDeletedId() {
         assertThatThrownBy(() -> userService.deleteUser(DELETED_USER_ID))
-                .isInstanceOf(UserNotFoundException.class);
+            .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
     }
