@@ -2,7 +2,6 @@ package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.errors.InvalidTokenException;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -30,21 +29,15 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             return;
         }
         String authorization = request.getHeader("Authorization");
+        // TODO: exception 그대로 처리
 
         if (authorization == null) {
-            // TODO: exception 으로 처리
-            response.sendError(HttpStatus.UNAUTHORIZED.value());
-            return;
+            throw new InvalidTokenException("");
         }
 
         String accessToken = authorization.substring("Bearer ".length());
-        // TODO: exception 그대로 처리
-        try {
-            authenticationService.parseToken(accessToken);
-        } catch (InvalidTokenException exception) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value());
-            return;
-        }
+
+        authenticationService.parseToken(accessToken);
 
         chain.doFilter(request, response);
     }
