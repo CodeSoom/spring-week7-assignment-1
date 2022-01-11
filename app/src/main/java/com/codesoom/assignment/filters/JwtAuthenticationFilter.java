@@ -37,14 +37,16 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
         String authorization = request.getHeader("Authorization");
 
-        if (authorization == null) {
-            throw new InvalidTokenException("");
+        if (authorization != null) {
+            String accessToken = authorization.substring("Bearer ".length());
+            Long userId = authenticationService.parseToken(accessToken);
+            Authentication authentication = new UserAuthentication(userId);
+
+            SecurityContext context = SecurityContextHolder.getContext();
+            context.setAuthentication(authentication);
         }
 
-        String accessToken = authorization.substring("Bearer ".length());
-        authenticationService.parseToken(accessToken);
-
-        chain.doFilter(request,response);
+        chain.doFilter(request, response);
     }
 
     private boolean filterWithPathAndMethod(HttpServletRequest request) {
