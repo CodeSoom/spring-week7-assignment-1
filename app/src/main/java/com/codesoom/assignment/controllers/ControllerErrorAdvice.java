@@ -39,6 +39,12 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Log-in failed");
     }
 
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(ForbiddenRequestException.class)
+    public ErrorResponse handleForbiddenRequestException() {
+        return new ErrorResponse("금지된 요청입니다.");
+    }
+
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)

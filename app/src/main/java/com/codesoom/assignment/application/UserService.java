@@ -4,6 +4,7 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.ForbiddenRequestException;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.Mapper;
@@ -41,10 +42,12 @@ public class UserService {
     }
 
     public User updateUser(Long id, UserModificationData modificationData) {
-        User user = findUser(id);
+        User user = userRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new ForbiddenRequestException());
 
         User source = mapper.map(modificationData, User.class);
         user.changeWith(source);
+        user.changePassword(modificationData.getPassword(), passwordEncoder);
 
         return user;
     }
