@@ -29,6 +29,9 @@ public class UserService {
         }
 
         User user = mapper.map(registrationData, User.class);
+
+        user.changePassword(registrationData.getPassword());
+
         return userRepository.save(user);
     }
 
