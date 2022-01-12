@@ -42,5 +42,4 @@ public class UserAuthentication extends AbstractAuthenticationToken {
 
         return authorities;
     }
-
 }
