@@ -16,16 +16,31 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         this.userId = userId;
     }
 
+    /**
+     * principal(주체)의 credential(증명서)를 반환합니다.
+     *
+     * @return Object principal(주체)의 증명서
+     */
     @Override
     public Object getCredentials() {
         return null;
     }
 
+    /**
+     * 접근 principal(주체)를 반환합니다.
+     *
+     * @return Object 접근 principal(주체)
+     */
     @Override
     public Object getPrincipal() {
         return userId;
     }
 
+    /**
+     * 인증 여부를 반환합니다.
+     *
+     * @return boolean 인증 여부
+     */
     @Override
     public boolean isAuthenticated() {
         return true;
