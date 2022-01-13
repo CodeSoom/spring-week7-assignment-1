@@ -43,16 +43,12 @@ public class ProductController {
             @RequestBody @Valid ProductData productData,
             Authentication authentication
     ) {
-        System.out.println("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
-        System.out.println(authentication);
-        System.out.println("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
         return productService.createProduct(productData);
     }
 
     @PatchMapping("{id}")
     @PreAuthorize("isAuthenticated()")
     public Product update(
-            //@RequestAttribute Long userId,
             @PathVariable Long id,
             @RequestBody @Valid ProductData productData
     ) {
@@ -62,7 +58,6 @@ public class ProductController {
     @DeleteMapping("{id}")
     @PreAuthorize("isAuthenticated()")
     public void destroy(
-            //@RequestAttribute Long userId,
             @PathVariable Long id
     ) {
         productService.deleteProduct(id);
