@@ -69,11 +69,11 @@ class UserControllerTest {
     @Test
     void registerUserWithValidAttributes() throws Exception {
         mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"tester@example.com\"," +
-                                "\"name\":\"Tester\",\"password\":\"test\"}")
-        )
+                        post("/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"email\":\"tester@example.com\"," +
+                                        "\"name\":\"Tester\",\"password\":\"test\"}")
+                )
                 .andExpect(status().isCreated())
                 .andExpect(content().string(
                         containsString("\"id\":13")
@@ -91,20 +91,20 @@ class UserControllerTest {
     @Test
     void registerUserWithInvalidAttributes() throws Exception {
         mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}")
-        )
+                        post("/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}")
+                )
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void updateUserWithValidAttributes() throws Exception {
         mockMvc.perform(
-                patch("/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
-        )
+                        patch("/users/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
                         containsString("\"id\":1")
@@ -119,20 +119,20 @@ class UserControllerTest {
     @Test
     void updateUserWithInvalidAttributes() throws Exception {
         mockMvc.perform(
-                patch("/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"password\":\"\"}")
-        )
+                        patch("/users/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"\",\"password\":\"\"}")
+                )
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void updateUserWithNotExsitedId() throws Exception {
         mockMvc.perform(
-                patch("/users/100")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
-        )
+                        patch("/users/100")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                )
                 .andExpect(status().isNotFound());
 
         verify(userService)

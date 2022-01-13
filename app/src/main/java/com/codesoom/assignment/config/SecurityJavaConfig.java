@@ -37,7 +37,7 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(authenticationErrorFilter,
                         JwtAuthenticationFilter.class)
                 .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(

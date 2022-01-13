@@ -15,7 +15,7 @@ class UserAuthenticationTest {
     private static final Long VALID_ID = 1L;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         userAuthentication = new UserAuthentication(VALID_ID);
     }
 
@@ -26,18 +26,20 @@ class UserAuthenticationTest {
         @Test
         @DisplayName("null을 리턴합니다.")
         void it_return_null() {
-            assertThat(userAuthentication.getCredentials()).isNull();
+            assertThat(userAuthentication.getCredentials())
+                    .isNull();
         }
     }
 
     @Nested
     @DisplayName("getPrincipal() 메서드는")
-    class Describe_getPrincipal{
+    class Describe_getPrincipal {
 
         @Test
         @DisplayName("userId를 리턴합니다.")
-        void it_return_userId(){
-            assertThat(userAuthentication.getPrincipal()).isEqualTo(VALID_ID);
+        void it_return_userId() {
+            assertThat(userAuthentication.getPrincipal())
+                    .isEqualTo(VALID_ID);
         }
     }
 
@@ -48,7 +50,8 @@ class UserAuthenticationTest {
         @Test
         @DisplayName("true를 리턴합니다.")
         void it_return_true() {
-            assertThat(userAuthentication.isAuthenticated()).isTrue();
+            assertThat(userAuthentication.isAuthenticated())
+                    .isTrue();
         }
     }
 }
