@@ -1,7 +1,10 @@
 package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.security.Roles;
 import com.codesoom.assignment.security.UserAuthentication;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -23,27 +26,33 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request
-            , HttpServletResponse response
-            , FilterChain chain)
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain chain)
             throws IOException, ServletException {
+
         if (filterWithPathAndMethod(request)) {
             chain.doFilter(request, response);
             return;
         }
-        String authorization = request.getHeader("Authorization");
-        // TODO: exception 그대로 처리
 
-        if (authorization != null) {
-            String accessToken = authorization.substring("Bearer ".length());
-            Long userId = authenticationService.parseToken(accessToken);
-            Authentication authentication = new UserAuthentication(userId);
+        try {
+            String accessToken = parseAuthorizationHeaderFrom(request);
 
-            SecurityContext context = SecurityContextHolder.getContext();
-            context.setAuthentication(authentication);
+            if (!accessToken.isBlank()) {
+                Authentication authentication = this.getAuthenticationManager()
+                        .authenticate(
+                                new UserAuthentication(Roles.ANONYMOUS, accessToken)
+                        );
+                SecurityContext context = SecurityContextHolder.getContext();
+                authentication.setAuthenticated(true);
+                context.setAuthentication(authentication);
+            }
+            chain.doFilter(request, response);
+        } catch (InvalidTokenException e) {
+            response.sendError(HttpStatus.UNAUTHORIZED.value());
         }
-
-        chain.doFilter(request, response);
     }
 
     private boolean filterWithPathAndMethod(HttpServletRequest request) {
@@ -62,5 +71,14 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         }
 
         return false;
+    }
+
+    private String parseAuthorizationHeaderFrom(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
+
+        if (authorization == null) {
+            return "";
+        }
+        return authorization.substring("Bearer ".length());
     }
 }
