@@ -56,6 +56,7 @@ public class UserService {
      * @param id               회원 아이디
      * @param modificationData 수정할 사용자 정보
      * @return 수정된 사용자
+     * @throws UserNotFoundException 사용자를 찾을 수 없는 경우
      */
     public User updateUser(Long id, UserModificationData modificationData) {
         User user = userRepository.findByIdAndDeletedIsFalse(id)
@@ -73,22 +74,13 @@ public class UserService {
      *
      * @param id 사용자 id
      * @return 저장된 사용자
+     * @throws UserNotFoundException 사용자를 찾을 수 없는 경우
      */
     public User deleteUser(Long id) {
-        User user = findUser(id);
+        User user = userRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
         user.destroy();
         return user;
-    }
-
-    /**
-     * id에 해당하는 사용자를 찾고 없으면 예외를 던집니다.
-     *
-     * @param id 사용자 id
-     * @return 사용자
-     * @throws UserNotFoundException (사용자를 찾을 수 없다는 예외)
-     */
-    private User findUser(Long id) {
-        return userRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
     }
 }
