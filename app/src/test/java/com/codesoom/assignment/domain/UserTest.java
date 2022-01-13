@@ -10,6 +10,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class UserTest {
     private PasswordEncoder passwordEncoder;
 
+    private final static String TEST_NAME = "TEST";
+    private final static String PASSWORD = "TEST";
+    private final static String WRONG_PASSWORD = "XXX";
+
     @BeforeEach
     void setUp() {
         passwordEncoder = new BCryptPasswordEncoder();
@@ -20,22 +24,22 @@ class UserTest {
         User user = User.builder().build();
 
         user.changeWith(User.builder()
-                .name("TEST")
-                .password("TEST")
+                .name(TEST_NAME)
+                .password(PASSWORD)
                 .build());
 
-        assertThat(user.getName()).isEqualTo("TEST");
-        assertThat(user.getPassword()).isEqualTo("");
+        assertThat(user.getName()).isEqualTo(TEST_NAME);
+        assertThat(user.getPassword()).isEqualTo(PASSWORD);
     }
 
     @Test
     void changePassword() {
         User user = User.builder().build();
 
-        user.changePassword("TEST", passwordEncoder);
+        user.changePassword(PASSWORD, passwordEncoder);
 
         assertThat(user.getPassword()).isNotEmpty();
-        assertThat(user.getPassword()).isNotEqualTo("TEST");
+        assertThat(user.getPassword()).isNotEqualTo(PASSWORD);
     }
 
     @Test
@@ -52,18 +56,18 @@ class UserTest {
     @Test
     void authenticate() {
         User user = User.builder().build();
-        user.changePassword("test", passwordEncoder);
+        user.changePassword(PASSWORD, passwordEncoder);
 
-        assertThat(user.authenticate("test", passwordEncoder)).isTrue();
-        assertThat(user.authenticate("xxx", passwordEncoder)).isFalse();
+        assertThat(user.authenticate(PASSWORD, passwordEncoder)).isTrue();
+        assertThat(user.authenticate(WRONG_PASSWORD, passwordEncoder)).isFalse();
     }
 
     @Test
     void authenticateWithDeletedUser() {
         User user = User.builder().deleted(true).build();
-        user.changePassword("test", passwordEncoder);
+        user.changePassword(PASSWORD, passwordEncoder);
 
-        assertThat(user.authenticate("test", passwordEncoder)).isFalse();
-        assertThat(user.authenticate("xxx", passwordEncoder)).isFalse();
+        assertThat(user.authenticate(PASSWORD, passwordEncoder)).isFalse();
+        assertThat(user.authenticate(WRONG_PASSWORD, passwordEncoder)).isFalse();
     }
 }
