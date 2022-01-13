@@ -21,23 +21,38 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         return authorities;
     }
 
+    /**
+     * 사용자의 증명서를 리턴한다.
+     *
+     * @return 사용자의 증명서
+     */
     @Override
     public Object getCredentials() {
         return null;
     }
 
+    /**
+     * 인증 상태를 리턴한다.
+     *
+     * @return 인증 상태
+     */
     @Override
     public boolean isAuthenticated() {
         return true;
     }
 
+    /**
+     * 사용자 id를 리턴한다.
+     *
+     * @return 사용자 id
+     */
     @Override
     public Object getPrincipal() {
         return userId;
     }
+
     @Override
     public String toString(){
         return "Authentication(" + userId + ")";
     }
-
 }
