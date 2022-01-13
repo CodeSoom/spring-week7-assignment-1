@@ -43,25 +43,27 @@ public class UserService {
             throw new UserEmailDuplicationException(email);
         }
 
-        User user = userRepository.save(
-                mapper.map(registrationData, User.class));
+        User user = mapper.map(registrationData, User.class);
 
         user.changePassword(registrationData.getPassword(), passwordEncoder);
 
-        return user;
+        return userRepository.save(user);
     }
 
     /**
      * id에 해당하는 사용자를 수정하고 반환합니다.
      *
+     * @param id               회원 아이디
      * @param modificationData 수정할 사용자 정보
-     * @return 저장된 사용자
+     * @return 수정된 사용자
      */
     public User updateUser(Long id, UserModificationData modificationData) {
-        User user = findUser(id);
+        User user = userRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
 
         User source = mapper.map(modificationData, User.class);
         user.changeWith(source);
+        user.changePassword(modificationData.getPassword(), passwordEncoder);
 
         return user;
     }
