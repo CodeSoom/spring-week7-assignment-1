@@ -25,13 +25,12 @@ class UserTest {
                 .password("TEST")
                 .build());
 
-
         assertThat(user.getName()).isEqualTo("TEST");
         assertThat(user.getPassword()).isNotEqualTo("");
     }
 
     @Test
-    void changePassword(){
+    void changePassword() {
         User user = User.builder().build();
 
         user.changePassword("TEST", passwordEncoder);
@@ -39,7 +38,6 @@ class UserTest {
         assertThat(user.getPassword()).isNotEmpty();
         assertThat(user.getPassword()).isNotEqualTo("TEST");
     }
-
 
     @Test
     void destroy() {
@@ -57,8 +55,7 @@ class UserTest {
         User user = User.builder().build();
         user.changePassword("test", passwordEncoder);
 
-
-        assertThat(user.authenticate("test",passwordEncoder )).isTrue();
+        assertThat(user.authenticate("test", passwordEncoder)).isTrue();
         assertThat(user.authenticate("xxx", passwordEncoder)).isFalse();
     }
 
@@ -70,6 +67,6 @@ class UserTest {
         user.changePassword("test", passwordEncoder);
 
         assertThat(user.authenticate("test", passwordEncoder)).isFalse();
-        assertThat(user.authenticate("xxx",passwordEncoder)).isFalse();
+        assertThat(user.authenticate("xxx", passwordEncoder)).isFalse();
     }
 }

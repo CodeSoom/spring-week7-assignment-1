@@ -39,11 +39,11 @@ class SessionControllerTest {
     @Test
     void loginWithRightEmailAndPassword() throws Exception {
         mockMvc.perform(
-                post("/session")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"tester@example.com\"," +
-                                "\"password\":\"test\"}")
-        )
+                        post("/session")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"email\":\"tester@example.com\"," +
+                                        "\"password\":\"test\"}")
+                )
                 .andExpect(status().isCreated())
                 .andExpect(content().string(containsString(".")));
     }
@@ -51,22 +51,22 @@ class SessionControllerTest {
     @Test
     void loginWithWrongEmail() throws Exception {
         mockMvc.perform(
-                post("/session")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"badguy@example.com\"," +
-                                "\"password\":\"test\"}")
-        )
+                        post("/session")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"email\":\"badguy@example.com\"," +
+                                        "\"password\":\"test\"}")
+                )
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void loginWithWrongPassword() throws Exception {
         mockMvc.perform(
-                post("/session")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"tester@example.com\"," +
-                                "\"password\":\"xxx\"}")
-        )
+                        post("/session")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"email\":\"tester@example.com\"," +
+                                        "\"password\":\"xxx\"}")
+                )
                 .andExpect(status().isBadRequest());
     }
 }

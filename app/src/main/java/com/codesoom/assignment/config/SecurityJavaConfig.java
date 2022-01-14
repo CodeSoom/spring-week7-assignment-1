@@ -1,6 +1,5 @@
 package com.codesoom.assignment.config;
 
-
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.filters.AuthenticationErrorFilter;
 import com.codesoom.assignment.filters.JwtAuthenticationFilter;
@@ -27,7 +26,7 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
     private AuthenticationService authenticationService;
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception{
+    protected void configure(HttpSecurity http) throws Exception {
         Filter authenticationFilter = new JwtAuthenticationFilter(authenticationManager(), authenticationService);
         Filter authenticationErrorFilter = new AuthenticationErrorFilter();
         http
@@ -43,7 +42,5 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
 
     }
-
-
 
 }

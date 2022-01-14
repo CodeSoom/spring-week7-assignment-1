@@ -30,8 +30,6 @@ public class User {
     @Builder.Default
     private boolean deleted = false;
 
-
-
     public void changeWith(User source) {
         name = source.name;
         password = source.password;

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class  UserAuthentication extends AbstractAuthenticationToken {
+public class UserAuthentication extends AbstractAuthenticationToken {
     private final Long userId;
 
     public UserAuthentication(Long userId) {
