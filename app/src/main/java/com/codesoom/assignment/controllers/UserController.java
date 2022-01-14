@@ -6,6 +6,7 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -52,6 +53,7 @@ public class UserController {
      * @return 수정된 사용자
      */
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     UserResultData update(
             @PathVariable Long id,
             @RequestBody @Valid UserModificationData modificationData
@@ -66,6 +68,7 @@ public class UserController {
      * @param id 삭제할 사용자 id
      */
     @DeleteMapping("{id}")
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void destroy(@PathVariable Long id) {
         userService.deleteUser(id);
