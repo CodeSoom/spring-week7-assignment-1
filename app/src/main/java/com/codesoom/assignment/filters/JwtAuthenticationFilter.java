@@ -4,6 +4,7 @@ import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.security.Roles;
 import com.codesoom.assignment.security.UserAuthentication;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -32,7 +33,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             FilterChain chain)
             throws IOException, ServletException {
 
-        if (filterWithPathAndMethod(request)) {
+        if (filterWithPath(request) && filterWithMethod(request)) {
             chain.doFilter(request, response);
             return;
         }
@@ -55,22 +56,14 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         }
     }
 
-    private boolean filterWithPathAndMethod(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        if (!path.startsWith("/products")) {
-            return true;
-        }
-
+    private boolean filterWithMethod(HttpServletRequest request) {
         String method = request.getMethod();
-        if (method.equals("GET")) {
-            return true;
-        }
+        return (method.equals(HttpMethod.GET));
+    }
 
-        if (method.equals("OPTIONS")) {
-            return true;
-        }
-
-        return false;
+    private boolean filterWithPath(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return !(path.startsWith("/products"));
     }
 
     private String parseAuthorizationHeaderFrom(HttpServletRequest request) {
