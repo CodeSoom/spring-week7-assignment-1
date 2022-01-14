@@ -14,6 +14,7 @@ import javax.persistence.Id;
  */
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor
 public class User {
     @Id
@@ -31,13 +32,6 @@ public class User {
 
     @Builder.Default
     private boolean deleted = false;
-
-    @Builder
-    public User(String email, String name, String password) {
-        this.email = email;
-        this.name = name;
-        this.password = password;
-    }
 
     @Builder
     public User(Long id, String email, String name, String password, boolean deleted) {
