@@ -1,6 +1,5 @@
 package com.codesoom.assignment.domain;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,9 +14,7 @@ import javax.persistence.Id;
  */
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue
@@ -34,6 +31,22 @@ public class User {
 
     @Builder.Default
     private boolean deleted = false;
+
+    @Builder
+    public User(String email, String name, String password) {
+        this.email = email;
+        this.name = name;
+        this.password = password;
+    }
+
+    @Builder
+    public User(Long id, String email, String name, String password, boolean deleted) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.deleted = deleted;
+    }
 
     /**
      * 사용자 정보를 수정한다.
@@ -68,7 +81,7 @@ public class User {
      *
      * @param password        비밀번호
      * @param passwordEncoder 비밀번호 인코더
-     * @return 인증결과
+     * @return 인증에 성공하면 true를 반환한다.
      */
     public boolean authenticate(String password
             , PasswordEncoder passwordEncoder
