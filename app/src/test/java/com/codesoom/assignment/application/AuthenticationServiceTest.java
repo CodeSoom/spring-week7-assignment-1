@@ -67,29 +67,29 @@ class AuthenticationServiceTest {
     @Test
     void loginWithRightEmailAndPassword() {
         String accessToken = authenticationService.login(
-                "tester@example.com", "test");
+                EXIST_EMAIL, PASSWORD);
 
         assertThat(accessToken).isEqualTo(VALID_TOKEN);
 
-        verify(userRepository).findByEmail("tester@example.com");
+        verify(userRepository).findByEmail(EXIST_EMAIL);
     }
 
     @Test
     void loginWithWrongEmail() {
         assertThatThrownBy(
-                () -> authenticationService.login("badguy@example.com", "test")
+                () -> authenticationService.login(NOT_EXIST_EMAIL, PASSWORD)
         ).isInstanceOf(LoginFailException.class);
 
-        verify(userRepository).findByEmail("badguy@example.com");
+        verify(userRepository).findByEmail(NOT_EXIST_EMAIL);
     }
 
     @Test
     void loginWithWrongPassword() {
         assertThatThrownBy(
-                () -> authenticationService.login("tester@example.com", "xxx")
+                () -> authenticationService.login(EXIST_EMAIL, WRONG_PASSWORD)
         ).isInstanceOf(LoginFailException.class);
 
-        verify(userRepository).findByEmail("tester@example.com");
+        verify(userRepository).findByEmail(EXIST_EMAIL);
     }
 
     @Test
