@@ -2,6 +2,7 @@ package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
+import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
@@ -14,6 +15,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Arrays;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
@@ -99,6 +102,15 @@ class UserControllerTest {
 
         given(authenticationService.parseToken(ADMIN_TOKEN))
                 .willReturn(1004L);
+
+        given(authenticationService.roles(1L))
+                .willReturn(Arrays.asList(new Role("USER")));
+
+        given(authenticationService.roles(2L))
+                .willReturn(Arrays.asList(new Role("USER")));
+
+        given(authenticationService.roles(1004L))
+                .willReturn(Arrays.asList(new Role("USER"), new Role("ADMIN")));
     }
 
     @Test
