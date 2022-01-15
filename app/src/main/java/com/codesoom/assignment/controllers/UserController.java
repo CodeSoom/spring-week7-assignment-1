@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @PatchMapping("{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     UserResultData update(
             @PathVariable Long id,
             @RequestBody @Valid UserModificationData modificationData,
