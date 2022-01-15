@@ -33,6 +33,9 @@ class UserControllerTest {
     private static final String OTHER_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjJ9.TEM6MULsZeqkBbUKziCR4Dg_8kymmZkyxsCXlfNJ3g0";
 
+    private static final String ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjEwMDR9.3GV5ZH3flBf0cnaXQCNNZlT4mgyFyBUhn3LKzQohh1A";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -94,6 +97,8 @@ class UserControllerTest {
         given(authenticationService.parseToken(OTHER_TOKEN))
                 .willReturn(2L);
 
+        given(authenticationService.parseToken(ADMIN_TOKEN))
+                .willReturn(1004L);
     }
 
     @Test
@@ -206,7 +211,8 @@ class UserControllerTest {
 
     @Test
     void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
+        mockMvc.perform(delete("/users/1")
+                        .header("Authorization", "Bearer " + ADMIN_TOKEN))
                 .andExpect(status().isNoContent());
 
         verify(userService).deleteUser(1L);
@@ -214,9 +220,23 @@ class UserControllerTest {
 
     @Test
     void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
+        mockMvc.perform(delete("/users/100")
+                        .header("Authorization", "Bearer " + ADMIN_TOKEN))
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
+    }
+
+    @Test
+    void destroyWithoutAccessToken() throws Exception {
+        mockMvc.perform(delete("/users/1"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void destroyWithoutAdminRole() throws Exception {
+        mockMvc.perform(delete("/users/1")
+                .header("Authorization", "Bearer " + MY_TOKEN))
+                .andExpect(status().isForbidden());
     }
 }
