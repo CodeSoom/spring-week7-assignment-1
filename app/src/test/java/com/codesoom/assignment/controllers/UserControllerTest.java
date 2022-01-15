@@ -1,12 +1,14 @@
 package com.codesoom.assignment.controllers;
 
-import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.application.UserService;
+import com.codesoom.assignment.TestUtils;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
+import com.codesoom.assignment.dto.SessionRequestData;
+import com.codesoom.assignment.dto.SessionResponseData;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
-import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.dto.UserResultData;
+import com.codesoom.assignment.utils.JwtUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -16,22 +18,17 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MockMvcBuilder;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
-import java.rmi.registry.Registry;
-
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -41,6 +38,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @DisplayName("UserController 테스트")
 class UserControllerTest {
+    private static final String SECRET = "12345678901234567890123456789010";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -59,6 +58,39 @@ class UserControllerTest {
                 .addFilter(new CharacterEncodingFilter("UTF-8", true))
                 .alwaysDo(print())
                 .build();
+    }
+
+    private SessionResponseData login(String email, String password) throws Exception {
+        SessionRequestData sessionRequestData = SessionRequestData.builder()
+                .email(email)
+                .password(password)
+                .build();
+
+        String content = objectMapper.writeValueAsString(sessionRequestData);
+
+        ResultActions actions = mockMvc.perform(
+                post("/session")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content)
+        );
+
+        return TestUtils.content(actions, SessionResponseData.class);
+    }
+
+    private UserResultData createUser(String email, String name, String password) throws Exception {
+        UserRegistrationData registrationData = UserRegistrationData.builder()
+                .name(name)
+                .email(email)
+                .password(password)
+                .build();
+
+        ResultActions actions = mockMvc.perform(
+                post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registrationData))
+        );
+
+        return TestUtils.content(actions, UserResultData.class);
     }
 
     @AfterEach
@@ -113,6 +145,7 @@ class UserControllerTest {
                         .name("곽형조")
                         .password("test1234")
                         .build();
+
                 requestContent = objectMapper.writeValueAsString(registrationData);
             }
 
@@ -167,6 +200,61 @@ class UserControllerTest {
                         .andExpect(status().isBadRequest());
             }
         }
+    }
+
+    @Nested
+    @DisplayName("PATCH /users/{id} 요청은")
+    class Describe_PATCH_users_id {
+
+        private UserResultData user;
+        private SessionResponseData session;
+
+        @Nested
+        @DisplayName("Access token 이 존재하고")
+        class Context_with_valid_access_token {
+
+            @BeforeEach
+            void prepare() throws Exception {
+                user = createUser("test@example.com", "곽형조", "asdqwe1234");
+                session = login(user.getEmail(), "asdqwe1234");
+            }
+
+            @Nested
+            @DisplayName("수정된 회원 정보가 주어진다면")
+            class Context_with_modification_user_data {
+
+                private String requestContent;
+
+                @BeforeEach
+                void prepareUserAndAccessToken() throws Exception {
+                    UserModificationData modificationData = UserModificationData.builder()
+                            .name("수정된이름")
+                            .password("수정된비밀번호")
+                            .build();
+
+                    requestContent = objectMapper.writeValueAsString(modificationData);
+                }
+
+                @Test
+                @DisplayName("수정된 회원 정보를 응답한다")
+                void it_response_modified_user() throws Exception {
+                    mockMvc.perform(
+                                    patch("/users/1")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .content(requestContent)
+                                            .header(
+                                                    "Authorization",
+                                                    String.format("Bearer %s", session.getAccessToken())
+                                            )
+                            )
+                            .andExpect(status().isOk())
+                            .andExpect(jsonPath("name").value("수정된이름"))
+                            .andExpect(jsonPath("password").value("수정된비밀번호"));
+
+                }
+            }
+        }
+
     }
 
 //    @BeforeEach
