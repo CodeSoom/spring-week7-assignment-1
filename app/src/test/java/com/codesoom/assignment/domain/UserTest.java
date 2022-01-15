@@ -11,7 +11,7 @@ class UserTest {
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         passwordEncoder = new BCryptPasswordEncoder();
     }
 
@@ -29,7 +29,7 @@ class UserTest {
     }
 
     @Test
-    void changePassword(){
+    void changePassword() {
         User user = User.builder().build();
 
         user.changePassword("TEST", passwordEncoder);
@@ -61,9 +61,9 @@ class UserTest {
     @Test
     void authenticateWithDeletedUser() {
         User user = User.builder().deleted(true).build();
-        user.changePassword("test",passwordEncoder);
+        user.changePassword("test", passwordEncoder);
 
         assertThat(user.authenticate("test", passwordEncoder)).isFalse();
-        assertThat(user.authenticate("xxx",passwordEncoder)).isFalse();
+        assertThat(user.authenticate("xxx", passwordEncoder)).isFalse();
     }
 }
