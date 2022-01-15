@@ -1,18 +1,19 @@
 package com.codesoom.assignment.security;
 
+import com.codesoom.assignment.domain.Role;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class UserAuthentication extends AbstractAuthenticationToken {
 
     private final Long userId;
 
-    public UserAuthentication(Long userId) {
-        super(authorities(userId));
+    public UserAuthentication(Long userId, List<Role> roles) {
+        super(authorities(roles));
         this.userId = userId;
     }
 
@@ -46,24 +47,23 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         return true;
     }
 
+    /**
+     * User의 id를 반환합니다.
+     *
+     * @return Long User의 id
+     */
+    public Long getUserId() {
+        return userId;
+    }
+
     @Override
     public String toString() {
         return "UserAuthentication(" + userId + "}";
     }
 
-    private static List<GrantedAuthority> authorities(Long userId) {
-
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("USER"));
-
-        if(userId == 1004) {
-            authorities.add(new SimpleGrantedAuthority("ADMIN"));
-        }
-
-        return authorities;
-    }
-
-    public Long getUserId() {
-        return userId;
+    private static List<GrantedAuthority> authorities(List<Role> roles) {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toList());
     }
 }

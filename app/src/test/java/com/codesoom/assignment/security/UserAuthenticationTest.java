@@ -5,6 +5,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("UserAuthentication 클래스")
@@ -16,7 +18,7 @@ class UserAuthenticationTest {
 
     @BeforeEach
     void setUp() {
-        userAuthentication = new UserAuthentication(VALID_ID);
+        userAuthentication = new UserAuthentication(VALID_ID, new ArrayList<>());
     }
 
     @Nested
