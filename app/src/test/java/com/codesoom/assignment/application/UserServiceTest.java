@@ -10,6 +10,7 @@ import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -103,7 +104,8 @@ class UserServiceTest {
                 .password("TEST")
                 .build();
 
-        User user = userService.updateUser(1L, modificationData);
+        Long userId = 1L;
+        User user = userService.updateUser(userId, modificationData, userId);
 
         assertThat(user.getId()).isEqualTo(1L);
         assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
@@ -119,7 +121,9 @@ class UserServiceTest {
                 .password("TEST")
                 .build();
 
-        assertThatThrownBy(() -> userService.updateUser(100L, modificationData))
+        Long userId = 100L;
+
+        assertThatThrownBy(() -> userService.updateUser(userId, modificationData, userId))
                 .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(100L);
@@ -133,8 +137,9 @@ class UserServiceTest {
                 .password("TEST")
                 .build();
 
+        Long userId = DELETED_USER_ID;
         assertThatThrownBy(
-                () -> userService.updateUser(DELETED_USER_ID, modificationData)
+                () -> userService.updateUser(userId, modificationData, userId)
         )
                 .isInstanceOf(UserNotFoundException.class);
 
@@ -149,6 +154,22 @@ class UserServiceTest {
         assertThat(user.isDeleted()).isTrue();
 
         verify(userRepository).findByIdAndDeletedIsFalse(1L);
+    }
+
+    @Test
+    void updateUserByOthersAccess() {
+        UserModificationData modificationData = UserModificationData.builder()
+                .name("TEST")
+                .password("TEST")
+                .build();
+
+        Long targetUserId = 1L;
+        Long currentUserId = 2L;
+
+        assertThatThrownBy(
+                () -> userService.updateUser(
+                        targetUserId, modificationData, currentUserId)
+                ).isInstanceOf(AccessDeniedException.class);
     }
 
     @Test

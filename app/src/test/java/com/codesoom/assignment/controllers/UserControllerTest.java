@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
@@ -25,6 +26,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
+
+    private static final String MY_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+
+    private static final String OTHER_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjJ9.TEM6MULsZeqkBbUKziCR4Dg_8kymmZkyxsCXlfNJ3g0";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -47,7 +55,11 @@ class UserControllerTest {
                 });
 
 
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
+        given(
+                userService.updateUser(
+                        eq(1L),
+                        any(UserModificationData.class),
+                        eq(1L)))
                 .will(invocation -> {
                     Long id = invocation.getArgument(0);
                     UserModificationData modificationData =
@@ -59,11 +71,29 @@ class UserControllerTest {
                             .build();
                 });
 
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
+        given(
+                userService.updateUser(
+                        eq(100L),
+                        any(UserModificationData.class),
+                        eq(1L)))
                 .willThrow(new UserNotFoundException(100L));
+
+        given(
+                userService.updateUser(
+                        eq(1L),
+                        any(UserModificationData.class),
+                        eq(2L)))
+                .willThrow(new AccessDeniedException("Access denied"));
 
         given(userService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
+
+        given(authenticationService.parseToken(MY_TOKEN))
+                .willReturn(1L);
+
+        given(authenticationService.parseToken(OTHER_TOKEN))
+                .willReturn(2L);
+
     }
 
     @Test
@@ -73,6 +103,7 @@ class UserControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{\"email\":\"tester@example.com\"," +
                                         "\"name\":\"Tester\",\"password\":\"test\"}")
+                                .header("Authorization", "Bearer " + MY_TOKEN)
                 )
                 .andExpect(status().isCreated())
                 .andExpect(content().string(
@@ -104,6 +135,7 @@ class UserControllerTest {
                         patch("/users/1")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                                .header("Authorization", "Bearer " + MY_TOKEN)
                 )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -113,7 +145,10 @@ class UserControllerTest {
                         containsString("\"name\":\"TEST\"")
                 ));
 
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
+        verify(userService).updateUser(
+                eq(1L),
+                any(UserModificationData.class),
+                eq(1L));
     }
 
     @Test
@@ -122,6 +157,7 @@ class UserControllerTest {
                         patch("/users/1")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{\"name\":\"\",\"password\":\"\"}")
+                                .header("Authorization", "Bearer " + MY_TOKEN)
                 )
                 .andExpect(status().isBadRequest());
     }
@@ -131,12 +167,41 @@ class UserControllerTest {
         mockMvc.perform(
                         patch("/users/100")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                                .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                                .header("Authorization", "Bearer " + MY_TOKEN)
                 )
                 .andExpect(status().isNotFound());
 
-        verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
+        verify(userService).updateUser(
+                        eq(100L),
+                        any(UserModificationData.class),
+                        eq(1L));
+    }
+
+    @Test
+    void updateUserWithoutAccessToken() throws Exception {
+        mockMvc.perform(
+                        patch("/users/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void updateUserWithOthersAccessToken() throws Exception {
+        mockMvc.perform(
+                        patch("/users/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                                .header("Authorization", "Bearer " + OTHER_TOKEN)
+                )
+                .andExpect(status().isForbidden());
+
+        verify(userService).updateUser(
+                eq(1L),
+                any(UserModificationData.class),
+                eq(2L));
     }
 
     @Test
