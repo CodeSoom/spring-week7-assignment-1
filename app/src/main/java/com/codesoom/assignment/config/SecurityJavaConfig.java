@@ -30,6 +30,9 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
 
         http
                 .csrf().disable()
+                .headers()
+                .frameOptions().disable()
+                .and()
                 .addFilter(authenticationFilter)
                 .addFilterBefore(authenticationErrorFilter,
                         JwtAuthenticationFilter.class)
