@@ -110,7 +110,7 @@ class AuthenticationServiceTest {
     class Describe_roles {
 
         @Test
-        @DisplayName("권한을 리스트를 리턴합니다.")
+        @DisplayName("권한 리스트를 리턴합니다.")
         void it_return_list() {
             assertThat(
                     authenticationService.roles(1L).stream()
