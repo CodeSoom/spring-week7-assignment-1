@@ -10,6 +10,8 @@ import com.codesoom.assignment.dto.UserLoginData;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
+import com.codesoom.assignment.security.Roles;
+import com.codesoom.assignment.utils.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,13 +22,20 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockFilterConfig;
+import org.springframework.security.config.BeanIds;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
+import org.springframework.web.filter.DelegatingFilterProxy;
+
+import javax.servlet.ServletException;
 
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -36,10 +45,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 class UserControllerTest {
-    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
-    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+    private static final String SECRET = "12345678901234567890123456789012";
+
+    private static final Long VALID_ID = 1L;
 
     private static final String EXIST_EMAIL = "test@test.com";
     private static final String NOT_EXIST_EMAIL = "bad@test.com";
@@ -69,14 +77,17 @@ class UserControllerTest {
     private UserModificationData userModificationData;
     private UserModificationData invalidUserModificationData;
 
+    private final JwtUtil jwtUtil = new JwtUtil(SECRET);
+
     @BeforeEach
-    void setUp() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+    void setUp() throws ServletException {
+
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac)
                 .addFilters(new CharacterEncodingFilter("UTF-8", true))
                 .alwaysDo(print())
                 .build();
 
-        userRegistrationData = UserRegistrationData.builder()
+                userRegistrationData = UserRegistrationData.builder()
                 .name(NAME)
                 .email(EXIST_EMAIL)
                 .password(PASSWORD)
@@ -105,6 +116,11 @@ class UserControllerTest {
         @Nested
         @DisplayName("올바른 사용자 정보가 주어진다면")
         class Context_with_valid_user {
+            @BeforeEach
+            void setUp() {
+
+            }
+
             @Test
             @DisplayName("회원정보와 Created HTTP 상태코드를 응답한다.")
             void it_return_user_created() throws Exception {
@@ -163,17 +179,31 @@ class UserControllerTest {
 
                 userResultData = createUser(user);
                 sessionResponseData = login(userLoginData);
+
+                given(userService.updateUser(eq(VALID_ID), any(UserModificationData.class)))
+                        .will(invocation -> {
+                            Long id = invocation.getArgument(0);
+                            UserModificationData modificationData =
+                                    invocation.getArgument(1);
+                            return User.builder()
+                                    .id(id)
+                                    .email(EXIST_EMAIL)
+                                    .name(modificationData.getName())
+                                    .build();
+                        });
             }
 
             @Test
             @DisplayName("수정된 회원정보와 OK HTTP 상태코드를 응답한다.")
             void it_return_user_status_ok() throws Exception {
                 mockMvc.perform(
-                                patch("/users/" + user.getId())
+                                patch("/users/" + VALID_ID)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(userModificationData))
                                         .header("Authorization",
-                                                "Bearer " + sessionResponseData.getAccessToken()))
+                                                "Bearer " + sessionResponseData.getAccessToken())
+                                        .header("Authority", Roles.USER)
+                        )
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.id", is(userResultData.getId())))
                         .andExpect(jsonPath("$.name", is(userModificationData.getName())))
@@ -227,6 +257,9 @@ class UserControllerTest {
                 .name(user.getName())
                 .build();
 
+        given(userService.registerUser(any(UserRegistrationData.class)))
+                .willReturn(user);
+
         ResultActions actions = mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userRegistrationData)));
@@ -240,6 +273,10 @@ class UserControllerTest {
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .build();
+
+        given(authenticationService.login(user.getEmail(),user.getPassword()))
+                .willReturn(jwtUtil.encode(1L));
+
         ResultActions actions = mockMvc.perform(post("/session")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(sessionRequestData)));
