@@ -21,7 +21,8 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     private final AuthenticationService authenticationService;
 
     public JwtAuthenticationFilter(
-            AuthenticationManager authenticationManager, AuthenticationService authenticationService) {
+            AuthenticationManager authenticationManager,
+            AuthenticationService authenticationService) {
         super(authenticationManager);
         this.authenticationService = authenticationService;
     }
