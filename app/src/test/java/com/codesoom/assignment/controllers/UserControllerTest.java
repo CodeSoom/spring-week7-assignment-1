@@ -81,8 +81,14 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() throws ServletException {
+        DelegatingFilterProxy delegatingFilterProxy = new DelegatingFilterProxy();
 
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac)
+        delegatingFilterProxy.init(
+                new MockFilterConfig(wac.getServletContext(), BeanIds.SPRING_SECURITY_FILTER_CHAIN)
+        );
+
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+                .addFilter(delegatingFilterProxy)
                 .addFilters(new CharacterEncodingFilter("UTF-8", true))
                 .alwaysDo(print())
                 .build();
@@ -202,10 +208,9 @@ class UserControllerTest {
                                         .content(objectMapper.writeValueAsString(userModificationData))
                                         .header("Authorization",
                                                 "Bearer " + sessionResponseData.getAccessToken())
-                                        .header("Authority", Roles.USER)
                         )
                         .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.id", is(userResultData.getId())))
+                        .andExpect(jsonPath("$.email", is(userResultData.getEmail())))
                         .andExpect(jsonPath("$.name", is(userModificationData.getName())))
                 ;
             }
