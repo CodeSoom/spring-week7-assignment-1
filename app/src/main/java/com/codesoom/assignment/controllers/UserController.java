@@ -5,7 +5,10 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
+import com.codesoom.assignment.security.UserAuthentication;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -22,22 +25,27 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("isAuthenticated()")
     UserResultData create(@RequestBody @Valid UserRegistrationData registrationData) {
         User user = userService.registerUser(registrationData);
         return getUserResultData(user);
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     UserResultData update(
             @PathVariable Long id,
-            @RequestBody @Valid UserModificationData modificationData
-    ) {
-        User user = userService.updateUser(id, modificationData);
+            @RequestBody @Valid UserModificationData modificationData,
+            UserAuthentication authentication
+    ) throws AccessDeniedException {
+        Long userId = authentication.getUserId();
+        User user = userService.updateUser(id, modificationData, userId);
         return getUserResultData(user);
     }
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("isAuthenticated() and hasAuthority('ADMIN')")
     void destroy(@PathVariable Long id) {
         userService.deleteUser(id);
     }

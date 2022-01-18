@@ -1,14 +1,22 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.Role;
+import com.codesoom.assignment.domain.RoleRepository;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -26,21 +34,33 @@ class AuthenticationServiceTest {
 
     private AuthenticationService authenticationService;
 
+    private PasswordEncoder passwordEncoder;
+
     private UserRepository userRepository = mock(UserRepository.class);
+
+    private RoleRepository roleRepository = mock(RoleRepository.class);
 
     @BeforeEach
     void setUp() {
         JwtUtil jwtUtil = new JwtUtil(SECRET);
+        passwordEncoder = new BCryptPasswordEncoder();
 
         authenticationService = new AuthenticationService(
-                userRepository, jwtUtil);
+                userRepository, roleRepository, jwtUtil, passwordEncoder);
 
         User user = User.builder()
-                .password("test")
+                .id(1L)
                 .build();
+        user.changePassword("test", passwordEncoder);
 
         given(userRepository.findByEmail("tester@example.com"))
                 .willReturn(Optional.of(user));
+
+        given(roleRepository.findAllByUserId(1L))
+                .willReturn(Arrays.asList(new Role("USER")));
+
+        given(roleRepository.findAllByUserId(1004L))
+                .willReturn(Arrays.asList(new Role("USER"), new Role("ADMIN")));
     }
 
     @Test
@@ -83,5 +103,26 @@ class AuthenticationServiceTest {
         assertThatThrownBy(
                 () -> authenticationService.parseToken(INVALID_TOKEN)
         ).isInstanceOf(InvalidTokenException.class);
+    }
+
+    @Nested
+    @DisplayName("roles() 메서드는")
+    class Describe_roles {
+
+        @Test
+        @DisplayName("권한 리스트를 리턴합니다.")
+        void it_return_list() {
+            assertThat(
+                    authenticationService.roles(1L).stream()
+                            .map(Role::getName)
+                            .collect(Collectors.toList()))
+                    .isEqualTo(Arrays.asList("USER"));
+
+            assertThat(
+                    authenticationService.roles(1004L).stream()
+                            .map(Role::getName)
+                            .collect(Collectors.toList()))
+                    .isEqualTo(Arrays.asList("USER", "ADMIN"));
+        }
     }
 }
