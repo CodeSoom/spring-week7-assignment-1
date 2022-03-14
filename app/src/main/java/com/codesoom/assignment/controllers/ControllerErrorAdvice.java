@@ -39,10 +39,10 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Log-in failed");
     }
 
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(InvalidTokenException.class)
-    public ErrorResponse handleInvalidAccessTokenException() {
-        return new ErrorResponse("Invalid access token");
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(ForbiddenRequestException.class)
+    public ErrorResponse handleForbiddenRequestException() {
+        return new ErrorResponse("금지된 요청입니다.");
     }
 
     @ResponseBody
