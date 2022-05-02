@@ -1,4 +1,4 @@
-package com.codesoom.assignment.dto;
+package com.codesoom.assignment.dto.session;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
