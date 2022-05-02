@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/** 토큰 검증 필터에서 발생한 예외를 처리합니다. */
 @Slf4j
 public class AuthenticationErrorFilter extends HttpFilter {
 
@@ -22,7 +23,6 @@ public class AuthenticationErrorFilter extends HttpFilter {
         try {
             chain.doFilter(request, response);
         } catch (InvalidTokenException e) {
-            //todo 에러 응답
             log.error("유효하지 않은 토큰 입력");
             response.sendError(HttpStatus.UNAUTHORIZED.value(), e.getMessage());
         }

@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.ArrayList;
 import java.util.List;
 
+/** 토큰 검증에 성공하면 SecurityContext에 해당 인증 정보를 저장합니다. */
 public class UserAuthentication extends AbstractAuthenticationToken {
 
     private final Long userId;

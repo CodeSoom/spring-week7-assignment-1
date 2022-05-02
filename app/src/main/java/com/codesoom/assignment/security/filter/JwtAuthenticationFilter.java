@@ -17,8 +17,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
+/**
+ *  요청 헤더에 포함된 토큰 검증을 담당합니다.
+ */
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     private final AuthorizationService authorizationService;
