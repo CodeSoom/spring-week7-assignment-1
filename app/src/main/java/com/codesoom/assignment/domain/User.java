@@ -49,6 +49,6 @@ public class User {
     }
 
     public void changePassword(String newPassword, PasswordEncoder passwordEncoder) {
-
+        password = passwordEncoder.encode(newPassword);
     }
 }
