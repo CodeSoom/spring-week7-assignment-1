@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 
+import static com.codesoom.assignment.ConstantsForTest.INVALID_TOKENS;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -122,12 +123,6 @@ public class ProductSaveControllerMockMvcTest extends ControllerTest {
         @Nested
         class Context_with_invalid_token {
 
-            private final String[] INVALID_TOKENS = {
-                    TOKEN_PREFIX + ""
-                    , TOKEN_PREFIX + " "
-                    , TOKEN_PREFIX + "esldkjflsoeis"
-                   };
-
             private final ProductDto VALID_PRODUCT_DTO
                     = new ProductDto("어쩌구", "어쩌구컴퍼니", BigDecimal.valueOf(2000), "url");
 
@@ -139,9 +134,9 @@ public class ProductSaveControllerMockMvcTest extends ControllerTest {
             @DisplayName("401 unauthorized를 응답한다.")
             @Test
             void it_will_save_product() throws Exception {
-                for (int i = 0; i < INVALID_TOKENS.length; i++) {
+                for (int i = 0; i < INVALID_TOKENS.size(); i++) {
                     mockMvc.perform(post("/products").accept(MediaType.APPLICATION_JSON_UTF8)
-                                    .header(HttpHeaders.AUTHORIZATION, INVALID_TOKENS[i])
+                                    .header(HttpHeaders.AUTHORIZATION, INVALID_TOKENS.get(i))
                                     .content(objectMapper.writeValueAsString(VALID_PRODUCT_DTO))
                                     .contentType(MediaType.APPLICATION_JSON ))
                             .andExpect(status().isUnauthorized());
