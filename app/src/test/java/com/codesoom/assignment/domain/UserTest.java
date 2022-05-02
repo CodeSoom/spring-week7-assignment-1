@@ -23,31 +23,22 @@ class UserTest {
                 .password(ORIGIN_PASSWORD)
                 .build();
 
-        @Nested
-        @DisplayName("PasswordEncoder 를 활용하여")
-        class Context_usePasswordEncoder {
+        PasswordEncoder passwordEncoder;
 
-            PasswordEncoder passwordEncoder;
+        @BeforeEach
+        void setUp() {
+            passwordEncoder = new BCryptPasswordEncoder();
+        }
 
-            @BeforeEach
-            void setUp() {
-                passwordEncoder = new BCryptPasswordEncoder();
-            }
+        @Test
+        @DisplayName("비밀번호를 암호화해서 변경한다.")
+        void it_changeEncryptPassword() {
 
-            void subject() {
-                user.changePassword(CHANGE_PASSWORD, passwordEncoder);
-            }
+            user.changePassword(CHANGE_PASSWORD, passwordEncoder);
 
-            @Test
-            @DisplayName("비밀번호를 암호화해서 변경한다.")
-            void it_changeEncryptPassword() {
+            boolean isPasswordMatch = passwordEncoder.matches(CHANGE_PASSWORD, user.getPassword());
 
-                subject();
-
-                boolean isPasswordMatch = passwordEncoder.matches(CHANGE_PASSWORD, user.getPassword());
-
-                assertThat(isPasswordMatch).isTrue();
-            }
+            assertThat(isPasswordMatch).isTrue();
         }
     }
 
