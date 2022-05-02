@@ -1,6 +1,6 @@
-package com.codesoom.assignment.controllers;
+package com.codesoom.assignment.controllers.session;
 
-import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.application.authentication.AuthenticationService;
 import com.codesoom.assignment.dto.SessionRequestData;
 import com.codesoom.assignment.dto.SessionResponseData;
 import org.springframework.http.HttpStatus;
