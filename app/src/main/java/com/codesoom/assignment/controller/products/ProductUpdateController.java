@@ -25,11 +25,9 @@ import java.math.BigDecimal;
 public class ProductUpdateController {
 
     private final ProductUpdateService service;
-    private final AuthorizationService authorizationService;
 
-    public ProductUpdateController(ProductUpdateService service, AuthorizationService authorizationService) {
+    public ProductUpdateController(ProductUpdateService service) {
         this.service = service;
-        this.authorizationService = authorizationService;
     }
 
     /**
@@ -41,10 +39,8 @@ public class ProductUpdateController {
      */
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value = "/{id}", method = {RequestMethod.PATCH, RequestMethod.PUT})
-    public Product updateProduct(@AccessToken String accessToken,
-                                 @PathVariable Long id,
+    public Product updateProduct(@PathVariable Long id,
                                  @Valid @RequestBody ProductUpdateDto productDto) {
-        authorizationService.parseToken(accessToken);
         return service.updateProduct(id, productDto);
     }
 

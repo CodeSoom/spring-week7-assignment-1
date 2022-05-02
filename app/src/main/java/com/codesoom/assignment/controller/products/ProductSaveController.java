@@ -23,11 +23,9 @@ import java.math.BigDecimal;
 public class ProductSaveController {
 
     private final ProductSaveService service;
-    private final AuthorizationService authorizationService;
 
-    public ProductSaveController(ProductSaveService service, AuthorizationService authorizationService) {
+    public ProductSaveController(ProductSaveService service) {
         this.service = service;
-        this.authorizationService = authorizationService;
     }
 
     /**
@@ -38,9 +36,7 @@ public class ProductSaveController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Product saveProduct(@AccessToken String accessToken,
-                               @Valid @RequestBody ProductSaveDto productSaveDto) {
-        authorizationService.parseToken(accessToken);
+    public Product saveProduct(@Valid @RequestBody ProductSaveDto productSaveDto) {
         return service.saveProduct(productSaveDto);
     }
 

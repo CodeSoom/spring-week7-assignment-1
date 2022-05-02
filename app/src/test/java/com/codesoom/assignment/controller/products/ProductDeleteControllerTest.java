@@ -28,9 +28,6 @@ public class ProductDeleteControllerTest {
     private ProductDeleteController controller;
 
     @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
     private ProductDeleteService service;
 
     @Autowired
@@ -39,12 +36,9 @@ public class ProductDeleteControllerTest {
     @Autowired
     private ProductRepository repository;
 
-    private String TOKEN;
-
     @BeforeEach
     void setup() {
-        this.controller = new ProductDeleteController(service, authorizationService);
-        this.TOKEN = jwtUtil.encode(1L);
+        this.controller = new ProductDeleteController(service);
         cleanup();
     }
 
@@ -73,7 +67,7 @@ public class ProductDeleteControllerTest {
             @DisplayName("해당 상품을 삭제한다.")
             @Test
             void it_delete_product() {
-                controller.deleteProduct(TOKEN, EXIST_ID);
+                controller.deleteProduct(EXIST_ID);
             }
         }
 
@@ -93,7 +87,7 @@ public class ProductDeleteControllerTest {
             @DisplayName("예외를 던진다.")
             @Test
             void will_throw_not_found_exception() {
-                assertThatThrownBy(() -> controller.deleteProduct(TOKEN, NOT_EXIST_ID))
+                assertThatThrownBy(() -> controller.deleteProduct(NOT_EXIST_ID))
                         .isInstanceOf(ProductNotFoundException.class);
             }
         }
