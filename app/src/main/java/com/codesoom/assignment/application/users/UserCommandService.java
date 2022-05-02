@@ -2,6 +2,7 @@ package com.codesoom.assignment.application.users;
 
 import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.domain.users.UserRepository;
+import com.codesoom.assignment.exceptions.UserNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

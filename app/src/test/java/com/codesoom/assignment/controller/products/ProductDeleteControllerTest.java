@@ -2,8 +2,7 @@ package com.codesoom.assignment.controller.products;
 
 import com.codesoom.assignment.application.auth.AuthorizationService;
 import com.codesoom.assignment.application.products.ProductDeleteService;
-import com.codesoom.assignment.application.products.ProductNotFoundException;
-import com.codesoom.assignment.controller.products.ProductDeleteController;
+import com.codesoom.assignment.exceptions.ProductNotFoundException;
 import com.codesoom.assignment.domain.products.Product;
 import com.codesoom.assignment.domain.products.ProductRepository;
 import com.codesoom.assignment.utils.JwtUtil;

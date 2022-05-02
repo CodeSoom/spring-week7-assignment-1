@@ -1,8 +1,7 @@
 package com.codesoom.assignment.controller.users;
 
-import com.codesoom.assignment.application.users.UserNotFoundException;
+import com.codesoom.assignment.exceptions.UserNotFoundException;
 import com.codesoom.assignment.application.users.UserUpdateService;
-import com.codesoom.assignment.controller.users.UserUpdateController;
 import com.codesoom.assignment.domain.users.UserRepository;
 import com.codesoom.assignment.domain.users.UserResponseDto;
 import com.codesoom.assignment.domain.users.UserSaveDto;

@@ -1,8 +1,9 @@
 package com.codesoom.assignment.application.auth;
 
-import com.codesoom.assignment.application.users.UserNotFoundException;
+import com.codesoom.assignment.exceptions.UserNotFoundException;
 import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.domain.users.UserRepository;
+import com.codesoom.assignment.exceptions.InvalidPasswordException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.springframework.stereotype.Service;
 

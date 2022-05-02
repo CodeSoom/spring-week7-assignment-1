@@ -1,7 +1,5 @@
 package com.codesoom.assignment.application.auth;
 
-import com.codesoom.assignment.application.users.UserNotFoundException;
-import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.domain.users.UserRepository;
 import com.codesoom.assignment.utils.JwtUtil;
 import io.jsonwebtoken.Claims;

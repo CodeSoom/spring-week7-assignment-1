@@ -1,6 +1,7 @@
 package com.codesoom.assignment.application.users;
 
 import com.codesoom.assignment.domain.users.User;
+import com.codesoom.assignment.exceptions.UserNotFoundException;
 
 /**
  * 회원 정보 수정을 담당합니다.

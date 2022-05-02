@@ -1,6 +1,6 @@
 package com.codesoom.assignment.controller.users;
 
-import com.codesoom.assignment.application.users.UserNotFoundException;
+import com.codesoom.assignment.exceptions.UserNotFoundException;
 import com.codesoom.assignment.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;

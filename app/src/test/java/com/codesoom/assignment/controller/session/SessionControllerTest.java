@@ -1,12 +1,10 @@
 package com.codesoom.assignment.controller.session;
 
-import com.codesoom.assignment.application.auth.InvalidPasswordException;
+import com.codesoom.assignment.exceptions.InvalidPasswordException;
 import com.codesoom.assignment.application.auth.UserLoginService;
-import com.codesoom.assignment.application.users.UserNotFoundException;
-import com.codesoom.assignment.application.users.UserSaveRequest;
+import com.codesoom.assignment.exceptions.UserNotFoundException;
 import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.domain.users.UserRepository;
-import com.codesoom.assignment.domain.users.UserSaveDto;
 import com.codesoom.assignment.dto.TokenResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

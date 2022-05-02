@@ -1,5 +1,7 @@
 package com.codesoom.assignment.application.users;
 
+import com.codesoom.assignment.exceptions.UserNotFoundException;
+
 /**
  * 회원 정보 삭제를 담당합니다.
  */
