@@ -33,6 +33,11 @@ public class User {
         password = source.password;
     }
 
+    public User initUserId(Long userId){
+        this.id=userId;
+        return this;
+    }
+
     public User passwordEncode(CryptService cryptService) {
         String encodePassword = cryptService.encode(this.password);
         this.password = encodePassword;
