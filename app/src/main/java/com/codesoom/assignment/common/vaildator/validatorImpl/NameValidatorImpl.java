@@ -1,7 +1,7 @@
 package com.codesoom.assignment.common.vaildator.validatorImpl;
 
 import com.codesoom.assignment.common.vaildator.Name;
-import com.codesoom.assignment.errors.message.ErrorMessage;
+import com.codesoom.assignment.common.message.ErrorMessage;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.ConstraintValidator;
