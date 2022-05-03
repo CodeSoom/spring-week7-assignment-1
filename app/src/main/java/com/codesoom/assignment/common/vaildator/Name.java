@@ -1,6 +1,6 @@
 package com.codesoom.assignment.common.vaildator;
 
-import com.codesoom.assignment.common.vaildator.validatorImpl.EmailValidatorImpl;
+import com.codesoom.assignment.common.vaildator.validatorImpl.NameValidatorImpl;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -14,7 +14,7 @@ import static java.lang.annotation.ElementType.PARAMETER;
 
 @Target({FIELD, PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = EmailValidatorImpl.class)
+@Constraint(validatedBy = NameValidatorImpl.class)
 @Documented
 public @interface Name {
     String message() default "";
