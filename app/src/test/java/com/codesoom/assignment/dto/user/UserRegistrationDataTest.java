@@ -1,6 +1,6 @@
 package com.codesoom.assignment.dto.user;
 
-import com.codesoom.assignment.errors.message.ErrorMessage;
+import com.codesoom.assignment.common.message.ErrorMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
