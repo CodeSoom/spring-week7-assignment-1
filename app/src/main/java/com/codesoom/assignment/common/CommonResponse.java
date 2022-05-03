@@ -1,8 +1,8 @@
 package com.codesoom.assignment.common;
 
 
+import com.codesoom.assignment.common.message.ErrorMessage;
 import com.codesoom.assignment.domain.Builder;
-import com.codesoom.assignment.errors.message.ErrorMessage;
 
 public class CommonResponse {
     private Result result;
@@ -21,7 +21,7 @@ public class CommonResponse {
         return success(data, null);
     }
 
-    public static <T> CommonResponse success(String message) {
+    public static CommonResponse success(String message) {
         return success(null, message);
     }
 
