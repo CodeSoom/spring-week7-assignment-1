@@ -9,7 +9,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Getter
-@Builder
 @AllArgsConstructor
 public class UserModificationData {
     @NotBlank

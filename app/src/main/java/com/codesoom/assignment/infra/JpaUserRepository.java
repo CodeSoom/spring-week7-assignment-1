@@ -1,13 +1,12 @@
 package com.codesoom.assignment.infra;
 
-import com.codesoom.assignment.domain.User;
-import com.codesoom.assignment.domain.UserRepository;
+import com.codesoom.assignment.domain.user.User;
+import com.codesoom.assignment.domain.user.UserRepository;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
 
-public interface JpaUserRepository
-        extends UserRepository, CrudRepository<User, Long> {
+public interface JpaUserRepository extends UserRepository, CrudRepository<User, Long> {
     User save(User user);
 
     boolean existsByEmail(String email);
@@ -17,4 +16,5 @@ public interface JpaUserRepository
     Optional<User> findByIdAndDeletedIsFalse(Long id);
 
     Optional<User> findByEmail(String email);
+
 }
