@@ -1,7 +1,9 @@
 package com.codesoom.assignment.domain.user;
 
 import com.codesoom.assignment.domain.Builder;
+import com.codesoom.assignment.domain.crypt.CryptService;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,6 +11,7 @@ import javax.persistence.Id;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue
@@ -28,6 +31,12 @@ public class User {
     public void changeWith(User source) {
         name = source.name;
         password = source.password;
+    }
+
+    public User passwordEncode(CryptService cryptService) {
+        String encodePassword = cryptService.encode(this.password);
+        this.password = encodePassword;
+        return this;
     }
 
     public void destroy() {
