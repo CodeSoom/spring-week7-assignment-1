@@ -25,16 +25,14 @@ public class PasswordValidatorImpl implements ConstraintValidator<Password, Stri
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        int invalidCount = 0;
         this.value = value;
         if (emptyCheck(context)) {
-            invalidCount = Math.incrementExact(invalidCount);
-
+            return false;
         }
         if (sizeCheck(context)) {
-            invalidCount = Math.incrementExact(invalidCount);
+            return false;
         }
-        return invalidCount == 0;
+        return true;
     }
 
     private boolean emptyCheck(ConstraintValidatorContext context) {

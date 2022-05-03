@@ -19,13 +19,13 @@ public class EmailValidatorImpl implements ConstraintValidator<Email, String> {
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        int invalidCount = 0;
+
         this.value = value;
         if (emptyCheck()) {
-            invalidCount = Math.incrementExact(invalidCount);
             addConstraintViolation(context, ErrorMessage.EMAIL_IS_EMPTY.getErrorMsg());
+            return false;
         }
-        return invalidCount == 0;
+        return true;
     }
 
     private boolean emptyCheck() {

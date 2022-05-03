@@ -19,21 +19,22 @@ public class NameValidatorImpl implements ConstraintValidator<Name, String> {
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        int invalidCount = 0;
         this.value = value;
-        if (emptyCheck()) {
-            invalidCount = Math.incrementExact(invalidCount);
-            addConstraintViolation(context, ErrorMessage.NAME_IS_EMPTY.getErrorMsg());
+        if (emptyCheck(context)) {
+
+            return false;
         }
-        return invalidCount == 0;
+        return true;
     }
 
-    private boolean emptyCheck() {
+    private boolean emptyCheck(ConstraintValidatorContext context) {
+        boolean isEmpty = StringUtils.isEmpty(value);
         if (nullable) {
             return false;
         }
-
-        boolean isEmpty = StringUtils.isEmpty(value);
+        if (isEmpty) {
+            addConstraintViolation(context, ErrorMessage.NAME_IS_EMPTY.getErrorMsg());
+        }
         return isEmpty;
     }
 
