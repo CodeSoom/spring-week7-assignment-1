@@ -25,9 +25,9 @@ public @interface Password {
 
     int min() default 4;
 
-    int max() default 1200;
+    int max() default 30;
 
-    boolean useSizeCheck() default false;
+    boolean useSizeCheck() default true;
 
     boolean nullable() default false;
 

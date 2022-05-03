@@ -41,7 +41,7 @@ public class PasswordValidatorImpl implements ConstraintValidator<Password, Stri
             return false;
         }
         if (isEmpty) {
-            addConstraintViolation(context, ErrorMessage.EMAIL_IS_EMPTY.getErrorMsg());
+            addConstraintViolation(context, ErrorMessage.PASSWORD_IS_EMPTY.getErrorMsg());
         }
         return isEmpty;
     }
@@ -55,7 +55,7 @@ public class PasswordValidatorImpl implements ConstraintValidator<Password, Stri
         int passwordLength = value.length();
 
         if (passwordLength < min) {
-            message = messageMaker.append(ErrorMessage.PASSWORD_LENGTH_PREFIX)
+            message = messageMaker.append(ErrorMessage.PASSWORD_LENGTH_PREFIX.getErrorMsg())
                     .append(min)
                     .append(ErrorMessage.PASSWORD_LENGTH_MORE_THAN_SUFFIX.getErrorMsg())
                     .toString();
@@ -65,7 +65,7 @@ public class PasswordValidatorImpl implements ConstraintValidator<Password, Stri
         }
 
         if (passwordLength > max) {
-            message = messageMaker.append(ErrorMessage.PASSWORD_LENGTH_PREFIX)
+            message = messageMaker.append(ErrorMessage.PASSWORD_LENGTH_PREFIX.getErrorMsg())
                     .append(min)
                     .append(ErrorMessage.PASSWORD_LENGTH_BELOW_SUFFIX.getErrorMsg())
                     .toString();
