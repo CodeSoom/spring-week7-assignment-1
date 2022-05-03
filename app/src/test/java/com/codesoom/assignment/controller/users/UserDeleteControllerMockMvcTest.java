@@ -1,5 +1,6 @@
 package com.codesoom.assignment.controller.users;
 
+import com.codesoom.assignment.TestUtil;
 import com.codesoom.assignment.controller.ControllerTest;
 import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.domain.users.UserRepository;
@@ -10,8 +11,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static com.codesoom.assignment.ConstantsForTest.TOKEN_PREFIX;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,48 +45,52 @@ public class UserDeleteControllerMockMvcTest extends ControllerTest {
     @Nested
     class Describe_delete_user {
 
-        @DisplayName("찾을 수 있는 회원의 id가 주어지면")
+        @DisplayName("본인의 id가 주어지면")
         @Nested
         class Context_with_exist_user {
 
-            private Long EXIST_ID;
+            private Long USER_ID;
+            private String TOKEN;
 
             @BeforeEach
-            void setup() {
-                this.EXIST_ID = repository
-                        .save(new User("홍길동", "hgd@codesoom.com", "hgd123!"))
-                        .getId();
+            void setup() throws Exception {
+                User user = repository.save(new User("김철수", "kimcs@codesoom.com", "rlacjftn098"));
+                this.USER_ID = user.getId();
+                this.TOKEN = TestUtil.generateToken(mockMvc, user.getEmail(), user.getPassword());
             }
 
-            @DisplayName("성공적으로 회원을 삭제한다.")
+            @DisplayName("성공적으로 회원 정보를 삭제한다.")
             @Test
             void it_will_delete_user() throws Exception {
-                mockMvc.perform(delete("/users/" + EXIST_ID))
+                mockMvc.perform(delete("/users/" + USER_ID)
+                                .header(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + TOKEN))
                         .andExpect(status().isNoContent());
 
-                assertThat(repository.findById(EXIST_ID)).isEmpty();
+                assertThat(repository.findById(USER_ID)).isEmpty();
             }
         }
 
-        @DisplayName("찾을 수 없는 회원의 id가 주어지면")
+        @DisplayName("본인이 아닌 id가 주어지면")
         @Nested
-        class Context_with_not_exist_user {
-
-            private final Long NOT_EXIST_ID = 999L;
+        class Context_with_not_authorize {
+            private Long NOT_USER_ID;
+            private String TOKEN;
 
             @BeforeEach
-            void setup() {
-                if (repository.existsById(NOT_EXIST_ID)) {
-                    repository.deleteById(NOT_EXIST_ID);
-                }
+            void setup() throws Exception {
+                User user = repository.save(new User("김철수", "kimcs@codesoom.com", "rlacjftn098"));
+                this.NOT_USER_ID = user.getId() + 100;
+                this.TOKEN = TestUtil.generateToken(mockMvc, user.getEmail(), user.getPassword());
             }
 
-            @DisplayName("404 not found를 응답한다.")
+            @DisplayName("403 forbidden을 응답한다.")
             @Test
-            void it_response_not_found() throws Exception {
-                mockMvc.perform(delete("/users/" + NOT_EXIST_ID))
-                        .andExpect(status().isNotFound());
+            void it_response_403_forbidden() throws Exception {
+                mockMvc.perform(delete("/users/" + NOT_USER_ID)
+                                .header(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + TOKEN))
+                        .andExpect(status().isForbidden());
             }
         }
     }
+
 }
