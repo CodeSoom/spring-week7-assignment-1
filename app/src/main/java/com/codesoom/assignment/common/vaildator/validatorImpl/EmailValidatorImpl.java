@@ -1,7 +1,7 @@
 package com.codesoom.assignment.common.vaildator.validatorImpl;
 
 import com.codesoom.assignment.common.vaildator.Email;
-import com.codesoom.assignment.common.vaildator.error.ErrorCode;
+import com.codesoom.assignment.errors.message.ErrorMessage;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.ConstraintValidator;
@@ -23,7 +23,7 @@ public class EmailValidatorImpl implements ConstraintValidator<Email, String> {
         this.value = value;
         if (emptyCheck()) {
             invalidCount = Math.incrementExact(invalidCount);
-            addConstraintViolation(context, ErrorCode.EMAIL_IS_EMPTY.getErrorMsg());
+            addConstraintViolation(context, ErrorMessage.EMAIL_IS_EMPTY.getErrorMsg());
         }
         return invalidCount == 0;
     }
