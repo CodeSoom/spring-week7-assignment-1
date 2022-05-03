@@ -1,16 +1,16 @@
 package com.codesoom.assignment.common;
 
 
-import com.codesoom.assignment.errors.message.ErrorMessage;
 import com.codesoom.assignment.domain.Builder;
+import com.codesoom.assignment.errors.message.ErrorMessage;
 
 public class CommonResponse {
     private Result result;
     private Object data;
-    private Object message;
+    private String message;
     private String errorCode;
 
-    public static <T> CommonResponse success(T data, Object message) {
+    public static <T> CommonResponse success(T data, String message) {
         return new CommonResponseBuilder().result(Result.SUCCESS)
                 .data(data)
                 .message(message)
@@ -25,7 +25,7 @@ public class CommonResponse {
         return success(null, message);
     }
 
-    public static CommonResponse fail(Object message, String errorCode) {
+    public static CommonResponse fail(String message, String errorCode) {
         return new CommonResponseBuilder().result(Result.FAIL)
                 .message(message)
                 .errorCode(errorCode)
@@ -76,7 +76,7 @@ public class CommonResponse {
     public static class CommonResponseBuilder implements Builder<CommonResponse> {
         private Result result;
         private Object data;
-        private Object message;
+        private String message;
         private String errorCode;
 
         private CommonResponseBuilder() {
@@ -92,7 +92,7 @@ public class CommonResponse {
             return this;
         }
 
-        public CommonResponseBuilder message(Object message) {
+        public CommonResponseBuilder message(String message) {
             this.message = message;
             return this;
 
