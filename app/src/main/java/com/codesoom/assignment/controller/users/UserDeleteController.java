@@ -2,6 +2,7 @@ package com.codesoom.assignment.controller.users;
 
 import com.codesoom.assignment.application.users.UserDeleteService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -24,6 +25,7 @@ public class UserDeleteController {
      *
      * @param id 회원 식별자
      */
+    @PreAuthorize("#id == authentication.principal")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
