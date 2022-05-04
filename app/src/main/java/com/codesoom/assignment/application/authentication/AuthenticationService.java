@@ -20,7 +20,7 @@ public class AuthenticationService {
         this.jwtUtil = jwtUtil;
     }
 
-    public String login(String email, String password) {
+    public String login(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(
                         () -> new UserNotFoundException(
