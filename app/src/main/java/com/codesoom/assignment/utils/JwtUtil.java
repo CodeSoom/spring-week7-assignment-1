@@ -1,5 +1,6 @@
 package com.codesoom.assignment.utils;
 
+import com.codesoom.assignment.exceptions.InvalidTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -31,7 +32,7 @@ public class JwtUtil {
 
     public Claims decode(String token) throws AuthException {
         if (token == null || token.isBlank()) {
-            throw new AuthException();
+            throw new InvalidTokenException(token);
         }
         try {
             return Jwts.parserBuilder()
@@ -40,7 +41,7 @@ public class JwtUtil {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (SignatureException e) {
-            throw new AuthException();
+            throw new InvalidTokenException(token);
         }
     }
 }
