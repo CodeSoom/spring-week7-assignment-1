@@ -10,12 +10,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class JwtUtilTest {
 
-    private static final String SECRET_KEY = "NcRfUjXn2r5u8x/A?D(G+KbPdSgVkYp3";
+    private static final String SECRET_KEY = "s6v9y$B?E(H+MbQeThWmZq4t7w!z%C*F";
     private JwtUtil jwtUtil;
 
     private static final Long USER_ID = 1L;
@@ -44,19 +47,23 @@ public class JwtUtilTest {
         @Nested
         class Context_with_valid_token {
 
-            private String VALID_TOKEN;
+            private List<String> VALID_TOKENS = new ArrayList<>();
 
             @BeforeEach
             void setup() {
-                this.VALID_TOKEN = jwtUtil.encode(USER_ID);
+                for (int i = 0; i < 20; i++) {
+                    VALID_TOKENS.add(jwtUtil.encode((long) ((Math.random() * (1000 - 1)) + 1)));
+                }
             }
 
             @DisplayName("검증에 성공하며 claims를 반환한다.")
             @Test
             void it_returns_claims() {
-                Claims claims = jwtUtil.decode(VALID_TOKEN);
+                for (String validToken : VALID_TOKENS) {
+                    Claims claims = jwtUtil.decode(validToken);
 
-                assertThat(claims.get("userId", Long.class)).isEqualTo(USER_ID);
+                    assertThat(claims.get("userId", Long.class)).isNotNull();
+                }
             }
         }
 
