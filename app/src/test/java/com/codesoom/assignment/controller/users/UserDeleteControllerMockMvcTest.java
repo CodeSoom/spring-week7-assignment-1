@@ -54,7 +54,7 @@ public class UserDeleteControllerMockMvcTest extends ControllerTest {
 
             @BeforeEach
             void setup() throws Exception {
-                User user = repository.save(new User("김철수", "kimcs@codesoom.com", "rlacjftn098"));
+                User user = repository.save(User.withoutId("김철수", "kimcs@codesoom.com", "rlacjftn098"));
                 this.USER_ID = user.getId();
                 this.TOKEN = TestUtil.generateToken(mockMvc, user.getEmail(), user.getPassword());
             }
@@ -78,7 +78,7 @@ public class UserDeleteControllerMockMvcTest extends ControllerTest {
 
             @BeforeEach
             void setup() throws Exception {
-                User user = repository.save(new User("김철수", "kimcs@codesoom.com", "rlacjftn098"));
+                User user = repository.save(User.withoutId("김철수", "kimcs@codesoom.com", "rlacjftn098"));
                 this.NOT_USER_ID = user.getId() + 100;
                 this.TOKEN = TestUtil.generateToken(mockMvc, user.getEmail(), user.getPassword());
             }

@@ -53,7 +53,7 @@ public class UserDeleteControllerTest {
             @BeforeEach
             void setup() {
                 this.EXIST_ID = repository
-                        .save(new User("홍길동", "hgd@codesoom.com", "hgd123!"))
+                        .save(User.withoutId("홍길동", "hgd@codesoom.com", "hgd123!"))
                         .getId();
             }
 

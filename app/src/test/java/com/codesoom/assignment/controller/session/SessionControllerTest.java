@@ -43,7 +43,7 @@ class SessionControllerTest {
     }
 
     private User saveUser() {
-        return repository.save(new User("맛동산", "abc@codesoom.com", "password"));
+        return repository.save(User.withoutId("맛동산", "abc@codesoom.com", "password"));
     }
 
     @DisplayName("login 메서드는")

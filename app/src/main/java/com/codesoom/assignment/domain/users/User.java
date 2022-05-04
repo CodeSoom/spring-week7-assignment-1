@@ -27,10 +27,17 @@ public class User {
     protected User() {
     }
 
-    public User(String name, String email, String password) {
+    private User(String name, String email, String password) {
         this.name = name;
         this.email = email;
         this.password = password;
+    }
+
+    /**
+     * id를 제외한 필드 초기화
+     */
+    public static User withoutId(String name, String email, String password) {
+        return new User(name, email, password);
     }
 
     public User(Long id, String name, String email, String password) {
