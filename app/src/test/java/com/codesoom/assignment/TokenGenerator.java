@@ -1,18 +1,14 @@
 package com.codesoom.assignment;
 
-import com.codesoom.assignment.controller.ControllerTest;
-import com.codesoom.assignment.domain.users.User;
-import com.codesoom.assignment.domain.users.UserSaveDto;
 import com.codesoom.assignment.dto.TokenResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class TestUtil {
+public class TokenGenerator {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
