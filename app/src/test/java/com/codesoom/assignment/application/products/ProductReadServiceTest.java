@@ -17,10 +17,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-@DisplayName("ProductReadServiceImpl 클래스")
+@DisplayName("ProductReadService 클래스")
 public class ProductReadServiceTest extends ServiceTest {
 
-    private ProductReadServiceImpl service;
+    private static final String NAME = "쥐돌이";
+    private static final String MAKER = "냥이월드";
+    private static final BigDecimal PRICE = BigDecimal.valueOf(3000);
+    private static final String IMG_URL = "fakeURL";
+    private static final Product PRODUCT = Product.withoutId(NAME, MAKER, PRICE, IMG_URL);
+
+    private ProductReadService service;
 
     @Autowired
     private ProductRepository repository;
@@ -31,8 +37,7 @@ public class ProductReadServiceTest extends ServiceTest {
     void setup() {
         cleanup();
         this.service = new ProductReadServiceImpl(repository);
-        final Product product = Product.withoutId("쥐돌이", "캣이즈락스타", BigDecimal.valueOf(4000), "");
-        SAVED_PRODUCT = repository.save(product);
+        this.SAVED_PRODUCT = repository.save(PRODUCT);
     }
 
     @AfterEach

@@ -18,7 +18,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
+@DisplayName("ProductCommandService 클래스")
 public class ProductCommandServiceTest extends ServiceTest {
+
+    private static final String NAME = "쥐돌이";
+    private static final String MAKER = "냥이월드";
+    private static final BigDecimal PRICE = BigDecimal.valueOf(3000);
+    private static final String IMG_URL = "fakeURL";
+    private static final Product PRODUCT = Product.withoutId(NAME, MAKER, PRICE, IMG_URL);
 
     private ProductCommandService service;
 
@@ -36,20 +43,42 @@ public class ProductCommandServiceTest extends ServiceTest {
         repository.deleteAll();
     }
 
+    private ProductSaveRequest createProductSaveRequest(String name, String maker,
+                                                        BigDecimal price, String imageUrl) {
+        return  new ProductSaveRequest() {
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getMaker() {
+                return maker;
+            }
+
+            @Override
+            public BigDecimal getPrice() {
+                return price;
+            }
+
+            @Override
+            public String getImageUrl() {
+                return imageUrl;
+            }
+        };
+    }
+
     @DisplayName("saveProduct 메서드는")
     @Nested
     class Describe_save_product {
+
+        private ProductSaveRequest PRODUCT_SAVE_REQUEST = createProductSaveRequest(NAME, MAKER, PRICE, IMG_URL);
+
         @DisplayName("상품을 등록하고, 등록된 상품을 반환한다.")
         @Test
         void will_return_saved_product() {
-            //given
-            final ProductDto productDto
-                    = new ProductDto("name", "maker", BigDecimal.valueOf(2000), "image");
+            final Product product = service.saveProduct(PRODUCT_SAVE_REQUEST);
 
-            //when
-            final Product product = service.saveProduct(productDto);
-
-            //then
             assertThat(repository.findById(product.getId())).isNotEmpty();
         }
     }
@@ -58,20 +87,19 @@ public class ProductCommandServiceTest extends ServiceTest {
     @Nested
     class Describe_update {
 
-        private final ProductDto PRODUCT_DTO
-                = new ProductDto("꿈돌이", "유령회사", BigDecimal.valueOf(5000), "");
+        private String NEW_NAME = "쥐돌이 리뉴얼 버전";
+        private ProductSaveRequest PRODUCT_SAVE_REQUEST_TO_UPDATE
+                = createProductSaveRequest(NEW_NAME, MAKER, PRICE, IMG_URL);
 
         @DisplayName("존재하는 상품 id와 변경 데이터가 주어진다면")
         @Nested
         class Context_with_exist_id {
 
             private Long EXIST_ID;
-            private final Product OLD_PRODUCT
-                    = Product.withoutId("쥐돌이", "캣이즈락스타", BigDecimal.valueOf(4000), "");
 
             @BeforeEach
             void setup() {
-                final Product product = repository.save(OLD_PRODUCT);
+                final Product product = repository.save(PRODUCT);
                 this.EXIST_ID = product.getId();
             }
 
@@ -83,10 +111,10 @@ public class ProductCommandServiceTest extends ServiceTest {
             @DisplayName("상품을 성공적으로 변경한 뒤 변경 결과를 반환한다.")
             @Test
             void will_return_updated_product() {
-                final Product product = service.updateProduct(EXIST_ID, PRODUCT_DTO);
+                final Product product = service.updateProduct(EXIST_ID, PRODUCT_SAVE_REQUEST_TO_UPDATE);
 
                 assertThat(product.getId()).isEqualTo(EXIST_ID);
-                assertThat(product.getName()).isNotEqualTo(OLD_PRODUCT.getName());
+                assertThat(product.getName()).isNotEqualTo(PRODUCT.getName());
             }
         }
 
@@ -106,7 +134,7 @@ public class ProductCommandServiceTest extends ServiceTest {
             @DisplayName("예외를 던진다.")
             @Test
             void will_throw_exception() {
-                assertThatThrownBy(() -> service.updateProduct(NOT_EXIST_ID, PRODUCT_DTO))
+                assertThatThrownBy(() -> service.updateProduct(NOT_EXIST_ID, PRODUCT_SAVE_REQUEST_TO_UPDATE))
                         .isInstanceOf(ProductNotFoundException.class);
             }
         }
@@ -124,9 +152,7 @@ public class ProductCommandServiceTest extends ServiceTest {
 
             @BeforeEach
             void setup() {
-                final Product product
-                        = Product.withoutId("쥐돌이", "캣이즈락스타", BigDecimal.valueOf(4000), "");
-                this.EXIST_ID = repository.save(product).getId();
+                this.EXIST_ID = repository.save(PRODUCT).getId();
             }
 
             @AfterEach
