@@ -12,7 +12,7 @@ class UserTest {
     private static final String PASSWORD = "password";
 
     @Test
-    @DisplayName("of() 메소드로 User 생성할 때")
+    @DisplayName("of() 메소드로 User 객체를 생성할 수 있다")
     void creationWithOf() {
         User user = User.of(
                 USERNAME,

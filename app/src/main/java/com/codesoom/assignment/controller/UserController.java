@@ -39,7 +39,7 @@ public class UserController {
     UserResultDto update(
             @PathVariable Long id,
             @RequestBody @Valid UserModificationDto modificationDto
-            ) {
+    ) {
         User user = userCommandService.save(id, modificationDto);
         return resultDto(user);
     }

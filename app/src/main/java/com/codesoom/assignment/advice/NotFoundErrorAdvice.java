@@ -21,5 +21,7 @@ public class NotFoundErrorAdvice {
     @ResponseBody
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserNotFoundException.class)
-    public ErrorResponse handleUserNotFound() { return new ErrorResponse("User not found"); }
+    public ErrorResponse handleUserNotFound() {
+        return new ErrorResponse("User not found");
+    }
 }
