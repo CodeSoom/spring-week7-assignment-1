@@ -39,7 +39,7 @@ public class UserTest {
            assertThat(user.getId()).isEqualTo(ID);
            assertThat(user.getName()).isEqualTo(NAME);
            assertThat(user.getEmail()).isEqualTo(EMAIL);
-           assertThat(user.getPassword()).isEqualTo(passwordEncoder.encode(PASSWORD));
+           assertThat(user.getPassword()).isEqualTo(PASSWORD);
         });
     }
 
@@ -51,20 +51,21 @@ public class UserTest {
         @Nested
         class Context_with_update_user_data {
 
+            private User ORIGINAL_USER;
             private String UPDATE_PREFIX = "foo";
-            private User USER_TO_UPDATE = User.withoutId(
-                    UPDATE_PREFIX + NAME
-                    , UPDATE_PREFIX + EMAIL
-                    , UPDATE_PREFIX + PASSWORD);
+            private User USER_TO_UPDATE = User.of(UPDATE_PREFIX + NAME, UPDATE_PREFIX + EMAIL);
+
+            @BeforeEach
+            void setup() {
+                ORIGINAL_USER = User.of(NAME, EMAIL);
+            }
 
             @DisplayName("수정된 결과를 반환한다.")
             @Test
             void it_returns_updated_user() {
-                User user = User.withoutId(NAME, EMAIL, PASSWORD);
-                user.update(USER_TO_UPDATE);
+                ORIGINAL_USER.update(USER_TO_UPDATE);
 
-                assertThat(user.getEmail()).isEqualTo(USER_TO_UPDATE.getEmail());
-                assertThat(user.getPassword()).isEqualTo(passwordEncoder.encode(USER_TO_UPDATE.getPassword()));
+                assertThat(ORIGINAL_USER.getEmail()).isEqualTo(USER_TO_UPDATE.getEmail());
             }
         }
     }
@@ -76,12 +77,18 @@ public class UserTest {
         @DisplayName("올바른 비밀번호가 주어지면")
         @Nested
         class Context_with_correct_password {
-            private User user = User.withoutId(NAME, EMAIL, PASSWORD);
+
+            private User user = User.of(NAME, EMAIL);
+
+            @BeforeEach
+            void setup() {
+                user.changePassword(PASSWORD, passwordEncoder);
+            }
 
             @DisplayName("true를 반환한다.")
             @Test
             void will_return_true() {
-                assertThat(user.authenticate(PASSWORD)).isTrue();
+                assertThat(user.authenticate(PASSWORD, passwordEncoder)).isTrue();
             }
         }
 
@@ -89,15 +96,36 @@ public class UserTest {
         @Nested
         class Context_with_incorrect_password {
 
-            private User user = User.withoutId(NAME, EMAIL, PASSWORD);
+            private User user = User.of(NAME, EMAIL);
             private final String INCORRECT_PASSWORD = PASSWORD + "fail";
+
+            @BeforeEach
+            void setup() {
+                user.changePassword(PASSWORD, passwordEncoder);
+            }
 
             @DisplayName("false를 반환한다.")
             @Test
             void will_return_false() {
-                assertThat(user.authenticate(INCORRECT_PASSWORD)).isFalse();
+                assertThat(user.authenticate(INCORRECT_PASSWORD, passwordEncoder)).isFalse();
             }
         }
     }
+
+    @DisplayName("changePassword 메서드는")
+    @Nested
+    class Describe_change_password {
+
+        @DisplayName("암호화된 비밀번호를 초기화한다.")
+        @Test
+        void it_init_password_field() {
+            User user = User.of("홍길동", "test@codesooem.com");
+            user.changePassword(PASSWORD, passwordEncoder);
+
+            assertThat(user.getPassword()).isNotEqualTo(PASSWORD);
+            assertThat(passwordEncoder.matches(PASSWORD, user.getPassword())).isTrue();
+        }
+    }
+
 
 }
