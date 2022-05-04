@@ -4,6 +4,7 @@ import com.codesoom.assignment.exceptions.InvalidTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,8 +46,8 @@ public class JwtUtil {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-        } catch (SignatureException | IllegalArgumentException | MalformedJwtException e) {
-            throw new InvalidTokenException("유효하지 않은 토큰입니다.");
+        } catch (SignatureException | IllegalArgumentException | MalformedJwtException | DecodingException e ) {
+            throw new InvalidTokenException("토큰 검증에 실패했습니다.");
         }
     }
 

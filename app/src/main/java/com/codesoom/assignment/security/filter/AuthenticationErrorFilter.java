@@ -1,7 +1,6 @@
 package com.codesoom.assignment.security.filter;
 
 import com.codesoom.assignment.exceptions.InvalidTokenException;
-import com.codesoom.assignment.exceptions.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 
@@ -23,7 +22,7 @@ public class AuthenticationErrorFilter extends HttpFilter {
         try {
             chain.doFilter(request, response);
         } catch (InvalidTokenException e) {
-            log.error("유효하지 않은 토큰 입력");
+            log.error(e.getMessage());
             response.sendError(HttpStatus.UNAUTHORIZED.value(), e.getMessage());
         }
     }
