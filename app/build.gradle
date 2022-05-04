@@ -72,6 +72,12 @@ dependencies {
     // Spring Developer Tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
+    // Spring Security
+    // 인증, 인가, 일반적인 해킹 기법에 대한 보호를 제공한다.
+    // 사용자의 비밀번호 암호화를 위해 PasswordEncoder 를 사용한다.
+    // 편리한 사용자 인증 보안 필터를 만들기 위해 WebSecurityConfigurerAdapter, @PreAuthorize 를 사용한다.
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
     // Spring Boot Test
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
