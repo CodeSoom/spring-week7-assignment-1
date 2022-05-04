@@ -1,5 +1,6 @@
 package com.codesoom.assignment.application.authentication;
 
+import com.codesoom.assignment.UserNotFoundException;
 import com.codesoom.assignment.domain.TestUserRepositoryDouble;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -38,9 +40,10 @@ class AuthenticationServiceTest {
     class Describe_of_login {
 
         @Nested
-        @DisplayName("로그인할 수 있는 사용자의 이메일이 주어지면")
-        class Context_with_valid_email {
+        @DisplayName("로그인할 수 있는 사용자의 이메일과 패스워드가 주어지면")
+        class Context_with_valid_email_and_password {
             private String loginEmail;
+            private String password;
 
             @BeforeEach
             void setUp() {
@@ -51,15 +54,45 @@ class AuthenticationServiceTest {
                 );
                 userRepository.save(user);
                 loginEmail = user.getEmail();
+                password = user.getPassword();
             }
 
             @Test
             @DisplayName("이메일에 맞는 사용자를 찾아서 사용자의 id로 claim을 등록한 jwt 토큰을 리턴한다")
             void it_return_jwt_token() {
-                String jwtToken = authenticationService.login(loginEmail);
+                String jwtToken = authenticationService.login(loginEmail, password);
 
                 assertThat(jwtToken).isNotEmpty();
             }
+        }
+
+        @Nested
+        @DisplayName("로그인할 수 없는 사용자의 이메일이 주어지면")
+        class Context_with_invalid_email {
+            private String loginEmail;
+            private String password;
+
+            @BeforeEach
+            void setUp() {
+                User user = User.of(
+                        USERNAME,
+                        EMAIL,
+                        PASSWORD
+                );
+                userRepository.save(user);
+                loginEmail = user.getEmail();
+                password = user.getPassword();
+
+                userRepository.delete(user);
+            }
+
+            @Test
+            @DisplayName("UserNotFoundException을 던진다")
+            void it_throw_userNotFoundException() {
+                assertThatThrownBy(() -> authenticationService.login(loginEmail, password))
+                        .isInstanceOf(UserNotFoundException.class);
+            }
+
         }
     }
 }
