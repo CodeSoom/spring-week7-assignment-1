@@ -4,6 +4,7 @@ import com.codesoom.assignment.UserNotFoundException;
 import com.codesoom.assignment.domain.TestUserRepositoryDouble;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
+import com.codesoom.assignment.exceptions.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -95,7 +96,27 @@ class AuthenticationServiceTest {
                 assertThatThrownBy(() -> authenticationService.login(loginEmail, password))
                         .isInstanceOf(UserNotFoundException.class);
             }
+        }
 
+        @Nested
+        @DisplayName("로그인할 수 없는 사용자의 패스워드가 주어지면")
+        class Context_iwht_invalid_password {
+            private String loginEmail;
+            private String password;
+
+            @BeforeEach
+            void setUp() {
+                User user = createUser();
+                loginEmail = user.getEmail();
+                password = user.getPassword() + "WrongPassword";
+            }
+
+            @Test
+            @DisplayName("LoginFailException을 던진다")
+            void it_throw_loginFailException() {
+                assertThatThrownBy(() -> authenticationService.login(loginEmail, password))
+                        .isInstanceOf(LoginFailException.class);
+            }
         }
     }
 }
