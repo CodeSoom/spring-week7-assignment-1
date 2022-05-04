@@ -1,6 +1,6 @@
 package com.codesoom.assignment.controller.users;
 
-import com.codesoom.assignment.TestUtil;
+import com.codesoom.assignment.TokenGenerator;
 import com.codesoom.assignment.controller.ControllerTest;
 import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.domain.users.UserRepository;
@@ -70,7 +70,7 @@ public class UserDeleteControllerMockMvcTest extends ControllerTest {
             void setup() throws Exception {
                 User user = saveUser();
                 this.USER_ID = user.getId();
-                this.TOKEN = TestUtil.generateToken(mockMvc, EMAIL, PASSWORD);
+                this.TOKEN = TokenGenerator.generateToken(mockMvc, EMAIL, PASSWORD);
             }
 
             @DisplayName("성공적으로 회원 정보를 삭제한다.")
@@ -94,7 +94,7 @@ public class UserDeleteControllerMockMvcTest extends ControllerTest {
             void setup() throws Exception {
                 User user = saveUser();
                 this.NOT_USER_ID = user.getId() + 100;
-                this.TOKEN = TestUtil.generateToken(mockMvc, EMAIL, PASSWORD);
+                this.TOKEN = TokenGenerator.generateToken(mockMvc, EMAIL, PASSWORD);
             }
 
             @DisplayName("403 forbidden을 응답한다.")

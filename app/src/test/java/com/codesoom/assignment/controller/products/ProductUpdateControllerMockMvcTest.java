@@ -1,6 +1,6 @@
 package com.codesoom.assignment.controller.products;
 
-import com.codesoom.assignment.TestUtil;
+import com.codesoom.assignment.TokenGenerator;
 import com.codesoom.assignment.controller.ControllerTest;
 import com.codesoom.assignment.domain.products.Product;
 import com.codesoom.assignment.domain.products.ProductDto;
@@ -58,7 +58,7 @@ public class ProductUpdateControllerMockMvcTest extends ControllerTest {
     void setup() throws Exception {
         cleanup();
         saveUser();
-        this.TOKEN = TestUtil.generateToken(mockMvc, EMAIL, PASSWORD);
+        this.TOKEN = TokenGenerator.generateToken(mockMvc, EMAIL, PASSWORD);
     }
 
     @AfterEach

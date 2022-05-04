@@ -1,6 +1,6 @@
 package com.codesoom.assignment.controller.users;
 
-import com.codesoom.assignment.TestUtil;
+import com.codesoom.assignment.TokenGenerator;
 import com.codesoom.assignment.controller.ControllerTest;
 import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.domain.users.UserRepository;
@@ -76,7 +76,7 @@ public class UserUpdateControllerMockMvcTest extends ControllerTest {
             @BeforeEach
             void setup() throws Exception {
                 this.EXIST_ID = saveUser().getId();
-                this.TOKEN = TestUtil.generateToken(mockMvc, EMAIL, PASSWORD);
+                this.TOKEN = TokenGenerator.generateToken(mockMvc, EMAIL, PASSWORD);
             }
 
             @AfterEach
@@ -213,7 +213,7 @@ public class UserUpdateControllerMockMvcTest extends ControllerTest {
                 final UserSaveDto userSaveDto
                         = new UserSaveDto("홍길동", "hgd@gmail.com", "hgdZzang123");
                 this.NOT_USER_ID = saveUser().getId() + 100;
-                this.TOKEN = TestUtil.generateToken(mockMvc, EMAIL, PASSWORD);
+                this.TOKEN = TokenGenerator.generateToken(mockMvc, EMAIL, PASSWORD);
             }
 
 
