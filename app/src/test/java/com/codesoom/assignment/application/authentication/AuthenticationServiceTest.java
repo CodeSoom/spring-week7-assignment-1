@@ -34,6 +34,19 @@ class AuthenticationServiceTest {
         userRepository.deleteAll();
     }
 
+    /**
+     * 하나의 User를 생성해 등록합니다
+     * @return 생성한 User
+     */
+    private User createUser() {
+        User user = User.of(
+                USERNAME,
+                EMAIL,
+                PASSWORD
+        );
+        return userRepository.save(user);
+    }
+
 
     @Nested
     @DisplayName("login 메소드는")
@@ -47,12 +60,7 @@ class AuthenticationServiceTest {
 
             @BeforeEach
             void setUp() {
-                User user = User.of(
-                        USERNAME,
-                        EMAIL,
-                        PASSWORD
-                );
-                userRepository.save(user);
+                User user = createUser();
                 loginEmail = user.getEmail();
                 password = user.getPassword();
             }
@@ -74,12 +82,7 @@ class AuthenticationServiceTest {
 
             @BeforeEach
             void setUp() {
-                User user = User.of(
-                        USERNAME,
-                        EMAIL,
-                        PASSWORD
-                );
-                userRepository.save(user);
+                User user = createUser();
                 loginEmail = user.getEmail();
                 password = user.getPassword();
 
