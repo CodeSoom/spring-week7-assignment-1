@@ -25,8 +25,6 @@ class AuthenticationServiceTest {
     @Autowired
     private TestUserRepositoryDouble userRepository;
     @Autowired
-    private JwtUtil jwtUtil;
-    @Autowired
     private AuthenticationService authenticationService;
 
     @AfterEach
