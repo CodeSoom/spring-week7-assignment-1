@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +24,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 class SessionControllerTest {
 
+    private static final String NAME = "김철수";
+    private static final String EMAIL = "abc@codesoom.com";
+    private static final String PASSWORD = "password";
+
     private SessionController controller;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UserLoginService service;
@@ -43,7 +51,10 @@ class SessionControllerTest {
     }
 
     private User saveUser() {
-        return repository.save(User.withoutId("맛동산", "abc@codesoom.com", "password"));
+        User user = User.of(NAME, EMAIL);
+        user.changePassword(PASSWORD, passwordEncoder);
+
+        return repository.save(user);
     }
 
     @DisplayName("login 메서드는")
@@ -54,13 +65,12 @@ class SessionControllerTest {
         @Nested
         class Context_with_correct_password {
 
-            private SessionController.LoginRequestDto CORRECT_LOGIN_REQUEST_DTO;
+            private SessionController.LoginRequestDto CORRECT_LOGIN_REQUEST_DTO
+                    = new SessionController.LoginRequestDto(EMAIL, PASSWORD);
 
             @BeforeEach
             void setup() {
-                final User user = saveUser();
-                this.CORRECT_LOGIN_REQUEST_DTO
-                        = new SessionController.LoginRequestDto(user.getEmail(), user.getPassword());
+               saveUser();
             }
 
             @AfterEach
@@ -81,13 +91,12 @@ class SessionControllerTest {
         @Nested
         class Context_with_incorrect_password {
 
-            private SessionController.LoginRequestDto INCORRECT_LOGIN_REQUEST_DTO;
+            private SessionController.LoginRequestDto INCORRECT_LOGIN_REQUEST_DTO
+                    = new SessionController.LoginRequestDto(EMAIL, PASSWORD + "fail");
 
             @BeforeEach
             void setup() {
-                final User user = saveUser();
-                this.INCORRECT_LOGIN_REQUEST_DTO
-                        = new SessionController.LoginRequestDto(user.getEmail(), user.getPassword() + "fail");
+                saveUser();
             }
 
             @AfterEach
@@ -107,9 +116,9 @@ class SessionControllerTest {
         @DisplayName("찾을 수 없는 회원 로그인 정보가 주어지면")
         @Nested
         class Context_with_not_exist_user {
-            private final String NOT_EXIST_USER_EMAIL = "hola007@fake.email";
+            private final String NOT_EXIST_USER_EMAIL = "fail" + EMAIL;
             private final SessionController.LoginRequestDto LOGIN_REQUEST_DTO
-                    = new SessionController.LoginRequestDto(NOT_EXIST_USER_EMAIL, "fakePWD123");
+                    = new SessionController.LoginRequestDto(NOT_EXIST_USER_EMAIL, PASSWORD);
 
             @BeforeEach
             void setup() {

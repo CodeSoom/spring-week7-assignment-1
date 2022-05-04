@@ -1,5 +1,6 @@
 package com.codesoom.assignment.controller.users;
 
+import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.exceptions.UserNotFoundException;
 import com.codesoom.assignment.application.users.UserUpdateService;
 import com.codesoom.assignment.domain.users.UserRepository;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,7 +24,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 public class UserUpdateControllerTest {
 
+    private static final String EMAIL = "hgd@gmail.com";
+    private static final String PASSWORD = "hgdZzang123";
+
     private UserUpdateController controller;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UserUpdateService service;
@@ -41,6 +49,12 @@ public class UserUpdateControllerTest {
         repository.deleteAll();
     }
 
+    private User saveUser() {
+        User user = User.of("김철수", EMAIL);
+        user.changePassword(PASSWORD, passwordEncoder);
+
+        return repository.save(user);
+    }
 
     @DisplayName("updateUser 메서드는")
     @Nested
@@ -56,9 +70,7 @@ public class UserUpdateControllerTest {
 
             @BeforeEach
             void setup() {
-                final UserSaveDto userSaveDto
-                        = new UserSaveDto("홍길동", "hgd@gmail.com", "hgdZzang123");
-                this.EXIST_ID = repository.save(userSaveDto.user()).getId();
+                this.EXIST_ID = saveUser().getId();
             }
 
             @AfterEach
@@ -74,7 +86,8 @@ public class UserUpdateControllerTest {
                 assertThat(userResponseDto.getId()).isEqualTo(EXIST_ID);
                 assertThat(userResponseDto.getName()).isEqualTo(UPDATE_TO_USER.getName());
                 assertThat(userResponseDto.getEmail()).isEqualTo(UPDATE_TO_USER.getEmail());
-                assertThat(userResponseDto.getPassword()).isEqualTo(UPDATE_TO_USER.getPassword());
+                assertThat(passwordEncoder
+                        .matches(UPDATE_TO_USER.getPassword(), userResponseDto.getPassword())).isTrue();
             }
         }
 

@@ -11,26 +11,40 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class UserUpdateTest extends ServiceTest {
 
+    private static final String EMAIL = "test@codesoom.com";
+    private static final String PASSWORD = "pAsSwOrD!2#";
+
     private UserCommandService service;
 
     @Autowired
     private UserRepository repository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setup() {
-        this.service = new UserCommandService(repository);
+        this.service = new UserCommandService(repository, passwordEncoder);
         cleanup();
     }
 
     @AfterEach
     void cleanup() {
         repository.deleteAll();
+    }
+
+    private User saveUser() {
+        User user = User.of("김철수", EMAIL);
+        user.changePassword(PASSWORD, passwordEncoder);
+
+        return repository.save(user);
     }
 
     @DisplayName("updateUser 메서드는")
@@ -50,9 +64,7 @@ public class UserUpdateTest extends ServiceTest {
 
             @BeforeEach
             void setup() {
-                final UserSaveDto userSaveDto
-                        = new UserSaveDto("홍길동", "hkd@codesoom.com", "ghdrlfEhd898");
-                this.EXIST_USER_ID = repository.save(userSaveDto.user()).getId();
+                this.EXIST_USER_ID = saveUser().getId();
             }
 
             @DisplayName("회원 정보를 수정 후 수정된 정보를 반환한다.")
@@ -62,7 +74,7 @@ public class UserUpdateTest extends ServiceTest {
 
                 assertThat(user.getName()).isEqualTo(UPDATE_NAME);
                 assertThat(user.getEmail()).isEqualTo(UPDATE_EMAIL);
-                assertThat(user.getPassword()).isEqualTo(UPDATE_PASSWORD);
+                assertThat(passwordEncoder.matches(UPDATE_PASSWORD, user.getPassword())).isTrue();
             }
         }
 

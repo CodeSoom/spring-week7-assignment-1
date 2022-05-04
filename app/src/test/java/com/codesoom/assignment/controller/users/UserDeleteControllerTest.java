@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +22,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 public class UserDeleteControllerTest {
 
+    private static final String EMAIL = "hgd@codesoom.com";
+    private static final String PASSWORD = "hgdZzang123!";
+
     private UserDeleteController controller;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UserDeleteService service;
@@ -40,6 +47,13 @@ public class UserDeleteControllerTest {
         repository.deleteAll();
     }
 
+    private User saveUser() {
+        User user = User.of("김철수", EMAIL);
+        user.changePassword(PASSWORD, passwordEncoder);
+
+        return repository.save(user);
+    }
+
     @DisplayName("deleteUser 메서드는")
     @Nested
     class Describe_delete_user {
@@ -52,9 +66,7 @@ public class UserDeleteControllerTest {
 
             @BeforeEach
             void setup() {
-                this.EXIST_ID = repository
-                        .save(User.withoutId("홍길동", "hgd@codesoom.com", "hgd123!"))
-                        .getId();
+                this.EXIST_ID = saveUser().getId();
             }
 
             @DisplayName("성공적으로 회원을 삭제한다.")

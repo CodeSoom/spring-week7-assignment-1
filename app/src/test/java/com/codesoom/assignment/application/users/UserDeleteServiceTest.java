@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -17,13 +18,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class UserDeleteServiceTest extends ServiceTest {
     
     private UserCommandService service;
-    
+
     @Autowired
     private UserRepository repository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setup() {
-        this.service = new UserCommandService(repository);
+        this.service = new UserCommandService(repository, passwordEncoder);
         cleanup();
     }
 
@@ -44,8 +48,10 @@ public class UserDeleteServiceTest extends ServiceTest {
 
             @BeforeEach
             void setup() {
+                User user = User.of("홍길동", "hgd@codesoom.com");
+                user.changePassword( "hgd123!", passwordEncoder);
                 this.EXIST_ID = repository
-                        .save(User.withoutId("홍길동", "hgd@codesoom.com", "hgd123!"))
+                        .save(user)
                         .getId();
             }
 

@@ -1,6 +1,7 @@
 package com.codesoom.assignment.controller.users;
 
 import com.codesoom.assignment.controller.ControllerTest;
+import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.domain.users.UserRepository;
 import com.codesoom.assignment.domain.users.UserResponseDto;
 import com.codesoom.assignment.domain.users.UserSaveDto;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -23,6 +25,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("UserSaveController 클래스")
 public class UserSaveControllerMockMvcTest extends ControllerTest {
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private MockMvc mockMvc;
@@ -52,7 +57,7 @@ public class UserSaveControllerMockMvcTest extends ControllerTest {
         class Context_with_valid_data {
 
             private final UserSaveDto VALID_USER_SAVE_DTO
-                    = new UserSaveDto("홍길동", "hkd@codesoom.com", "password");
+                    = new UserSaveDto("홍길동", "test@codesoom.com", "TEST234@");
 
             @DisplayName("회원 정보를 성공적으로 저장한다.")
             @Test

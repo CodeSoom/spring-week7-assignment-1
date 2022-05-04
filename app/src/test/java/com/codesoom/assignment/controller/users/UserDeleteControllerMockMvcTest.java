@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static com.codesoom.assignment.ConstantsForTest.TOKEN_PREFIX;
@@ -21,6 +22,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("UserDeleteController 클래스")
 public class UserDeleteControllerMockMvcTest extends ControllerTest {
+
+    private final String EMAIL = "kimcs@codesoom.com";
+    private final String PASSWORD = "rlacjftn098";
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private MockMvc mockMvc;
@@ -41,6 +48,13 @@ public class UserDeleteControllerMockMvcTest extends ControllerTest {
         repository.deleteAll();
     }
 
+    private User saveUser() {
+        User user = User.of("김철수", EMAIL);
+        user.changePassword(PASSWORD, passwordEncoder);
+
+        return repository.save(user);
+    }
+
     @DisplayName("[DELETE] /users/{id}")
     @Nested
     class Describe_delete_user {
@@ -54,9 +68,9 @@ public class UserDeleteControllerMockMvcTest extends ControllerTest {
 
             @BeforeEach
             void setup() throws Exception {
-                User user = repository.save(User.withoutId("김철수", "kimcs@codesoom.com", "rlacjftn098"));
+                User user = saveUser();
                 this.USER_ID = user.getId();
-                this.TOKEN = TestUtil.generateToken(mockMvc, user.getEmail(), user.getPassword());
+                this.TOKEN = TestUtil.generateToken(mockMvc, EMAIL, PASSWORD);
             }
 
             @DisplayName("성공적으로 회원 정보를 삭제한다.")
@@ -78,9 +92,9 @@ public class UserDeleteControllerMockMvcTest extends ControllerTest {
 
             @BeforeEach
             void setup() throws Exception {
-                User user = repository.save(User.withoutId("김철수", "kimcs@codesoom.com", "rlacjftn098"));
+                User user = saveUser();
                 this.NOT_USER_ID = user.getId() + 100;
-                this.TOKEN = TestUtil.generateToken(mockMvc, user.getEmail(), user.getPassword());
+                this.TOKEN = TestUtil.generateToken(mockMvc, EMAIL, PASSWORD);
             }
 
             @DisplayName("403 forbidden을 응답한다.")

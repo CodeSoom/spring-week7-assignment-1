@@ -2,6 +2,7 @@ package com.codesoom.assignment.controller.users;
 
 import com.codesoom.assignment.TestUtil;
 import com.codesoom.assignment.controller.ControllerTest;
+import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.domain.users.UserRepository;
 import com.codesoom.assignment.domain.users.UserResponseDto;
 import com.codesoom.assignment.domain.users.UserSaveDto;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -27,6 +29,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("UserUpdateController 클래스")
 public class UserUpdateControllerMockMvcTest extends ControllerTest {
+
+    private static final String EMAIL = "hgd@gmail.com";
+    private static final String PASSWORD = "hgdZzang123";
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private MockMvc mockMvc;
@@ -47,6 +55,13 @@ public class UserUpdateControllerMockMvcTest extends ControllerTest {
         repository.deleteAll();
     }
 
+    private User saveUser() {
+        User user = User.of("김철수", EMAIL);
+        user.changePassword(PASSWORD, passwordEncoder);
+
+        return repository.save(user);
+    }
+
     @DisplayName("[PATCH] /users/{id}")
     @Nested
     class Describe_patch_users {
@@ -60,10 +75,8 @@ public class UserUpdateControllerMockMvcTest extends ControllerTest {
 
             @BeforeEach
             void setup() throws Exception {
-                final UserSaveDto userSaveDto
-                        = new UserSaveDto("홍길동", "hgd@gmail.com", "hgdZzang123");
-                this.EXIST_ID = repository.save(userSaveDto.user()).getId();
-                this.TOKEN = TestUtil.generateToken(mockMvc, userSaveDto.getEmail(), userSaveDto.getPassword());
+                this.EXIST_ID = saveUser().getId();
+                this.TOKEN = TestUtil.generateToken(mockMvc, EMAIL, PASSWORD);
             }
 
             @AfterEach
@@ -95,7 +108,7 @@ public class UserUpdateControllerMockMvcTest extends ControllerTest {
                     assertThat(user.getId()).isEqualTo(EXIST_ID);
                     assertThat(user.getName()).isEqualTo(UPDATE_TO_USER.getName());
                     assertThat(user.getEmail()).isEqualTo(UPDATE_TO_USER.getEmail());
-                    assertThat(user.getPassword()).isEqualTo(UPDATE_TO_USER.getPassword());
+                    assertThat(passwordEncoder.matches("tlacjd123",user.getPassword())).isTrue();
                 }
             }
 
@@ -199,8 +212,8 @@ public class UserUpdateControllerMockMvcTest extends ControllerTest {
             void setup() throws Exception {
                 final UserSaveDto userSaveDto
                         = new UserSaveDto("홍길동", "hgd@gmail.com", "hgdZzang123");
-                this.NOT_USER_ID = repository.save(userSaveDto.user()).getId() + 100;
-                this.TOKEN = TestUtil.generateToken(mockMvc, userSaveDto.getEmail(), userSaveDto.getPassword());
+                this.NOT_USER_ID = saveUser().getId() + 100;
+                this.TOKEN = TestUtil.generateToken(mockMvc, EMAIL, PASSWORD);
             }
 
 
