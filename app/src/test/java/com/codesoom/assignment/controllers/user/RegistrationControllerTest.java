@@ -111,7 +111,7 @@ class RegistrationControllerTest {
             }
             @Test
             @DisplayName("상태코드[400]과 메세지:[비밀번호는 {설정된 자리수} 이하 이여야합니다}]를 응답한다")
-            void will_status_badRequest_비밀번호는_설정된_자리수_이상_이여야합니다() throws Exception{
+            void will_status_badRequest_비밀번호는_설정된_자리수_이하_이여합니다() throws Exception{
                 MvcResult mvcResult = mockMvc.perform(
                         post("/users")
                                 .contentType(MediaType.APPLICATION_JSON_VALUE)
