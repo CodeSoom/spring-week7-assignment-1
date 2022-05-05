@@ -1,6 +1,5 @@
 package com.codesoom.assignment.controller.session;
 
-import com.codesoom.assignment.application.users.UserSaveRequest;
 import com.codesoom.assignment.controller.ControllerTest;
 import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.domain.users.UserRepository;
@@ -13,6 +12,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -22,6 +22,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("SessionController 클래스")
 public class SessionControllerMockMvcTest extends ControllerTest {
+
+    private final String EMAIL = "abc@codesoom.com";
+    private final String PASSWORD = "abc123correct";
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,6 +48,13 @@ public class SessionControllerMockMvcTest extends ControllerTest {
         repository.deleteAll();
     }
 
+    private User saveUser() {
+        User user = User.of("김철수", EMAIL);
+        user.changePassword(PASSWORD, passwordEncoder);
+
+        return repository.save(user);
+    }
+
     @DisplayName("[POST] /session")
     @Nested
     class Describe_post_login {
@@ -53,30 +66,13 @@ public class SessionControllerMockMvcTest extends ControllerTest {
             @DisplayName("정확한 비밀번호가 주어지면")
             @Nested
             class Context_with_correct_password {
-                private final String EMAIL = "abc@codesoom.com";
-                private final String CORRECT_PASSWORD = "abc123correct";
 
                 private final SessionController.LoginRequestDto CORRECT_LOGIN_REQUEST_DTO
-                        = new SessionController.LoginRequestDto(EMAIL, CORRECT_PASSWORD);
+                        = new SessionController.LoginRequestDto(EMAIL, PASSWORD);
 
                 @BeforeEach
                 void setup() {
-                    repository.save(new UserSaveRequest() {
-                        @Override
-                        public String getName() {
-                            return "맛동산";
-                        }
-
-                        @Override
-                        public String getEmail() {
-                            return EMAIL;
-                        }
-
-                        @Override
-                        public String getPassword() {
-                            return CORRECT_PASSWORD;
-                        }
-                    });
+                    saveUser();
                 }
 
                 @AfterEach
@@ -103,31 +99,14 @@ public class SessionControllerMockMvcTest extends ControllerTest {
             @DisplayName("틀린 비밀번호가 주어지면")
             @Nested
             class Context_with_incorrect_password {
-                private final String EMAIL = "abc@codesoom.com";
-                private final String CORRECT_PASSWORD = "abc123correct";
-                private final String INCORRECT_PASSWORD = "abc123incorrect";
+                private final String INCORRECT_PASSWORD = "fail" + PASSWORD;
 
                 private final SessionController.LoginRequestDto INCORRECT_LOGIN_REQUEST_DTO
                         = new SessionController.LoginRequestDto(EMAIL, INCORRECT_PASSWORD);
 
                 @BeforeEach
                 void setup() {
-                    repository.save(new UserSaveRequest() {
-                        @Override
-                        public String getName() {
-                            return "맛동산";
-                        }
-
-                        @Override
-                        public String getEmail() {
-                            return EMAIL;
-                        }
-
-                        @Override
-                        public String getPassword() {
-                            return CORRECT_PASSWORD;
-                        }
-                    });
+                    saveUser();
                 }
 
                 @AfterEach
@@ -149,9 +128,9 @@ public class SessionControllerMockMvcTest extends ControllerTest {
         @DisplayName("찾을 수 없는 회원 로그인 정보가 주어지면")
         @Nested
         class Context_with_not_exist_user {
-            private final String NOT_EXIST_USER_EMAIL = "hola007@fake.email";
+            private final String NOT_EXIST_USER_EMAIL = "fail" + EMAIL;
             private final SessionController.LoginRequestDto LOGIN_REQUEST_DTO
-                    = new SessionController.LoginRequestDto(NOT_EXIST_USER_EMAIL, "fakePWD123");
+                    = new SessionController.LoginRequestDto(NOT_EXIST_USER_EMAIL, PASSWORD);
 
             @BeforeEach
             void setup() {

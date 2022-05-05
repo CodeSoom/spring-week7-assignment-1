@@ -1,6 +1,6 @@
 package com.codesoom.assignment.config;
 
-import com.codesoom.assignment.application.auth.InvalidTokenException;
+import com.codesoom.assignment.exceptions.InvalidTokenException;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;

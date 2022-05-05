@@ -2,6 +2,7 @@ package com.codesoom.assignment.application.products;
 
 import com.codesoom.assignment.domain.products.Product;
 import com.codesoom.assignment.domain.products.ProductRepository;
+import com.codesoom.assignment.exceptions.ProductNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

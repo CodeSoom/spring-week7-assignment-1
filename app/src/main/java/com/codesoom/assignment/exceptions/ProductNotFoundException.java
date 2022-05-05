@@ -1,4 +1,4 @@
-package com.codesoom.assignment.application.products;
+package com.codesoom.assignment.exceptions;
 
 
 import org.springframework.http.HttpStatus;

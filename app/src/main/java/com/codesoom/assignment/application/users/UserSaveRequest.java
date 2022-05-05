@@ -15,7 +15,7 @@ public interface UserSaveRequest {
     String getPassword();
 
     default User user() {
-        return new User(getName(), getEmail(), getPassword());
+        return User.of(getName(), getEmail());
     }
 
 }

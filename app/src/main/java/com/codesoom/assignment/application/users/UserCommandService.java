@@ -2,6 +2,8 @@ package com.codesoom.assignment.application.users;
 
 import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.domain.users.UserRepository;
+import com.codesoom.assignment.exceptions.UserNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,14 +16,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserCommandService implements UserSaveService, UserUpdateService, UserDeleteService {
 
     private final UserRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserCommandService(UserRepository repository) {
+    public UserCommandService(UserRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public User saveUser(UserSaveRequest userSaveRequest) {
-        return repository.save(userSaveRequest);
+        User user = userSaveRequest.user();
+        user.changePassword(userSaveRequest.getPassword(), passwordEncoder);
+        return repository.save(user);
     }
 
     @Override
@@ -31,6 +37,7 @@ public class UserCommandService implements UserSaveService, UserUpdateService, U
                         new UserNotFoundException(String.format("%s에 해당하는 회원을 찾을 수 없어 수정에 실패하였습니다.", id)));
 
         user.update(userSaveRequest.user());
+        user.changePassword(userSaveRequest.getPassword(), passwordEncoder);
 
         return user;
     }

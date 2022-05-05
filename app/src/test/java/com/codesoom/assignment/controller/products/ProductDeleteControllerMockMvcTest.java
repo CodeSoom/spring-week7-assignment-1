@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 
+import static com.codesoom.assignment.ConstantsForTest.INVALID_TOKENS;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -93,12 +94,6 @@ public class ProductDeleteControllerMockMvcTest extends ControllerTest {
         @Nested
         class Context_with_invalid_token {
 
-            private String[] INVALID_TOKENS = {
-                    ""
-                    , " "
-                    , TOKEN + "231"
-            };
-
             private Long EXIST_ID;
 
             @BeforeEach
@@ -111,9 +106,9 @@ public class ProductDeleteControllerMockMvcTest extends ControllerTest {
             @DisplayName("401 unauthorized를 응답한다.")
             @Test
             void it_delete_product() throws Exception {
-                for (int i = 0; i < INVALID_TOKENS.length; i++) {
+                for (int i = 0; i < INVALID_TOKENS.size(); i++) {
                     mockMvc.perform(delete("/products/" + EXIST_ID)
-                                    .header(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + INVALID_TOKENS[i]))
+                                    .header(HttpHeaders.AUTHORIZATION, INVALID_TOKENS.get(i)))
                             .andExpect(status().isUnauthorized());
                 }
             }

@@ -1,4 +1,4 @@
-package com.codesoom.assignment.application.users;
+package com.codesoom.assignment.exceptions;
 
 import org.springframework.http.HttpStatus;
 

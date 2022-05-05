@@ -28,13 +28,7 @@ public class ProductSaveControllerTest {
     private ProductSaveController controller;
 
     @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
     private ProductSaveService service;
-
-    @Autowired
-    private AuthorizationService authorizationService;
 
     @Autowired
     private ProductRepository repository;
@@ -43,8 +37,7 @@ public class ProductSaveControllerTest {
 
     @BeforeEach
     void setup() {
-        this.controller = new ProductSaveController(service, authorizationService);
-        this.TOKEN = jwtUtil.encode(1L);
+        this.controller = new ProductSaveController(service);
         cleanup();
     }
 
@@ -72,7 +65,7 @@ public class ProductSaveControllerTest {
             @DisplayName("상품을 성공적으로 등록한다.")
             @Test
             void it_will_save_product() {
-                Product product = controller.saveProduct(TOKEN, VALID_PRODUCT_DTO);
+                Product product = controller.saveProduct(VALID_PRODUCT_DTO);
 
                 assertThat(product.getName()).isEqualTo(VALID_PRODUCT_DTO.getName());
                 assertThat(repository.findById(product.getId())).isNotEmpty();

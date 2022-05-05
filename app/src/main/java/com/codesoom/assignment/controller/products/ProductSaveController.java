@@ -6,6 +6,7 @@ import com.codesoom.assignment.application.products.ProductSaveService;
 import com.codesoom.assignment.config.AccessToken;
 import com.codesoom.assignment.domain.products.Product;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -23,11 +24,9 @@ import java.math.BigDecimal;
 public class ProductSaveController {
 
     private final ProductSaveService service;
-    private final AuthorizationService authorizationService;
 
-    public ProductSaveController(ProductSaveService service, AuthorizationService authorizationService) {
+    public ProductSaveController(ProductSaveService service) {
         this.service = service;
-        this.authorizationService = authorizationService;
     }
 
     /**
@@ -36,11 +35,10 @@ public class ProductSaveController {
      * @param productSaveDto 상품 등록 데이터
      * @return 등록된 상품
      */
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Product saveProduct(@AccessToken String accessToken,
-                               @Valid @RequestBody ProductSaveDto productSaveDto) {
-        authorizationService.parseToken(accessToken);
+    public Product saveProduct(@Valid @RequestBody ProductSaveDto productSaveDto) {
         return service.saveProduct(productSaveDto);
     }
 

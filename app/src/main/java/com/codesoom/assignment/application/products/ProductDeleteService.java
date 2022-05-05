@@ -1,6 +1,8 @@
 package com.codesoom.assignment.application.products;
 
 
+import com.codesoom.assignment.exceptions.ProductNotFoundException;
+
 /**
  * 상품 삭제를 담당합니다.
  */

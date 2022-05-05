@@ -1,10 +1,11 @@
 package com.codesoom.assignment.application.auth;
 
 import com.codesoom.assignment.application.ServiceTest;
-import com.codesoom.assignment.application.users.UserNotFoundException;
+import com.codesoom.assignment.exceptions.UserNotFoundException;
 import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.domain.users.UserRepository;
 import com.codesoom.assignment.domain.users.UserSaveDto;
+import com.codesoom.assignment.exceptions.InvalidPasswordException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,13 +13,20 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AuthenticationServiceTest extends ServiceTest {
 
+    private static final String USER_EMAIL = "hgd@codesoom.com";
+    private static final String USER_PASSWORD = "hgdZzang123!";
+
     private UserLoginService service;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -28,13 +36,20 @@ class AuthenticationServiceTest extends ServiceTest {
 
     @BeforeEach
     void setup() {
-        this.service = new UserLoginService(jwtUtil, repository);
+        this.service = new UserLoginService(passwordEncoder, jwtUtil, repository);
         cleanup();
     }
 
     @AfterEach
     void cleanup() {
         repository.deleteAll();
+    }
+
+    private User saveUser() {
+        User user = User.of("김철수", USER_EMAIL);
+        user.changePassword(USER_PASSWORD, passwordEncoder);
+
+        return repository.save(user);
     }
 
     @DisplayName("login 메서드는")
@@ -48,8 +63,6 @@ class AuthenticationServiceTest extends ServiceTest {
             @DisplayName("정확한 비밀번호가 주어지면")
             @Nested
             class Context_with_correct_password {
-                private final String USER_EMAIL = "hgd@codesoom.com";
-                private final String USER_PASSWORD = "hgdZzang123!";
 
                 private final LoginRequest LOGIN_REQUEST_DTO = new LoginRequest() {
                     @Override
@@ -65,7 +78,7 @@ class AuthenticationServiceTest extends ServiceTest {
 
                 @BeforeEach
                 void setup() {
-                    repository.save(new UserSaveDto("홍길동", USER_EMAIL, USER_PASSWORD));
+                    saveUser();
                 }
 
                 @AfterEach
@@ -86,8 +99,6 @@ class AuthenticationServiceTest extends ServiceTest {
             @DisplayName("틀린 비밀번호가 주어지면")
             @Nested
             class Context_with_incorrect_password {
-                private final String USER_EMAIL = "hgd@codesoom.com";
-                private final String CORRECT_PASSWORD = "hgdZzang123!";
                 private final String INCORRECT_PASSWORD = "HiImTroll";
 
                 private final LoginRequest INCORRECT_PASSWORD_REQUEST = new LoginRequest() {
@@ -104,7 +115,7 @@ class AuthenticationServiceTest extends ServiceTest {
 
                 @BeforeEach
                 void setup() {
-                    repository.save(new UserSaveDto("홍길동", USER_EMAIL, CORRECT_PASSWORD));
+                    saveUser();
                 }
 
                 @AfterEach
@@ -125,7 +136,7 @@ class AuthenticationServiceTest extends ServiceTest {
         @Nested
         class Context_with_not_exist_user {
 
-            private final String NOT_EXIST_USER_EMAIL = "ace@codesoom.com";
+            private final String NOT_EXIST_USER_EMAIL = "fail" + USER_EMAIL;
             private final LoginRequest NOT_EXIST_LOGIN_REQUEST = new LoginRequest() {
                 @Override
                 public String getEmail() {
@@ -134,7 +145,7 @@ class AuthenticationServiceTest extends ServiceTest {
 
                 @Override
                 public String getPassword() {
-                    return "password12343";
+                    return USER_PASSWORD;
                 }
             };
 

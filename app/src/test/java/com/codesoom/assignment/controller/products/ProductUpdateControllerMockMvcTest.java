@@ -1,12 +1,12 @@
 package com.codesoom.assignment.controller.products;
 
+import com.codesoom.assignment.TokenGenerator;
 import com.codesoom.assignment.controller.ControllerTest;
 import com.codesoom.assignment.domain.products.Product;
 import com.codesoom.assignment.domain.products.ProductDto;
 import com.codesoom.assignment.domain.products.ProductRepository;
+import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.domain.users.UserRepository;
-import com.codesoom.assignment.domain.users.UserSaveDto;
-import com.codesoom.assignment.dto.TokenResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,21 +16,28 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
 
+import static com.codesoom.assignment.ConstantsForTest.INVALID_TOKENS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @DisplayName("ProductUpdateController 클래스")
 public class ProductUpdateControllerMockMvcTest extends ControllerTest {
+
+    private static final String EMAIL = "hgd@codesoom.com";
+    private static final String PASSWORD = "hgdZzang123!";
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private MockMvc mockMvc;
@@ -50,7 +57,8 @@ public class ProductUpdateControllerMockMvcTest extends ControllerTest {
     @BeforeEach
     void setup() throws Exception {
         cleanup();
-        this.TOKEN = createToken();
+        saveUser();
+        this.TOKEN = TokenGenerator.generateToken(mockMvc, EMAIL, PASSWORD);
     }
 
     @AfterEach
@@ -59,18 +67,11 @@ public class ProductUpdateControllerMockMvcTest extends ControllerTest {
         userRepository.deleteAll();
     }
 
-    String createToken() throws Exception {
-        final String email = "hgd@codesoom.com";
-        final String password = "hgd123098!#";
-        userRepository.save(new UserSaveDto("홍길동", email, password));
+    private User saveUser() {
+        User user = User.of("김철수", EMAIL);
+        user.changePassword(PASSWORD, passwordEncoder);
 
-        final byte[] contentAsByteArray = mockMvc.perform(post("/session")
-                .content(String.format("{\"email\": \"%s\", \"password\": \"%s\"}", email, password))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsByteArray();
-        final TokenResponse tokenResponse = objectMapper.readValue(contentAsByteArray, TokenResponse.class);
-        return TOKEN_PREFIX + tokenResponse.getAccessToken();
+        return userRepository.save(user);
     }
 
     @DisplayName("updateProduct 메서드는")
@@ -86,7 +87,7 @@ public class ProductUpdateControllerMockMvcTest extends ControllerTest {
             private Long EXIST_ID;
 
             @BeforeEach
-            void setup() {
+            void setup() throws Exception {
                 this.EXIST_ID = repository.save(Product.withoutId(
                         "쥐돌이", "캣이즈락스타", BigDecimal.valueOf(4000), "")).getId();
             }
@@ -95,9 +96,9 @@ public class ProductUpdateControllerMockMvcTest extends ControllerTest {
             @Test
             void will_return_updated_product() throws Exception {
                 final MvcResult result = mockMvc.perform(patch("/products/" + EXIST_ID)
-                        .header(HttpHeaders.AUTHORIZATION, TOKEN)
-                        .content(objectMapper.writeValueAsString(productToUpdate))
-                        .contentType(MediaType.APPLICATION_JSON))
+                                .header(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + TOKEN)
+                                .content(objectMapper.writeValueAsString(productToUpdate))
+                                .contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk())
                         .andReturn();
 
@@ -123,7 +124,7 @@ public class ProductUpdateControllerMockMvcTest extends ControllerTest {
             @Test
             void will_return_updated_product() throws Exception {
                 mockMvc.perform(patch("/products/" + NOT_EXIST_ID)
-                        .header(HttpHeaders.AUTHORIZATION, TOKEN)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + TOKEN)
                         .content(objectMapper.writeValueAsString(productToUpdate))
                         .contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isNotFound());
@@ -154,7 +155,7 @@ public class ProductUpdateControllerMockMvcTest extends ControllerTest {
             @Test
             void it_will_save_product() throws Exception {
                 mockMvc.perform(patch("/products/" + EXIST_ID).accept(MediaType.APPLICATION_JSON_UTF8)
-                        .header(HttpHeaders.AUTHORIZATION, TOKEN)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + TOKEN)
                         .content(objectMapper.writeValueAsString(VALID_PRODUCT_DTO))
                         .contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk())
@@ -181,7 +182,7 @@ public class ProductUpdateControllerMockMvcTest extends ControllerTest {
             @Test
             void it_thrown_exception() throws Exception {
                 mockMvc.perform(patch("/products/" + EXIST_ID)
-                        .header(HttpHeaders.AUTHORIZATION, TOKEN)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + TOKEN)
                         .content(objectMapper.writeValueAsString(INVALID_PRODUCT_DTO))
                         .contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isBadRequest());
@@ -191,12 +192,6 @@ public class ProductUpdateControllerMockMvcTest extends ControllerTest {
         @DisplayName("유효하지 않은 토큰이 주어지면")
         @Nested
         class Context_with_invalid_token {
-
-            private final String[] INVALID_TOKENS = {
-                    TOKEN_PREFIX + ""
-                    , TOKEN_PREFIX + " "
-                    , TOKEN_PREFIX + "esldkjflsoeis"
-                    };
 
             private final ProductDto VALID_PRODUCT_DTO
                     = new ProductDto("어쩌구", "어쩌구컴퍼니", BigDecimal.valueOf(2000), "url");
@@ -212,9 +207,9 @@ public class ProductUpdateControllerMockMvcTest extends ControllerTest {
             @DisplayName("401 unauthorized를 응답한다.")
             @Test
             void it_thrown_exception() throws Exception {
-                for (int i = 0; i < INVALID_TOKENS.length; i++) {
+                for (int i = 0; i < INVALID_TOKENS.size(); i++) {
                     mockMvc.perform(patch("/products/" + EXIST_ID)
-                                    .header(HttpHeaders.AUTHORIZATION, INVALID_TOKENS[i])
+                                    .header(HttpHeaders.AUTHORIZATION, INVALID_TOKENS.get(i))
                                     .content(objectMapper.writeValueAsString(VALID_PRODUCT_DTO))
                                     .contentType(MediaType.APPLICATION_JSON))
                             .andExpect(status().isUnauthorized());
