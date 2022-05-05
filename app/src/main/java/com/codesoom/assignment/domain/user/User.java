@@ -33,11 +33,6 @@ public class User {
         password = source.password;
     }
 
-    public User initUserId(Long userId) {
-        this.id = userId;
-        return this;
-    }
-
     public User passwordEncode(CryptService cryptService) {
         String encodePassword = cryptService.encode(this.password);
         this.password = encodePassword;
@@ -45,8 +40,7 @@ public class User {
     }
 
     public boolean isMatchPassword(CryptService cryptService, String inputPassword) {
-        String encodeInputPassword = cryptService.encode(inputPassword);
-        return cryptService.isMatch(this.password, encodeInputPassword);
+        return cryptService.isMatch(inputPassword, this.password);
     }
 
     public void destroy() {
