@@ -11,4 +11,6 @@ public interface UserService {
     void leave(Long userId);
 
     User findUser(Long id);
+
+    User findUserByEmail(String email);
 }
