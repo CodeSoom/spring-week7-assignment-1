@@ -3,7 +3,7 @@ package com.codesoom.assignment.controller;
 import com.codesoom.assignment.application.product.ProductCommandService;
 import com.codesoom.assignment.application.product.ProductQueryService;
 import com.codesoom.assignment.domain.Product;
-import com.codesoom.assignment.dto.ProductDto;
+import com.codesoom.assignment.dto.product.ProductDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;

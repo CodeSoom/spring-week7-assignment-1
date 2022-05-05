@@ -1,4 +1,4 @@
-package com.codesoom.assignment.dto;
+package com.codesoom.assignment.dto.product;
 
 
 import com.codesoom.assignment.domain.Product;

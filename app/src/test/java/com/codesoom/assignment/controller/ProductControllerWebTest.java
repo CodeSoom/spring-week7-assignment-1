@@ -5,7 +5,7 @@ import com.codesoom.assignment.application.product.ProductCommandService;
 import com.codesoom.assignment.application.product.ProductQueryService;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.domain.TestProductRepositoryDouble;
-import com.codesoom.assignment.dto.ProductDto;
+import com.codesoom.assignment.dto.product.ProductDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;

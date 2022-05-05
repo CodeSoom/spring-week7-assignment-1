@@ -2,7 +2,7 @@ package com.codesoom.assignment.application.product;
 
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.domain.ProductRepository;
-import com.codesoom.assignment.dto.ProductDto;
+import com.codesoom.assignment.dto.product.ProductDto;
 import com.codesoom.assignment.exceptions.ProductNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
