@@ -3,7 +3,7 @@ package com.codesoom.assignment.application.authentication;
 import com.codesoom.assignment.UserNotFoundException;
 import com.codesoom.assignment.domain.TestUserRepositoryDouble;
 import com.codesoom.assignment.domain.User;
-import com.codesoom.assignment.domain.UserRepository;
+import com.codesoom.assignment.exceptions.InvalidTokenException;
 import com.codesoom.assignment.exceptions.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.AfterEach;
@@ -14,9 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.security.auth.message.AuthException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @DisplayName("AuthenticationService 에서")
@@ -27,6 +28,10 @@ class AuthenticationServiceTest {
 
     @Autowired
     private TestUserRepositoryDouble userRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @Autowired
     private AuthenticationService authenticationService;
 
@@ -116,6 +121,51 @@ class AuthenticationServiceTest {
             void it_throw_loginFailException() {
                 assertThatThrownBy(() -> authenticationService.login(loginEmail, password))
                         .isInstanceOf(LoginFailException.class);
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("parseToken 메소드는")
+    class Describe_of_parseToken {
+
+        @Nested
+        @DisplayName("유효한 accessToken이 주어지면")
+        class Context_with_valid_accessToken {
+            private String accessToken;
+            private final User user = createUser();
+
+            @BeforeEach
+            void setUp() {
+                accessToken = jwtUtil.encode(user.getId());
+            }
+
+            @Test
+            @DisplayName("accessToken 에서 id를 가져올 수 있다")
+            void it_return_id() throws AuthException {
+                Long id = authenticationService.parseToken(accessToken);
+
+                assertThat(id).isEqualTo(user.getId());
+            }
+        }
+
+        @Nested
+        @DisplayName("유효하지 않은 accessToken이 주어지면")
+        class Context_with_invalid_accessToken {
+            private String accessToken;
+            private final User user = createUser();
+
+            @BeforeEach
+            void setUp() {
+                accessToken = jwtUtil.encode(user.getId());
+                accessToken = accessToken + "InvalidToken";
+            }
+
+            @Test
+            @DisplayName("InvalidTokenException을 던진다")
+            void it_throw_invalidTokenException() {
+                assertThatThrownBy(() -> authenticationService.parseToken(accessToken))
+                        .isInstanceOf(InvalidTokenException.class);
             }
         }
     }

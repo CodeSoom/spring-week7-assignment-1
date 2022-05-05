@@ -1,12 +1,14 @@
 package com.codesoom.assignment.application.authentication;
 
 import com.codesoom.assignment.UserNotFoundException;
-import com.codesoom.assignment.application.user.UserQueryService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.exceptions.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
+import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Service;
+
+import javax.security.auth.message.AuthException;
 
 @Service
 public class AuthenticationService {
@@ -32,6 +34,11 @@ public class AuthenticationService {
             throw new LoginFailException(email);
         }
         return jwtUtil.encode(user.getId());
+    }
+
+    public Long parseToken(String accessToken) throws AuthException {
+        Claims claims = jwtUtil.decode(accessToken);
+        return claims.get("id", Long.class);
     }
 
 }
