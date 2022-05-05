@@ -1,9 +1,25 @@
+
+
 spring:
+  profiles:
+    active: test
+---
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:h2:mem:test
+    driver-class-name: org.h2.Driver
+  jpa:
+    ddl-auto: create-drop
+
+---
+spring:
+  profiles: real
   datasource:
     url: jdbc:h2:~/data/demo
   jpa:
     hibernate:
       ddl-auto: update
-
+---
 jwt:
   secret: "12345678901234567890123456789010"
