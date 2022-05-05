@@ -34,8 +34,6 @@ public class UserController {
             @PathVariable Long id,
             @RequestBody @Valid UserModificationData modificationData
     ) {
-//        User user = userService.updateUser(id, modificationData);
-//        return getUserResultData(user);
         return null;
     }
 
