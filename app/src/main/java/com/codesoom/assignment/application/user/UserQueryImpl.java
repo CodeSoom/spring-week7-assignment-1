@@ -3,6 +3,7 @@ package com.codesoom.assignment.application.user;
 import com.codesoom.assignment.domain.user.User;
 import com.codesoom.assignment.domain.user.UserQuery;
 import com.codesoom.assignment.domain.user.UserRepository;
+import com.codesoom.assignment.errors.user.UserNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,6 +16,16 @@ public class UserQueryImpl implements UserQuery {
 
     @Override
     public User findUser(Long userId) {
-        return null;
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException());
+        return user;
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException());
+
+        return user;
     }
 }

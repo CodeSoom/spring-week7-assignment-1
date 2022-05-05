@@ -1,7 +1,9 @@
 package com.codesoom.assignment.errors.user;
 
+import com.codesoom.assignment.common.message.ErrorMessage;
+
 public class UserNotFoundException extends RuntimeException {
-    public UserNotFoundException(Long id) {
-        super("User not found: " + id);
+    public UserNotFoundException() {
+        super(ErrorMessage.USER_NOT_EXIST.getErrorMsg());
     }
 }
