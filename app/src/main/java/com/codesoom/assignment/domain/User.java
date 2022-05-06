@@ -11,9 +11,7 @@ import javax.persistence.Id;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue
@@ -27,6 +25,15 @@ public class User {
 
     @Builder.Default
     private boolean deleted = false;
+
+    @Builder
+    public User(Long id, String email, String name, String password, boolean deleted) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.deleted = deleted;
+    }
 
     public void changeWith(User source) {
         name = source.name;
