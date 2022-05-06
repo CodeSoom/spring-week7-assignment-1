@@ -1,6 +1,7 @@
 package com.codesoom.assignment.domain.users;
 
 import lombok.Getter;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,7 +28,8 @@ public class User {
     @Column
     private String password;
 
-    @Column(columnDefinition = "boolean default false")
+    @ColumnDefault("false")
+    @Column(insertable = false)
     private Boolean deleted = Boolean.FALSE;
 
     protected User() {
