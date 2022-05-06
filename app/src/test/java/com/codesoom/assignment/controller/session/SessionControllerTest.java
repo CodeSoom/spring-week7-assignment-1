@@ -122,7 +122,7 @@ class SessionControllerTest {
 
             @BeforeEach
             void setup() {
-                User user = repository.findByEmail(NOT_EXIST_USER_EMAIL).orElse(null);
+                User user = repository.findByEmailAndDeletedIsFalse(NOT_EXIST_USER_EMAIL).orElse(null);
                 if(user != null) {
                     repository.delete(user);
                 }
