@@ -44,8 +44,8 @@ public class User {
         deleted = true;
     }
 
-    public boolean authenticate(String password) {
-        return !deleted && password.equals(this.password);
+    public boolean authenticate(String password, PasswordEncoder passwordEncoder) {
+        return !deleted && passwordEncoder.matches(password, this.password);
     }
 
     public void changePassword(String newPassword, PasswordEncoder passwordEncoder) {
