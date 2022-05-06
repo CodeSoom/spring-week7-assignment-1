@@ -23,7 +23,6 @@ public class User {
 
     private String password;
 
-    @Builder.Default
     private boolean deleted = false;
 
     @Builder
