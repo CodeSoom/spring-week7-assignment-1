@@ -127,5 +127,18 @@ public class UserTest {
         }
     }
 
+    @DisplayName("destroy 메서드는")
+    @Nested
+    class Describe_destroy {
+
+        @DisplayName("deleted 필드를 true로 변경한다.")
+        @Test
+        void it_is_deleted_ture() {
+            User user = User.of("홍길동", "test@codesooem.com");
+            user.destroy();
+
+            assertThat(user.getDeleted()).isTrue();
+        }
+    }
 
 }
