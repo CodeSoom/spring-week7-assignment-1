@@ -39,7 +39,7 @@ public class AuthenticationService {
     /**
      * 생성한 토큰에서 claims에 있는 id 파싱
      * @param accessToken Claim에 id가 담겨있는 토큰
-     * @return claims에서 id를 리턴
+     * @return 토큰에 포함된 id
      */
     public Long parseToken(String accessToken) throws AuthException {
         Claims claims = jwtUtil.decode(accessToken);

@@ -28,14 +28,13 @@ public class SessionController {
     public SessionResponseDto login(
             @RequestBody @Valid SessionRequestDto sessionRequestDto
     ) {
-        String email = sessionRequestDto.getEmail();
-        String password = sessionRequestDto.getPassword();
+        final String email = sessionRequestDto.getEmail();
+        final String password = sessionRequestDto.getPassword();
 
-        String accessToken = authenticationService.login(email, password);
+        final String accessToken = authenticationService.login(email, password);
 
         return SessionResponseDto.builder()
                 .accessToken(accessToken)
                 .build();
-
     }
 }
