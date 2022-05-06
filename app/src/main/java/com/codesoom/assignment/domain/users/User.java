@@ -1,6 +1,8 @@
 package com.codesoom.assignment.domain.users;
 
 import lombok.Getter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Column;
@@ -24,6 +26,9 @@ public class User {
 
     @Column
     private String password;
+
+    @Column(columnDefinition = "boolean default false")
+    private Boolean deleted = Boolean.FALSE;
 
     protected User() {
     }
@@ -62,6 +67,12 @@ public class User {
 
     public boolean authenticate(String rawPassword, PasswordEncoder passwordEncoder) {
         return passwordEncoder.matches(rawPassword, this.password);
+    }
+
+    /** 회원 삭제 시 삭제 여부를 변경한다. */
+    public User destroy() {
+        this.deleted = Boolean.TRUE;
+        return this;
     }
 
 }

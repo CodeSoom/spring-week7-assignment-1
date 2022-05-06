@@ -48,7 +48,7 @@ public class UserCommandService implements UserSaveService, UserUpdateService, U
                 .orElseThrow(() ->
                         new UserNotFoundException(String.format("%s에 해당하는 회원을 찾을 수 없어 삭제에 실패하였습니다.", id)));
 
-        repository.delete(user);
+        user.destroy();
     }
 
 }

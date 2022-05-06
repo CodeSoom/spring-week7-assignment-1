@@ -8,7 +8,7 @@ import com.codesoom.assignment.exceptions.UserNotFoundException;
 public interface UserDeleteService {
 
     /**
-     * 식별자에 해당하는 회원 정보를 삭제합니다.
+     * 식별자에 해당하는 회원의 삭제 상태를 true로 변경합니다.
      *
      * @param id 회원 식별자
      * @throws UserNotFoundException 식별자로 회원을 찾지 못한 경우
