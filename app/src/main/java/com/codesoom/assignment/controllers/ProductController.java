@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/products")
@@ -44,7 +45,6 @@ public class ProductController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
     public Product create(
-            @RequestAttribute Long userId,
             @RequestBody @Valid ProductData productData,
             Authentication authentication
     ) {
@@ -54,7 +54,6 @@ public class ProductController {
     @PatchMapping("{id}")
     @PreAuthorize("isAuthenticated()")
     public Product update(
-            @RequestAttribute Long userId,
             @PathVariable Long id,
             @RequestBody @Valid ProductData productData
     ) {
@@ -65,7 +64,6 @@ public class ProductController {
     @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void destroy(
-            @RequestAttribute Long userId,
             @PathVariable Long id
     ) {
         productService.deleteProduct(id);
