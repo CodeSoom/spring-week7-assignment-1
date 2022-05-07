@@ -2,6 +2,7 @@ package com.codesoom.assignment.application.user;
 
 import com.codesoom.assignment.domain.user.User;
 import com.codesoom.assignment.domain.user.UserQuery;
+import com.codesoom.assignment.domain.user.UserQueryValidator;
 import com.codesoom.assignment.domain.user.UserRepository;
 import com.codesoom.assignment.errors.user.UserNotFoundException;
 import org.springframework.stereotype.Component;
@@ -9,9 +10,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserQueryImpl implements UserQuery {
     private final UserRepository userRepository;
+    private final UserQueryValidator userQueryValidator;
 
-    public UserQueryImpl(UserRepository userRepository) {
+    public UserQueryImpl(UserRepository userRepository, UserQueryValidator userQueryValidator) {
         this.userRepository = userRepository;
+        this.userQueryValidator = userQueryValidator;
     }
 
     @Override
