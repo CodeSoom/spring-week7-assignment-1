@@ -74,7 +74,7 @@ public class UserDeleteControllerTest {
             void it_will_delete_user() {
                 controller.deleteUser(EXIST_ID);
 
-                assertThat(repository.findById(EXIST_ID).get().getDeleted()).isTrue();
+                assertThat(repository.findById(EXIST_ID).get().isDeleted()).isTrue();
             }
         }
 

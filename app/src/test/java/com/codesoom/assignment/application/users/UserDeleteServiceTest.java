@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -62,7 +60,7 @@ public class UserDeleteServiceTest extends ServiceTest {
             void it_will_delete_user() {
                 User user = service.deleteUser(EXIST_ID);
 
-                assertThat(user.getDeleted()).isTrue();
+                assertThat(user.isDeleted()).isTrue();
             }
         }
 

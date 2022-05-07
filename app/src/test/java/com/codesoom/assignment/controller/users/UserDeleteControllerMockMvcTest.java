@@ -80,7 +80,7 @@ public class UserDeleteControllerMockMvcTest extends ControllerTest {
                                 .header(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + TOKEN))
                         .andExpect(status().isNoContent());
 
-                assertThat(repository.findById(USER_ID).get().getDeleted()).isTrue();
+                assertThat(repository.findById(USER_ID).get().isDeleted()).isTrue();
             }
         }
 
