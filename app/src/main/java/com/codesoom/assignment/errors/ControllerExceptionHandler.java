@@ -2,6 +2,7 @@ package com.codesoom.assignment.errors;
 
 
 import com.codesoom.assignment.common.CommonResponse;
+import com.codesoom.assignment.errors.user.UserCommonException;
 import com.codesoom.assignment.errors.user.UserEmailDuplicationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -23,8 +24,14 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(UserEmailDuplicationException.class)
+    @ExceptionHandler(value = UserEmailDuplicationException.class)
     public CommonResponse onUserEmailDuplicationException(RuntimeException e) {
+        return CommonResponse.fail(e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = UserCommonException.class)
+    public CommonResponse onUserCommonException(RuntimeException e) {
         return CommonResponse.fail(e.getMessage());
     }
 
