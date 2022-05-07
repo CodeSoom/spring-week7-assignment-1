@@ -4,9 +4,9 @@ package com.codesoom.assignment.common;
 import com.codesoom.assignment.common.message.ErrorMessage;
 import com.codesoom.assignment.domain.Builder;
 
-public class CommonResponse {
+public class CommonResponse<T> {
     private Result result;
-    private Object data;
+    private T data;
     private String message;
     private String errorCode;
 
@@ -21,7 +21,7 @@ public class CommonResponse {
         return success(data, null);
     }
 
-    public static CommonResponse success(String message) {
+    public static <T> CommonResponse success(String message) {
         return success(null, message);
     }
 
@@ -68,7 +68,7 @@ public class CommonResponse {
 
     private CommonResponse(CommonResponseBuilder commonResponseBuilder) {
         this.result = commonResponseBuilder.result;
-        this.data = commonResponseBuilder.data;
+        this.data = (T) commonResponseBuilder.data;
         this.message = commonResponseBuilder.message;
         this.errorCode = commonResponseBuilder.errorCode;
     }
