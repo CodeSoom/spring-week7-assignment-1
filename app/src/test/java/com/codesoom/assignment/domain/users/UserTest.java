@@ -127,5 +127,41 @@ public class UserTest {
         }
     }
 
+    @DisplayName("isDeleted 메서드는")
+    @Nested
+    class Describe_is_deleted {
+
+        @DisplayName("삭제 상태가 아니라면")
+        @Nested
+        class Context_when_not_invoked_destroy {
+
+            final User user = User.of("홍길동", "test@codesooem.com");
+
+            @DisplayName("false를 반환한다.")
+            @Test
+            void it_returns_false() {
+                assertThat(user.isDeleted()).isFalse();
+            }
+        }
+
+        @DisplayName("삭제 상태라면")
+        @Nested
+        class Context_when_invoked_destroy {
+
+            final User user = User.of("홍길동", "test@codesooem.com");
+
+            @BeforeEach
+            void setup() {
+                user.destroy();
+            }
+
+            @DisplayName("true를 반환한다.")
+            @Test
+            void it_returns_false() {
+                assertThat(user.isDeleted()).isTrue();
+            }
+        }
+
+    }
 
 }

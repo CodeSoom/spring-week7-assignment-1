@@ -23,7 +23,7 @@ public class UserLoginService implements AuthenticationService {
 
     @Override
     public String login(LoginRequest loginRequest) {
-        User user = repository.findByEmail(loginRequest.getEmail())
+        User user = repository.findByEmailAndDeletedIsFalse(loginRequest.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("회원을 찾을 수 없으므로 로그인에 실패했습니다."));
 
         if (!user.authenticate(loginRequest.getPassword(), passwordEncoder)) {

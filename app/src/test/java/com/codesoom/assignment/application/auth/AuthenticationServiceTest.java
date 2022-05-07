@@ -4,7 +4,6 @@ import com.codesoom.assignment.application.ServiceTest;
 import com.codesoom.assignment.exceptions.UserNotFoundException;
 import com.codesoom.assignment.domain.users.User;
 import com.codesoom.assignment.domain.users.UserRepository;
-import com.codesoom.assignment.domain.users.UserSaveDto;
 import com.codesoom.assignment.exceptions.InvalidPasswordException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.AfterEach;
@@ -151,7 +150,7 @@ class AuthenticationServiceTest extends ServiceTest {
 
             @BeforeEach
             void setup() {
-                User user = repository.findByEmail(NOT_EXIST_USER_EMAIL).orElse(null);
+                User user = repository.findByEmailAndDeletedIsFalse(NOT_EXIST_USER_EMAIL).orElse(null);
                 if (user != null) {
                     repository.delete(user);
                 }

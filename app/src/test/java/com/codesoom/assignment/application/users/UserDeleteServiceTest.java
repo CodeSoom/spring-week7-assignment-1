@@ -55,12 +55,12 @@ public class UserDeleteServiceTest extends ServiceTest {
                         .getId();
             }
 
-            @DisplayName("성공적으로 회원을 삭제한다.")
+            @DisplayName("회원의 삭제 상태를 true로 변경한다.")
             @Test
             void it_will_delete_user() {
-                service.deleteUser(EXIST_ID);
+                User user = service.deleteUser(EXIST_ID);
 
-                assertThat(repository.findById(EXIST_ID)).isEmpty();
+                assertThat(user.isDeleted()).isTrue();
             }
         }
 
