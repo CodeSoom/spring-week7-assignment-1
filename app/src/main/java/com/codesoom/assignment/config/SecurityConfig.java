@@ -1,6 +1,7 @@
 package com.codesoom.assignment.config;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.filters.AuthenticationErrorFilter;
 import com.codesoom.assignment.filters.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +41,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 현재는 단순 API 형태로 사용할 것이기 때문에 CSRF 기능을 비활성화한다.
                 .disable()
                 .addFilter(authenticationFilter)
+                .addFilterBefore(new AuthenticationErrorFilter()
+                        , JwtAuthenticationFilter.class)
                 .sessionManagement()
                     // 세션, 쿠키방식의 인증 매커니즘을 쓰지 않겠다. 매번 인증을 받겠다.
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
