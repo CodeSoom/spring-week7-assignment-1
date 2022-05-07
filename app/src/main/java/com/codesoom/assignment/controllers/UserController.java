@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+/**
+ * 회원에 대한 HTTP 요청 처리
+ */
 @RestController
 @RequestMapping("/users")
 @CrossOrigin
@@ -20,6 +23,11 @@ public class UserController {
         this.userService = userService;
     }
 
+    /**
+     * 회원을 등록하고 회원 데이터 전송에 필요한 회원 데이터를 리턴합니다.
+     * @param registrationData 등록될 회원 데이터
+     * @return 등록된 회원 데이터
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     UserResultData create(@RequestBody @Valid UserRegistrationData registrationData) {
@@ -27,6 +35,12 @@ public class UserController {
         return getUserResultData(user);
     }
 
+    /**
+     * 회원 정보를 수정하고 수정한 회원 데이터를 리턴합니다.
+     * @param id 회원 아이디
+     * @param modificationData 수정할 회원 데이터
+     * @return 수정된 회원 데이터
+     */
     @PatchMapping("{id}")
     UserResultData update(
             @PathVariable Long id,
@@ -36,6 +50,10 @@ public class UserController {
         return getUserResultData(user);
     }
 
+    /**
+     * 회원을 삭제합니다.
+     * @param id 회원 아이디
+     */
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void destroy(@PathVariable Long id) {
