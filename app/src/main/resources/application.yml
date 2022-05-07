@@ -23,3 +23,6 @@ spring:
 ---
 jwt:
   secret: "12345678901234567890123456789010"
+  expireMs: 604800000
+  claimKey: "userEmail"
+
