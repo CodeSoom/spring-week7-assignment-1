@@ -1,8 +1,8 @@
 package com.codesoom.assignment.common.message;
 
 public enum NormalMessage {
-    JOIN_OK("회원가입이 성공했습니다!");
-
+    JOIN_OK("회원가입이 성공했습니다!"),
+    LOGIN_OK(" 환영 합니다");
     private final String errorMsg;
 
     NormalMessage(String errorMsg) {
