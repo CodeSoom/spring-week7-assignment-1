@@ -1,9 +1,9 @@
 package com.codesoom.assignment.controllers.user;
 
-import com.codesoom.assignment.application.user.UserServiceImpl;
 import com.codesoom.assignment.common.CommonResponse;
 import com.codesoom.assignment.common.message.NormalMessage;
 import com.codesoom.assignment.domain.user.User;
+import com.codesoom.assignment.domain.user.UserService;
 import com.codesoom.assignment.dto.user.UserModificationData;
 import com.codesoom.assignment.dto.user.UserRegistrationData;
 import com.codesoom.assignment.dto.user.UserResultData;
@@ -16,9 +16,9 @@ import javax.validation.Valid;
 @RequestMapping("/users")
 @CrossOrigin
 public class UserController {
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
-    public UserController(UserServiceImpl userService) {
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
