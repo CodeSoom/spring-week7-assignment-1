@@ -38,6 +38,14 @@ public class User {
         password = source.password;
     }
 
+    /**
+     * 암호화된 패스워드를 저장한다.
+     * @param encodedPassword 인코딩된 패스워드
+     */
+    public void encryptPassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
     public void destroy() {
         deleted = true;
     }
