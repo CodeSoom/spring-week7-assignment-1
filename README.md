@@ -5,7 +5,7 @@
 - [ ] Spring Security 의 `PasswordEncoder` 를 통해 사용자의 비밀번호를 암호화해서 저장한다.
   - [ ] 비밀번호 암호화 저장 테스트 작성하기
   - [ ] 사용자의 비밀번호를 암호화 시켜 저장하도록 구현
-- [ ] Spring Security 의 `WebSecurityConfigurerAdapter` 를 이용해 설정을 구성한다.
+- [x] Spring Security 의 `WebSecurityConfigurerAdapter` 를 이용해 설정을 구성한다.
 - [ ] 사용자 정보 수정 (`PATCH /users/{id}`) 요청에서 사용자를 인증하여, id 와 사용자가 일치하는 경우만 작업을 수행한다.
 
 ## 과제 목표
