@@ -28,4 +28,14 @@ public class JwtParser {
         return parseToken(token);
     }
 
+    public String getUserEmailFromToken(Claims token) {
+        return String.valueOf(token.get(jwtConfig.getClaimKey()));
+    }
+
+    public String getUserEmailFromToken(String token) {
+        Claims body = getTokenBodies(token);
+        return String.valueOf(body.get(jwtConfig.getClaimKey()));
+    }
+
+
 }

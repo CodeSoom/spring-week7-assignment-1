@@ -3,6 +3,8 @@ package com.codesoom.assignment.security.jwt;
 import com.codesoom.assignment.common.message.ErrorMessage;
 import com.codesoom.assignment.errors.authentication.InvalidTokenException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,29 +18,9 @@ public class JwtValidator {
         this.jwtParser = jwtParser;
     }
 
-    public String getUserEmailFromToken(Claims token) {
-        return String.valueOf(token.get(jwtConfig.getClaimKey()));
-    }
-
-    public String getUserEmailFromToken(String token) {
-        Claims body = jwtParser.getTokenBodies(token);
-        return String.valueOf(body.get(jwtConfig.getClaimKey()));
-    }
-
-    private void isExpiredToken(Claims bodies) {
-        long expirationMs = bodies.getExpiration().getTime();
-        long currentMs = System.currentTimeMillis();
-
-        long diffExpirationToCurrent = Math.subtractExact(expirationMs, currentMs);
-
-        if (diffExpirationToCurrent < 0) {
-            throw new InvalidTokenException(ErrorMessage.EXPIRED_TOKEN.getErrorMsg());
-        }
-
-    }
 
     private void isSameAs(Claims token, String accessUser) {
-        String tokenGeneratedUser = getUserEmailFromToken(token);
+        String tokenGeneratedUser = jwtParser.getUserEmailFromToken(token);
         boolean isEqual = tokenGeneratedUser.equals(accessUser);
         if (!isEqual) {
             throw new InvalidTokenException(ErrorMessage.INVALID_USER_BY_TOKEN.getErrorMsg());
@@ -46,9 +28,17 @@ public class JwtValidator {
     }
 
 
-    public void validateToken(String token, String assesUserEmail) {
-        Claims tokenBody = jwtParser.getTokenBodies(token);
-        isExpiredToken(tokenBody);
-        isSameAs(tokenBody, assesUserEmail);
+    public void validateToken(String token, String assessUserEmail) {
+        try {
+            Claims tokenBodies = jwtParser.getTokenBodies(token);
+            isSameAs(tokenBodies, assessUserEmail);
+        } catch (ExpiredJwtException e) {
+            throw new InvalidTokenException(ErrorMessage.EXPIRED_TOKEN.getErrorMsg());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidTokenException(ErrorMessage.INVALID_TOKEN.getErrorMsg());
+        } catch (SignatureException e) {
+            throw new InvalidTokenException(ErrorMessage.INVALID_USER_BY_TOKEN.getErrorMsg());
+        }
+
     }
 }
