@@ -29,7 +29,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    public Claims decode(String token) throws AuthException {
+    public Claims decode(String token) throws InvalidTokenException {
         if (token == null || token.isBlank()) {
             throw new InvalidTokenException(token);
         }
