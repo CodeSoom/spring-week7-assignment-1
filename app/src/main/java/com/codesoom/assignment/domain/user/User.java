@@ -1,7 +1,9 @@
 package com.codesoom.assignment.domain.user;
 
+import com.codesoom.assignment.common.message.ErrorMessage;
 import com.codesoom.assignment.domain.Builder;
 import com.codesoom.assignment.domain.crypt.CryptService;
+import com.codesoom.assignment.errors.user.UserCommonException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -40,16 +42,36 @@ public class User {
     }
 
     public boolean isMatchPassword(CryptService cryptService, String inputPassword) {
-        return cryptService.isMatch(inputPassword, this.password);
+        boolean isMatchPassword = cryptService.isMatch(inputPassword, this.password);
+
+        if (!isMatchPassword) {
+            throw new UserCommonException(ErrorMessage.PASSWORD_NOT_MATCH.getErrorMsg());
+        }
+
+        return true;
     }
 
     public void destroy() {
         deleted = true;
     }
 
-    public boolean authenticate(String password) {
-        return !deleted && password.equals(this.password);
+    public boolean authenticate(
+            CryptService cryptService,
+            String password
+    ) {
+
+        isDeleted();
+        isMatchPassword(cryptService, password);
+
+        return true;
     }
+
+    private void isDeleted() {
+        if (deleted) {
+            throw new UserCommonException(ErrorMessage.DELETED_USER.getErrorMsg());
+        }
+    }
+
 
     public static class UserBuilder implements Builder<User> {
         private Long id;
