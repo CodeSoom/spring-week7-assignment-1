@@ -1,8 +1,8 @@
 package com.codesoom.assignment.config;
 
 import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.filter.JwtAuthenticationFilter;
-import com.codesoom.assignment.filter.JwtExceptionTranslationFilter;
+import com.codesoom.assignment.filter.JwtAuthorizationFilter;
+import com.codesoom.assignment.filter.JwtAuthorizationExceptionTranslationFilter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -22,12 +22,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.csrf().disable();
 
-        JwtAuthenticationFilter jwtAuthenticationFilter =
-                new JwtAuthenticationFilter(authenticationManager(), authenticationService);
+        JwtAuthorizationFilter jwtAuthorizationFilter =
+                new JwtAuthorizationFilter(authenticationManager(), authenticationService);
 
-        JwtExceptionTranslationFilter jwtExceptionTranslationFilter = new JwtExceptionTranslationFilter();
+        JwtAuthorizationExceptionTranslationFilter jwtAuthorizationExceptionTranslationFilter =
+                new JwtAuthorizationExceptionTranslationFilter();
 
-        http.addFilter(jwtAuthenticationFilter);
-        http.addFilterBefore(jwtExceptionTranslationFilter, JwtAuthenticationFilter.class);
+        http.addFilter(jwtAuthorizationFilter);
+        http.addFilterBefore(jwtAuthorizationExceptionTranslationFilter, JwtAuthorizationFilter.class);
     }
 }

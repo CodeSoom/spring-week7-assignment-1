@@ -13,13 +13,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * JWT 인증 필터
+ * JWT 인가 필터
  */
-public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
+public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     private final AuthenticationService authenticationService;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, AuthenticationService authenticationService) {
+    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, AuthenticationService authenticationService) {
         super(authenticationManager);
         this.authenticationService = authenticationService;
     }

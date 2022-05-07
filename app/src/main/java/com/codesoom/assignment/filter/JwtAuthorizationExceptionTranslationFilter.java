@@ -11,9 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * {@link JwtAuthenticationFilter} 내에 발생한 {@link InvalidTokenException} 예외를 처리합니다.
+ * {@link JwtAuthorizationFilter} 내에 발생한 {@link InvalidTokenException} 예외를 처리하는 필터
  */
-public class JwtExceptionTranslationFilter extends HttpFilter {
+public class JwtAuthorizationExceptionTranslationFilter extends HttpFilter {
 
     @Override
     protected void doFilter(HttpServletRequest request,
