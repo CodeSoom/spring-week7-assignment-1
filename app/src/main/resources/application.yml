@@ -1,9 +1,10 @@
 spring:
   datasource:
-    url: jdbc:h2:~/data/demo
+    # 테스트를 위해 메모리 내장 DB 를 사용한다.
+    url: jdbc:h2:mem:test
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
 
 jwt:
   secret: "12345678901234567890123456789010"
