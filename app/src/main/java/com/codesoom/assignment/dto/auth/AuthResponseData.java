@@ -1,4 +1,4 @@
-package com.codesoom.assignment.dto.session;
+package com.codesoom.assignment.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class SessionResponseData {
+public class AuthResponseData {
     private String accessToken;
 }
