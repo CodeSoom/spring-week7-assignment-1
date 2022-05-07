@@ -2,6 +2,7 @@ package com.codesoom.assignment.common.message;
 
 //TODO:다국어 처리 고민
 public enum ErrorMessage {
+    EMPTY_USER_EMAIL_TOKEN("유저 이메일이 반값이므로 토큰을 생성할 수 없습니다"),
     INVALID_USER_BY_TOKEN("인증되지 않은 사용자입니다"),
     PASSWORD_NOT_MATCH("비밀번호를 확인해주세요"),
     DELETED_USER("삭제된 유저입니다"),
