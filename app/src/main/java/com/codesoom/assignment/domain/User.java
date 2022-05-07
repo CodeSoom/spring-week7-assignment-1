@@ -1,9 +1,8 @@
 package com.codesoom.assignment.domain;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,9 +10,6 @@ import javax.persistence.Id;
 
 @Entity
 @Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue
@@ -25,8 +21,19 @@ public class User {
 
     private String password;
 
-    @Builder.Default
     private boolean deleted = false;
+
+    protected User() {
+    }
+
+    @Builder
+    public User(Long id, String email, String name, String password, boolean deleted) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.deleted = deleted;
+    }
 
     public void changeWith(User source) {
         name = source.name;
@@ -37,7 +44,11 @@ public class User {
         deleted = true;
     }
 
-    public boolean authenticate(String password) {
-        return !deleted && password.equals(this.password);
+    public boolean authenticate(String password, PasswordEncoder passwordEncoder) {
+        return !deleted && passwordEncoder.matches(password, this.password);
+    }
+
+    public void changePassword(String newPassword, PasswordEncoder passwordEncoder) {
+        password = passwordEncoder.encode(newPassword);
     }
 }
