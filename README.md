@@ -1,5 +1,15 @@
 # 인가(Authorization) 구현하기
 
+## 과제 TODO
+
+- [x] Spring Security 의 `PasswordEncoder` 를 통해 사용자의 비밀번호를 암호화해서 저장한다.
+  - [x] 비밀번호 암호화 저장 테스트 작성하기
+  - [x] 사용자의 비밀번호를 암호화 시켜 저장하도록 구현
+- [x] Spring Security 의 `WebSecurityConfigurerAdapter` 를 이용해 설정을 구성한다.
+- [ ] 사용자 정보 수정 (`PATCH /users/{id}`) 요청에서 사용자를 인증하여, id 와 사용자가 일치하는 경우만 작업을 수행한다.
+  - [x] `AbstractAuthenticationToken` 상속해서 `UserAuthentication` 작성하기
+  - [x] `BasicAuthenticationFilter` 상속해서 `JwtAuthenticationFilter` 작성하기
+
 ## 과제 목표
 
 지금은 로그인을 했다고 하더라도, 다른 사람의 정보를 내 마음대로 수정할 수 있습니다. 
