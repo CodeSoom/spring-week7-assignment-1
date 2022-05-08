@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.Optional;
 
 @Entity
 @Getter
@@ -33,9 +34,14 @@ public class User {
         this.deleted = deleted;
     }
 
+    /**
+     * source 로 들어온 사용자 정보로 사용자 정보를 업데이트한다.
+     * 단, null 이 들어온 경우에는 기존의 값을 그대로 유지한다.
+     * @param source 사용자 정보 변경에 쓰이는 User 객체
+     */
     public void changeWith(User source) {
-        name = source.name;
-        password = source.password;
+        name = Optional.ofNullable(source.name).orElse(name);
+        password = Optional.ofNullable(source.password).orElse(password);
     }
 
     /**

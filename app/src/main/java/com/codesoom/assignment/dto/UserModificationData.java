@@ -8,16 +8,22 @@ import lombok.Getter;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+/**
+ * 변경될 name 혹은 password
+ * 혹은 둘 다 가지고 있을 수 있다.
+ */
 @Getter
-@Builder
-@AllArgsConstructor
 public class UserModificationData {
-    @NotBlank
     @Mapping("name")
     private String name;
 
-    @NotBlank
     @Size(min = 4, max = 1024)
     @Mapping("password")
     private String password;
+
+    @Builder
+    public UserModificationData(String name, String password) {
+        this.name = name;
+        this.password = password;
+    }
 }
