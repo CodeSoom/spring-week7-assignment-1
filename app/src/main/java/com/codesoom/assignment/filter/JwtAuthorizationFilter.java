@@ -47,8 +47,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     /**
-     * 인증이 필요한 HTTP 요청인지 확인합니다.<br>
-     * 인증이 필요한 요청이면 true 를 리턴하고, 인증이 필요하지 않다면 false 를 리턴합니다.<br><br>
+     * 인증이 필요한 HTTP 요청인지 확인합니다.
+     * <p>인증이 필요한 요청이면 true 를 리턴하고, 인증이 필요하지 않다면 false 를 리턴합니다.
      *
      * @param httpRequest HTTP 요청 정보
      * @return 인증이 필요한 요청이면 true, 필요하지 않다면 false
