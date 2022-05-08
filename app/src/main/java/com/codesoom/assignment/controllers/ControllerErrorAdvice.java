@@ -45,6 +45,12 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Invalid access token");
     }
 
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AccessForbiddenException.class)
+    public ErrorResponse handleAccessForbiddenException(Exception e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)

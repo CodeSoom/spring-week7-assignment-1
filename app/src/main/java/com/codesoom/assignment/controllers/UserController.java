@@ -5,8 +5,10 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
+import com.codesoom.assignment.errors.AccessForbiddenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -32,8 +34,15 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     UserResultData update(
             @PathVariable Long id,
-            @RequestBody @Valid UserModificationData modificationData
+            @RequestBody @Valid UserModificationData modificationData,
+            Authentication authentication
     ) {
+        Long userId = (Long) authentication.getPrincipal();
+
+        if(!userId.equals(id)) {
+            throw new AccessForbiddenException("다른 사용자의 정보를 변경할 수 없습니다.");
+        }
+
         User user = userService.updateUser(id, modificationData);
         return getUserResultData(user);
     }
