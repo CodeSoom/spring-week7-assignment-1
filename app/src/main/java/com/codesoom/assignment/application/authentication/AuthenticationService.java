@@ -3,12 +3,12 @@ package com.codesoom.assignment.application.authentication;
 import com.codesoom.assignment.UserNotFoundException;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
+import com.codesoom.assignment.exceptions.InvalidTokenException;
 import com.codesoom.assignment.exceptions.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Service;
 
-import javax.security.auth.message.AuthException;
 
 @Service
 public class AuthenticationService {
@@ -41,7 +41,7 @@ public class AuthenticationService {
      * @param accessToken Claim에 id가 담겨있는 토큰
      * @return 토큰에 포함된 id
      */
-    public Long parseToken(String accessToken) throws AuthException {
+    public Long parseToken(String accessToken) throws InvalidTokenException {
         Claims claims = jwtUtil.decode(accessToken);
         return claims.get("id", Long.class);
     }
