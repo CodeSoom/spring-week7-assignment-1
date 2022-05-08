@@ -131,7 +131,7 @@ class UserControllerTest {
                                 .content("{\"name\":\"TEST\",\"password\":\"test\"}")
                                 .header("Authorization", "Bearer " + INVALID_TOKEN)
                 )
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
