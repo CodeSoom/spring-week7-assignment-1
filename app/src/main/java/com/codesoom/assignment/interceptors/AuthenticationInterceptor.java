@@ -29,20 +29,20 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         String path = request.getRequestURI();
         String method = request.getMethod();
         if (path.startsWith("/products") && (
-                method.equals("GET") || method.equals("OPTIONS"))
+                "GET".equals(method) || "OPTIONS".equals(method))
         ) {
             return true;
         }
 
         if ((path.startsWith("/session") || path.startsWith("/users"))
-                && method.equals("POST")) {
+                && "POST".equals(method)) {
             return true;
         }
         return false;
     }
 
     /**
-     * 유효한 토큰으로 요청을 했는지 확인
+     * 유효한 토큰으로 요청했다면 true, 그렇지 않다면 false를 리턴합니다
      * @param request 요청
      * @param response 응답
      * @return {@code request} 에 있는 토큰이 유효한지 확인
