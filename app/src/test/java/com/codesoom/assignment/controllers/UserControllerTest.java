@@ -35,6 +35,7 @@ class UserControllerTest {
     private AuthenticationService authenticationService;
 
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String NOT_FOUND_USER_VALID_TOKEN = VALID_TOKEN + "NOT_FOUND";
 
     @BeforeEach
     void setUp() {
@@ -72,6 +73,9 @@ class UserControllerTest {
 
         given(authenticationService.parseToken(VALID_TOKEN))
                 .willReturn(1L);
+
+        given(authenticationService.parseToken(NOT_FOUND_USER_VALID_TOKEN))
+                .willReturn(100L);
     }
 
     @Test
@@ -131,6 +135,7 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isBadRequest());
     }
@@ -141,7 +146,7 @@ class UserControllerTest {
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                        .header("Authorization", "Bearer " + NOT_FOUND_USER_VALID_TOKEN)
         )
                 .andExpect(status().isNotFound());
 
@@ -161,7 +166,7 @@ class UserControllerTest {
     @Test
     void destroyWithNotExistedId() throws Exception {
         mockMvc.perform(delete("/users/100")
-                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                        .header("Authorization", "Bearer " + NOT_FOUND_USER_VALID_TOKEN))
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
