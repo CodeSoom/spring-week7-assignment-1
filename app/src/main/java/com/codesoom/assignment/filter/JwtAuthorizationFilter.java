@@ -37,7 +37,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         final String authorization = request.getHeader("Authorization");
 
         if (authorization == null) {
-            throw new InvalidTokenException("http request without authorization in Header");
+            throw new InvalidTokenException("HTTP 요청 헤더에 Authorization 이 있어야 합니다.");
         }
 
         final String accessToken = authorization.substring("Bearer ".length());
