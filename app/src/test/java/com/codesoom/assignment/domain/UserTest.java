@@ -61,7 +61,7 @@ class UserTest {
 
         assertThat(user.isDeleted()).isFalse();
 
-        user.destroy();
+        user.inActivate();
 
         assertThat(user.isDeleted()).isTrue();
     }

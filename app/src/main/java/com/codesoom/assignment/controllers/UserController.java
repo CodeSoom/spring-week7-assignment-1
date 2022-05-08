@@ -51,13 +51,13 @@ public class UserController {
     }
 
     /**
-     * 회원을 삭제합니다.
+     * 회원을 비활성화 합니다.
      * @param id 회원 아이디
      */
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void destroy(@PathVariable Long id) {
-        userService.deleteUser(id);
+    void inActivate(@PathVariable Long id) {
+        userService.inActivateUser(id);
     }
 
     private UserResultData getUserResultData(User user) {

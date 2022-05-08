@@ -50,9 +50,9 @@ public class UserService {
         return user;
     }
 
-    public User deleteUser(Long id) {
+    public User inActivateUser(Long id) {
         User user = findUser(id);
-        user.destroy();
+        user.inActivate();
         return user;
     }
 

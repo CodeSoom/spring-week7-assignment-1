@@ -144,7 +144,7 @@ class UserServiceTest {
 
     @Test
     void deleteUserWithExistedId() {
-        User user = userService.deleteUser(1L);
+        User user = userService.inActivateUser(1L);
 
         assertThat(user.getId()).isEqualTo(1L);
         assertThat(user.isDeleted()).isTrue();
@@ -154,7 +154,7 @@ class UserServiceTest {
 
     @Test
     void deleteUserWithNotExistedId() {
-        assertThatThrownBy(() -> userService.deleteUser(100L))
+        assertThatThrownBy(() -> userService.inActivateUser(100L))
                 .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(100L);
@@ -162,7 +162,7 @@ class UserServiceTest {
 
     @Test
     void deleteUserWithDeletedId() {
-        assertThatThrownBy(() -> userService.deleteUser(DELETED_USER_ID))
+        assertThatThrownBy(() -> userService.inActivateUser(DELETED_USER_ID))
                 .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
