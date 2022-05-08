@@ -5,7 +5,6 @@ import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserRegistrationData;
-import com.codesoom.assignment.errors.AccessForbiddenException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,6 +18,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Utf8MockMvc
@@ -128,10 +128,7 @@ public class UserControllerApiTest {
                 void it_sends_403_forbidden_response() throws Exception {
                     resultActions
                             .andExpect(status().isForbidden())
-                            .andExpect(result -> {
-                                Exception exception = result.getResolvedException();
-                                assertThat(exception).isInstanceOf(AccessForbiddenException.class);
-                            });
+                            .andDo(print());
                 }
             }
         }

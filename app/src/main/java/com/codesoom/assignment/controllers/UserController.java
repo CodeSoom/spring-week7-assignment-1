@@ -1,14 +1,12 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.UserService;
+import com.codesoom.assignment.authorization.AuthorizeUser;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
-import com.codesoom.assignment.errors.AccessForbiddenException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -30,28 +28,21 @@ public class UserController {
         return getUserResultData(user);
     }
 
-    @PatchMapping("{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("{userId}")
+    @AuthorizeUser
     UserResultData update(
-            @PathVariable Long id,
-            @RequestBody @Valid UserModificationData modificationData,
-            Authentication authentication
+            @PathVariable Long userId,
+            @RequestBody @Valid UserModificationData modificationData
     ) {
-        Long userId = (Long) authentication.getPrincipal();
-
-        if(!userId.equals(id)) {
-            throw new AccessForbiddenException("다른 사용자의 정보를 변경할 수 없습니다.");
-        }
-
-        User user = userService.updateUser(id, modificationData);
+        User user = userService.updateUser(userId, modificationData);
         return getUserResultData(user);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("isAuthenticated()")
-    void destroy(@PathVariable Long id) {
-        userService.deleteUser(id);
+    @AuthorizeUser
+    void destroy(@PathVariable Long userId) {
+        userService.deleteUser(userId);
     }
 
     private UserResultData getUserResultData(User user) {
