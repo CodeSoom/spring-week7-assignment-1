@@ -25,6 +25,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
+
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -104,6 +108,7 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -122,6 +127,7 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isBadRequest());
     }
@@ -132,6 +138,7 @@ class UserControllerTest {
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isNotFound());
 
@@ -141,15 +148,18 @@ class UserControllerTest {
 
     @Test
     void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
+        mockMvc.perform(delete("/users/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                )
                 .andExpect(status().isNoContent());
-
         verify(userService).deleteUser(1L);
     }
 
     @Test
     void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
+        mockMvc.perform(delete("/users/100")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                )
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
