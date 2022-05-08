@@ -6,16 +6,12 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
-import com.codesoom.assignment.errors.ProductNotFoundException;
-import com.codesoom.assignment.errors.UserUnauthorizedException;
+import com.codesoom.assignment.errors.UserForbiddenException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -48,7 +44,7 @@ public class UserController {
             User user = userService.updateUser(id, modificationData);
             return getUserResultData(user);
         } else {
-            throw new UserUnauthorizedException();
+            throw new UserForbiddenException();
         }
     }
 
@@ -59,10 +55,9 @@ public class UserController {
             @RequestAttribute Long userId,
             @PathVariable Long id
     ) {
-        if (userId.equals(id)) {
+        if (!userId.equals(id)) {
             userService.deleteUser(id);
-        } else {
-            throw new UserUnauthorizedException();
+            throw new UserForbiddenException();
         }
     }
 
