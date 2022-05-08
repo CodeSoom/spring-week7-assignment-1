@@ -17,10 +17,13 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 import javax.servlet.Filter;
 
+/**
+ * @EnableGlobalMethodSecurity 애노테이션은 메서드 보안을 활성화한다.
+ * 참고: https://docs.spring.io/spring-security/reference/servlet/authorization/method-security.html
+ * (prePostEnable = true) 는 @PreAuthorize, @PostAuthorize, @PreFilter, @PostFilter 애노테이션의 사용을 가능하게 한다.
+ * 스프링 시큐리티 최신 버전(5.6 이상)에서는 @EnableMethodSecurity 를 사용한다.
+ */
 @Configuration
-// Method Security 참고: https://docs.spring.io/spring-security/reference/servlet/authorization/method-security.html
-// @PreAuthorize, @PostAuthorize, @PreFilter, @PostFilter 애노테이션의 사용을 가능하게 한다.
-// 스프링 시큐리티 최신 버전(5.6 이상)에서는 @EnableMethodSecurity 를 사용한다.
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
