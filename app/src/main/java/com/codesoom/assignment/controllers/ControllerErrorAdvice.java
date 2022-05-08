@@ -33,10 +33,10 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("User's email address is already existed");
     }
 
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(UserUnauthorizedException.class)
-    public ErrorResponse handleUserUnauthorizedException() {
-        return new ErrorResponse("User is not authorized.");
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(UserForbiddenException.class)
+    public ErrorResponse handleUserForbiddenException() {
+        return new ErrorResponse("You don't have to permission.");
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
