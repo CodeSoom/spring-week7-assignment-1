@@ -66,7 +66,7 @@ class UserControllerTest {
         given(userService.updateUser(eq(100L), any(UserModificationData.class)))
                 .willThrow(new UserNotFoundException(100L));
 
-        given(userService.deleteUser(100L))
+        given(userService.inActivateUser(100L))
                 .willThrow(new UserNotFoundException(100L));
     }
 
@@ -152,7 +152,7 @@ class UserControllerTest {
                         .header("Authorization", "Bearer " + VALID_TOKEN)
                 )
                 .andExpect(status().isNoContent());
-        verify(userService).deleteUser(1L);
+        verify(userService).inActivateUser(1L);
     }
 
     @Test
@@ -162,6 +162,6 @@ class UserControllerTest {
                 )
                 .andExpect(status().isNotFound());
 
-        verify(userService).deleteUser(100L);
+        verify(userService).inActivateUser(100L);
     }
 }

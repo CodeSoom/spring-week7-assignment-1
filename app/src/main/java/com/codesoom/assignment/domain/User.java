@@ -40,7 +40,7 @@ public class User {
         password = source.password;
     }
 
-    public void destroy() {
+    public void inActivate() {
         deleted = true;
     }
 
