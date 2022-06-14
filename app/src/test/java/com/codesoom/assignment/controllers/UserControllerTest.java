@@ -212,6 +212,7 @@ class UserControllerTest {
                                 patch("/users/100")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + VALID_TOKEN)
                         )
                         .andExpect(status().isNotFound());
 
