@@ -173,7 +173,7 @@ class UserControllerTest {
 
         @Nested
         @DisplayName("접근 권한이 없는 인증 토큰이 주어지면")
-        class Context_access_denied_access_token {
+        class Context_access_denied_token {
 
             @BeforeEach
             void setUp() {
@@ -200,6 +200,9 @@ class UserControllerTest {
 
             @BeforeEach
             void setUp() {
+                given(authenticationService.parseToken(VALID_TOKEN))
+                        .willReturn(100L);
+
                 given(userService.updateUser(eq(100L), any(UserModificationData.class)))
                         .willThrow(new UserNotFoundException(100L));
             }
