@@ -270,6 +270,20 @@ class UserControllerTest {
         }
 
         @Nested
+        @DisplayName("토큰이 주어지지 않으면")
+        class Context_with_access_denied_access_token {
+
+            @Test
+            @DisplayName("401 status를 응답한다.")
+            void destroyWithExistedId() throws Exception {
+                mockMvc.perform(
+                                delete("/users/1")
+                        )
+                        .andExpect(status().isUnauthorized());
+            }
+        }
+
+        @Nested
         @DisplayName("존재하지 않는 유저 아이디가 주어지면")
         class Context_with_not_existed_id {
 
