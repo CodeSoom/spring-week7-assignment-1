@@ -7,10 +7,13 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -34,6 +37,11 @@ class UserControllerTest {
     @MockBean
     private AuthenticationService authenticationService;
 
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+
     @BeforeEach
     void setUp() {
         given(userService.registerUser(any(UserRegistrationData.class)))
@@ -43,19 +51,6 @@ class UserControllerTest {
                             .id(13L)
                             .email(registrationData.getEmail())
                             .name(registrationData.getName())
-                            .build();
-                });
-
-
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
-                .will(invocation -> {
-                    Long id = invocation.getArgument(0);
-                    UserModificationData modificationData =
-                            invocation.getArgument(1);
-                    return User.builder()
-                            .id(id)
-                            .email("tester@example.com")
-                            .name(modificationData.getName())
                             .build();
                 });
 
@@ -98,22 +93,53 @@ class UserControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
-    void updateUserWithValidAttributes() throws Exception {
-        mockMvc.perform(
-                patch("/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
-        )
-                .andExpect(status().isOk())
-                .andExpect(content().string(
-                        containsString("\"id\":1")
-                ))
-                .andExpect(content().string(
-                        containsString("\"name\":\"TEST\"")
-                ));
+    @Nested
+    @DisplayName("PATCH /users/{id} 요청은")
+    class Describe_update {
 
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
+        @Nested
+        @DisplayName("유효한 요청 데이터와 인증 토큰이 주어지면")
+        class Context_with_valid_data_and_access_token {
+
+            @BeforeEach
+            void setUp() {
+                given(userService.updateUser(eq(1L), any(UserModificationData.class)))
+                        .will(invocation -> {
+                            Long id = invocation.getArgument(0);
+                            UserModificationData modificationData =
+                                    invocation.getArgument(1);
+                            return User.builder()
+                                    .id(id)
+                                    .email("tester@example.com")
+                                    .name(modificationData.getName())
+                                    .build();
+                        });
+
+                given(authenticationService.parseToken(VALID_TOKEN))
+                        .willReturn(1L);
+            }
+
+            @Test
+            @DisplayName("변경된 유저를 응답한다.")
+            void it_responses_updated_user() throws Exception {
+                mockMvc.perform(
+                                patch("/users/1")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + VALID_TOKEN)
+                        )
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(
+                                containsString("\"id\":1")
+                        ))
+                        .andExpect(content().string(
+                                containsString("\"name\":\"TEST\"")
+                        ));
+
+                verify(userService).updateUser(eq(1L), any(UserModificationData.class));
+                verify(authenticationService).parseToken(VALID_TOKEN);
+            }
+        }
     }
 
     @Test
