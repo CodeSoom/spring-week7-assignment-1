@@ -289,13 +289,19 @@ class UserControllerTest {
 
             @BeforeEach
             void setUp() {
+                given(authenticationService.parseToken(VALID_TOKEN))
+                        .willReturn(100L);
+
                 given(userService.deleteUser(100L))
                         .willThrow(new UserNotFoundException(100L));
             }
 
             @Test
             void destroyWithNotExistedId() throws Exception {
-                mockMvc.perform(delete("/users/100"))
+                mockMvc.perform(
+                            delete("/users/100")
+                                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + VALID_TOKEN)
+                        )
                         .andExpect(status().isNotFound());
 
                 verify(userService).deleteUser(100L);
