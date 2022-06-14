@@ -39,8 +39,9 @@ class UserControllerTest {
 
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
-    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+    private static final String ACCESS_DENIED_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+    private static final Long ACCESS_DENIED_USER_ID = 123L;
 
     @BeforeEach
     void setUp() {
@@ -156,6 +157,30 @@ class UserControllerTest {
                         .andExpect(status().isUnauthorized());
             }
         }
+
+        @Nested
+        @DisplayName("접근 권한이 없는 인증 토큰이 주어지면")
+        class Context_access_denied_access_token {
+
+            @BeforeEach
+            void setUp() {
+                given(authenticationService.parseToken(ACCESS_DENIED_TOKEN))
+                        .willReturn(ACCESS_DENIED_USER_ID);
+            }
+
+            @Test
+            @DisplayName("403 status를 응답한다.")
+            void it_responses_403_status() throws Exception {
+                mockMvc.perform(
+                                patch("/users/1")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + ACCESS_DENIED_TOKEN)
+                        )
+                        .andExpect(status().isForbidden());
+            }
+        }
+
     }
 
     @Test
