@@ -140,6 +140,22 @@ class UserControllerTest {
                 verify(authenticationService).parseToken(VALID_TOKEN);
             }
         }
+
+        @Nested
+        @DisplayName("인증 토큰이 주어지지 않으면")
+        class Context_without_access_token {
+
+            @Test
+            @DisplayName("401 status를 응답한다.")
+            void it_responses_401_status() throws Exception {
+                mockMvc.perform(
+                                patch("/users/1")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        )
+                        .andExpect(status().isUnauthorized());
+            }
+        }
     }
 
     @Test
