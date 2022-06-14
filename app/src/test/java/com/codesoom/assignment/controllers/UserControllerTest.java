@@ -227,7 +227,7 @@ class UserControllerTest {
 
         @Nested
         @DisplayName("권한이 있는 토큰이 주어지면")
-        class Context_with_authorized_access_token {
+        class Context_with_access_token {
 
             @BeforeEach
             void setUp() {
@@ -237,7 +237,7 @@ class UserControllerTest {
 
             @Test
             @DisplayName("204 status를 응답한다.")
-            void destroyWithExistedId() throws Exception {
+            void it_responses_204_status() throws Exception {
                 mockMvc.perform(
                             delete("/users/1")
                                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + VALID_TOKEN)
@@ -245,6 +245,27 @@ class UserControllerTest {
                         .andExpect(status().isNoContent());
 
                 verify(userService).deleteUser(1L);
+            }
+        }
+
+        @Nested
+        @DisplayName("권한이 없는 토큰이 주어지면")
+        class Context_with_access_denied_token {
+
+            @BeforeEach
+            void setUp() {
+                given(authenticationService.parseToken(ACCESS_DENIED_TOKEN))
+                        .willReturn(ACCESS_DENIED_USER_ID);
+            }
+
+            @Test
+            @DisplayName("403 status를 응답한다.")
+            void it_responses_403_status() throws Exception {
+                mockMvc.perform(
+                                delete("/users/1")
+                                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + ACCESS_DENIED_TOKEN)
+                        )
+                        .andExpect(status().isForbidden());
             }
         }
 
