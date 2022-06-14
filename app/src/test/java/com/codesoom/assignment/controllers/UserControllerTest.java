@@ -15,8 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -227,13 +226,22 @@ class UserControllerTest {
     class Describe_destroy {
 
         @Nested
-        @DisplayName("존재하는 유저 아이디가 주어지면")
-        class Context_with_existed_userId {
+        @DisplayName("권한이 있는 토큰이 주어지면")
+        class Context_with_authorized_access_token {
+
+            @BeforeEach
+            void setUp() {
+                given(authenticationService.parseToken(VALID_TOKEN))
+                        .willReturn(1L);
+            }
 
             @Test
             @DisplayName("204 status를 응답한다.")
             void destroyWithExistedId() throws Exception {
-                mockMvc.perform(delete("/users/1"))
+                mockMvc.perform(
+                            delete("/users/1")
+                                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + VALID_TOKEN)
+                        )
                         .andExpect(status().isNoContent());
 
                 verify(userService).deleteUser(1L);
@@ -249,6 +257,7 @@ class UserControllerTest {
                 given(userService.deleteUser(100L))
                         .willThrow(new UserNotFoundException(100L));
             }
+
             @Test
             void destroyWithNotExistedId() throws Exception {
                 mockMvc.perform(delete("/users/100"))
