@@ -39,6 +39,8 @@ public class UserService {
         User source = mapper.map(modificationData, User.class);
         user.changeWith(source);
 
+        user.encodePassword(passwordEncoder);
+
         return user;
     }
 
