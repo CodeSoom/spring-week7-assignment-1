@@ -1,5 +1,6 @@
 package com.codesoom.assignment.domain;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -37,25 +38,79 @@ class UserTest {
         assertThat(user.isDeleted()).isTrue();
     }
 
-    @Test
-    void authenticate() {
-        User user = User.builder()
-                .password("test")
-                .build();
+    @Nested
+    @DisplayName("authenticate 메소드는")
+    class Describe_authenticate {
 
-        assertThat(user.authenticate("test")).isTrue();
-        assertThat(user.authenticate("xxx")).isFalse();
-    }
+        @Nested
+        @DisplayName("deleted user가 아니고 패스워드가 일치하면")
+        class Context_when_user_is_not_deleted_and_password_matches {
+            User user;
 
-    @Test
-    void authenticateWithDeletedUser() {
-        User user = User.builder()
-                .password("test")
-                .deleted(true)
-                .build();
+            @BeforeEach
+            void setUp() {
+                user = User.builder()
+                        .password("test")
+                        .build();
 
-        assertThat(user.authenticate("test")).isFalse();
-        assertThat(user.authenticate("xxx")).isFalse();
+                user.encodePassword(passwordEncoder);
+            }
+
+            @Test
+            @DisplayName("true를 반환한다.")
+            void it_returns_true() {
+                boolean actual = user.authenticate("test", passwordEncoder);
+
+                assertThat(actual).isTrue();
+            }
+        }
+
+        @Nested
+        @DisplayName("유저가 deleted 상태이면")
+        class Context_when_deleted_user {
+            User user;
+
+            @BeforeEach
+            void setUp() {
+                user = User.builder()
+                        .password("test")
+                        .deleted(true)
+                        .build();
+
+                user.encodePassword(passwordEncoder);
+            }
+
+            @Test
+            @DisplayName("false 반환한다.")
+            void it_returns_true() {
+                boolean actual = user.authenticate("test", passwordEncoder);
+
+                assertThat(actual).isFalse();
+            }
+        }
+
+        @Nested
+        @DisplayName("일치하지 않은 패스워드가 주어지면")
+        class Context_with_mismatched_password {
+            User user;
+
+            @BeforeEach
+            void setUp() {
+                user = User.builder()
+                        .password("test")
+                        .build();
+
+                user.encodePassword(passwordEncoder);
+            }
+
+            @Test
+            @DisplayName("false 반환한다.")
+            void it_returns_true() {
+                boolean actual = user.authenticate("test1", passwordEncoder);
+
+                assertThat(actual).isFalse();
+            }
+        }
     }
 
     @Nested
