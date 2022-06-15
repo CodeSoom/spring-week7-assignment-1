@@ -7,20 +7,19 @@ import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.Mapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
+@RequiredArgsConstructor
 @Service
 @Transactional
 public class UserService {
     private final Mapper mapper;
     private final UserRepository userRepository;
-
-    public UserService(Mapper dozerMapper, UserRepository userRepository) {
-        this.mapper = dozerMapper;
-        this.userRepository = userRepository;
-    }
+    private final PasswordEncoder passwordEncoder;
 
     public User registerUser(UserRegistrationData registrationData) {
         String email = registrationData.getEmail();
@@ -29,6 +28,8 @@ public class UserService {
         }
 
         User user = mapper.map(registrationData, User.class);
+        user.encodePassword(passwordEncoder);
+
         return userRepository.save(user);
     }
 
