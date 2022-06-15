@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -39,5 +40,13 @@ public class User {
 
     public boolean authenticate(String password) {
         return !deleted && password.equals(this.password);
+    }
+
+    public void encodePassword(PasswordEncoder passwordEncoder) {
+        if (this.password == null) {
+            throw new IllegalStateException("null인 패스워드 생성시 password를 반드시 넣을 것");
+        }
+        
+        this.password = passwordEncoder.encode(this.password);
     }
 }
