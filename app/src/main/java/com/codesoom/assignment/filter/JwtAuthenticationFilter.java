@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
 		String authorization = request.getHeader("Authorization");
 
-		if (authorization == null || !authorization.startsWith("Bearer ")) {
+		if (authorization == null) {
 			chain.doFilter(request, response);
 			return;
 		}
