@@ -103,29 +103,6 @@ class UserControllerTest {
         }
 
         @Nested
-        @DisplayName("인가 받지 않은 사용자의 access token을 전달 받으면")
-        class Context_with_unauthorized_access_token {
-            @BeforeEach
-            void setUp() {
-                given(authenticationService.parseToken(UNAUTHENTICATED_TOKEN))
-                        .willThrow(new InvalidTokenException(UNAUTHENTICATED_TOKEN));
-            }
-
-            @Test
-            @DisplayName("HTTP Status Code 401 UNAUTHORIZED 반환한다")
-            void it_responses_401() throws Exception {
-                mockMvc.perform(
-                                post("/users")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"email\":\"tester@example.com\"," +
-                                                "\"name\":\"Tester\",\"password\":\"test\"}")
-                                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + UNAUTHENTICATED_TOKEN)
-                        )
-                        .andExpect(status().isUnauthorized());
-            }
-        }
-
-        @Nested
         @DisplayName("인증되지 않은 토큰을 전달받으면")
         class Context_access_unauthenticated_token {
 
@@ -136,8 +113,8 @@ class UserControllerTest {
             }
 
             @Test
-            @DisplayName("HTTP STATUS CODE 403 FORBIDDEN 응답한다")
-            void it_responses_403() throws Exception {
+            @DisplayName("HTTP Status Code 401 UNAUTHORIZED 반환한다")
+            void it_responses_401() throws Exception {
                 mockMvc.perform(
                                 post("/users")
                                         .contentType(MediaType.APPLICATION_JSON)
@@ -145,7 +122,7 @@ class UserControllerTest {
                                                 "\"name\":\"Tester\",\"password\":\"test\"}")
                                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + UNAUTHORIZED_TOKEN)
                         )
-                        .andExpect(status().isForbidden());
+                        .andExpect(status().isUnauthorized());
             }
         }
     }
