@@ -11,6 +11,7 @@ import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -28,7 +28,6 @@ import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
-import com.codesoom.assignment.errors.InvalidTokenException;
 
 @RestController
 @RequestMapping("/products")
@@ -56,32 +55,29 @@ public class ProductController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
+	@PreAuthorize("isAuthenticated()")
 	public Product create(
 		@AuthenticationPrincipal Principal principal,
 		@RequestBody @Valid ProductData productData
 	) {
-		if (principal == null) {
-			throw new InvalidTokenException("null");
-		}
 		return productService.createProduct(productData);
 	}
 
 	@PatchMapping("{id}")
+	@PreAuthorize("isAuthenticated()")
 	public Product update(
 		@AuthenticationPrincipal Principal principal,
 		@PathVariable Long id,
 		@RequestBody @Valid ProductData productData
 	) {
-		if (principal == null) {
-			throw new InvalidTokenException("null");
-		}
 		return productService.updateProduct(id, productData);
 	}
 
 	@DeleteMapping("{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@PreAuthorize("isAuthenticated()")
 	public void destroy(
-        @AuthenticationPrincipal Principal principal,
+		@AuthenticationPrincipal Principal principal,
 		@PathVariable Long id
 	) {
 		productService.deleteProduct(id);
