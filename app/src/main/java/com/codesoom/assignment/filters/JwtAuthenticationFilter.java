@@ -3,6 +3,7 @@ package com.codesoom.assignment.filters;
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.security.UserAuthentication;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -15,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-
+@Slf4j
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     private final AuthenticationService authenticationService;
 
@@ -32,14 +33,19 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         if (authorization != null) {
             String accessToken = authorization.substring("Bearer ".length());
 
-            Long userId = authenticationService.parseToken(accessToken);
+            try {
+                Long userId = authenticationService.parseToken(accessToken);
 
-            Authentication authentication = new UserAuthentication(userId);
+                Authentication authentication = new UserAuthentication(userId);
 
-            SecurityContext context = SecurityContextHolder.getContext();
-            context.setAuthentication(authentication);
+                SecurityContext context = SecurityContextHolder.getContext();
+                context.setAuthentication(authentication);
+            } catch (InvalidTokenException e) {
+                log.info("invalid token requset");
+            }
         }
 
         chain.doFilter(request, response);
     }
+
 }
