@@ -1,8 +1,11 @@
 package com.codesoom.assignment.domain;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,6 +19,13 @@ class UserTest {
     private static final String PASSWORD = "TEST";
 
     private User user;
+    private PasswordEncoder passwordEncoder;
+
+    @BeforeEach
+    void setUp() {
+        user = User.builder().build();
+        passwordEncoder = new BCryptPasswordEncoder();
+    }
 
     // TODO: 객체 생성 테스트
     //  - Builder로 User를 생성할 수 있어야 한다.
@@ -49,6 +59,24 @@ class UserTest {
 
     // TODO: 암호화 테스트
     //  - 비밀번호를 암호화할 수 있어야 한다.
+    @Nested
+    @DisplayName("encodePassword 메서드는")
+    class Describe_encodePassword_method {
+        @Nested
+        @DisplayName("사용자가 입력한 비밀번호가 주어지면")
+        class Context_if_raw_password_given {
+            @BeforeEach
+            void setUp() {
+                user.encodePassword(PASSWORD, passwordEncoder);
+            }
+
+            @Test
+            @DisplayName("그 비밀번호를 암호화한다")
+            void It_encodes_raw_password() {
+                assertThat(user.getPassword()).isNotEqualTo(PASSWORD);
+            }
+        }
+    }
 
     // TODO: 인증 테스트
     //  - 주어진 비밀번호와 암호화된 비밀번호가 일치하는지 인증할 수 있어야 한다.

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -27,4 +28,9 @@ public class User {
     private String name;
 
     private String password;
+
+    // TODO: 기존의 비밀번호를 암호화해야 한다.
+    public void encodePassword(String password,
+                               PasswordEncoder passwordEncoder) {
+    }
 }
