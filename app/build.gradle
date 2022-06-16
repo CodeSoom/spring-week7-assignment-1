@@ -59,6 +59,9 @@ dependencies {
     runtime 'io.jsonwebtoken:jjwt-impl:0.11.2'
     runtime 'io.jsonwebtoken:jjwt-jackson:0.11.2'
 
+    // Spring Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
     // Spring Web
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
