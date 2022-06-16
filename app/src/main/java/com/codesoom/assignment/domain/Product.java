@@ -29,4 +29,8 @@ public class Product {
     private Integer price;
 
     private String imageUrl;
+
+    // TODO: 기존 데이터가 매개변수의 데이터로 수정되어야 한다.
+    public void update(String newName, String newMaker, int newPrice, String newImageUrl) {
+    }
 }
