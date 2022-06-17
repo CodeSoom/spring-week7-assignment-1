@@ -40,4 +40,10 @@ public class User {
                                PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(password);
     }
+
+    // TODO: 비밀번호를 인증해야 한다.
+    public boolean authenticatePassword(String password,
+                                        PasswordEncoder passwordEncoder) {
+        return false;
+    }
 }

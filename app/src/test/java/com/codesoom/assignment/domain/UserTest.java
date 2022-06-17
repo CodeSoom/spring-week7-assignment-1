@@ -80,6 +80,24 @@ class UserTest {
 
     // TODO: 인증 테스트
     //  - 주어진 비밀번호와 암호화된 비밀번호가 일치하는지 인증할 수 있어야 한다.
+    @Nested
+    @DisplayName("authenticate 메서드는")
+    class Describe_authenticate_method {
+        @Nested
+        @DisplayName("사용자가 입력한 비밀번호가 주어지면")
+        class Context_if_raw_password_given {
+            @BeforeEach
+            void setUp() {
+                user.encodePassword(PASSWORD, passwordEncoder);
+            }
+
+            @Test
+            @DisplayName("암호화한 비밀번호와 일치하는지 확인한다")
+            void It_authenticates_password() {
+                assertThat(user.authenticatePassword(PASSWORD, passwordEncoder)).isTrue();
+            }
+        }
+    }
 
     // TODO: 데이터 수정 테스트
     //  - name, password를 수정할 수 있어야 한다.
