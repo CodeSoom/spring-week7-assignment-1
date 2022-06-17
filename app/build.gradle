@@ -30,6 +30,14 @@ repositories {
     jcenter()
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '7.0'
+}
+
+task prepareKotlinBuildScriptModel {
+
+}
+
 dependencies {
     // Use JUnit Jupiter API for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
@@ -68,6 +76,9 @@ dependencies {
     // Spring Data JPA
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     runtimeOnly 'com.h2database:h2'
+
+    // Spring Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 
     // Spring Developer Tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
