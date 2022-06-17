@@ -55,6 +55,16 @@ public class User {
     }
 
     // TODO: 기존 데이터가 매개변수의 데이터로 수정되어야 한다.
+    /**
+     * 기존의 name, email, password를 매개변수로 주어진 데이터로 바꾼다.
+     *
+     * @param newName 수정할 이름
+     * @param newEmail 수정할 이메일
+     * @param newPassword 수정할 비밀번호
+     */
     public void update(String newName, String newEmail, String newPassword) {
+        this.name = newName;
+        this.email = newEmail;
+        this.password = newPassword;
     }
 }
