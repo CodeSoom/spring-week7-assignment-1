@@ -17,6 +17,9 @@ class UserTest {
     private static final String NAME = "TestUser";
     private static final String EMAIL = "test@example.com";
     private static final String PASSWORD = "TEST";
+    private static final String NEW_NAME = "NewTester";
+    private static final String NEW_EMAIL = "newtester@example.com";
+    private static final String NEW_PASSWORD = "NEWTEST";
 
     private User user;
     private PasswordEncoder passwordEncoder;
@@ -102,4 +105,40 @@ class UserTest {
     // TODO: 데이터 수정 테스트
     //  - name, password를 수정할 수 있어야 한다.
     //  - 이 때 password는 암호화되어야 한다.
+    @Nested
+    @DisplayName("update 메서드는")
+    class Describe_update_method {
+        @BeforeEach
+        void setUp() {
+            user = User.builder()
+                    .id(ID)
+                    .name(NAME)
+                    .email(EMAIL)
+                    .password(PASSWORD)
+                    .build();
+        }
+
+        @Nested
+        @DisplayName("매개변수로 새로운 데이터가 주어지면")
+        class Context_if_new_data_given {
+            User subject() {
+                user.update(NEW_NAME, NEW_EMAIL, NEW_PASSWORD);
+                user.encodePassword(NEW_PASSWORD, passwordEncoder);
+
+                return user;
+            }
+
+            @Test
+            @DisplayName("기존 User의 데이터를 매개변수의 데이터로 수정한다")
+            void It_updates_data_of_existing_user_by_parameter() {
+                User updatedUser = subject();
+
+                assertThat(updatedUser.getId()).isEqualTo(ID);
+                assertThat(updatedUser.getName()).isEqualTo(NEW_NAME);
+                assertThat(updatedUser.getEmail()).isEqualTo(NEW_EMAIL);
+                assertThat(user.authenticatePassword(NEW_PASSWORD, passwordEncoder)).isTrue();
+            }
+        }
+    }
+
 }
