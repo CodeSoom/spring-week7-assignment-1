@@ -34,8 +34,9 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 .headers().frameOptions().disable() // headers 옵션 중 frameOptions만 비활성화
                 .and()
                 .csrf().disable()  // csrf 비활성화
-                .addFilter(authenticationFilter) // Form Login에 사용되는 custom AuthenticationFilter 구현체를 등록??
+                .addFilter(authenticationFilter) // 커스텀 필터를 지정
                 .addFilterBefore(authenticationErrorFilter,
+                        // addFilterBefore(A, B.class): B.class 이전에 A 필터를 호출
                         JwtAuthenticationFilter.class) //  JwtAuthenticationFilter
                 // Form Login 시 걸리는 Filter이다. UsernamePasswordAuthenticationFilter를 상속한 JwtAuthenticationFilter을 등록
                 // 이 필터는 HttpServletRequest에서 사용자가 Form으로 입력한 로그인 정보를 인터셉트해서 AuthenticationManager에게
