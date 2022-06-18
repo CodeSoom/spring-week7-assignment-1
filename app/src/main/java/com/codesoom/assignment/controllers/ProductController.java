@@ -55,7 +55,7 @@ public class ProductController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("isAuthenticated() AND hasAuthority(USER)")
 	public Product create(
 		@AuthenticationPrincipal Principal principal,
 		@RequestBody @Valid ProductData productData
