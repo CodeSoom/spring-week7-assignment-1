@@ -1,5 +1,6 @@
 package com.codesoom.utils;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,5 +31,10 @@ public class JwtUtil {
                 .claim("userId", userId)
                 .signWith(key)
                 .compact();
+    }
+
+    // TODO: 토큰을 디코딩해야 한다.
+    public Claims decodeToken(String token) {
+        return null;
     }
 }
