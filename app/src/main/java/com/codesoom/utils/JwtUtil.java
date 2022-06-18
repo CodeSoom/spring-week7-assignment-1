@@ -1,5 +1,6 @@
 package com.codesoom.utils;
 
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,16 @@ public class JwtUtil {
     }
 
     // TODO: 토큰을 반환해야 한다.
+    /**
+     * userId로 생성한 토큰을 반환한다.
+     *
+     * @param userId 토큰을 생성할 id
+     * @return 생성된 토큰
+     */
     public String encodeUserId(Long userId) {
-        return null;
+        return Jwts.builder()
+                .claim("userId", userId)
+                .signWith(key)
+                .compact();
     }
 }
