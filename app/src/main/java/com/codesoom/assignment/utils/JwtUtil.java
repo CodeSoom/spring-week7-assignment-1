@@ -1,4 +1,4 @@
-package com.codesoom.utils;
+package com.codesoom.assignment.utils;
 
 import com.codesoom.assignment.errors.InvalidTokenException;
 import io.jsonwebtoken.Claims;
