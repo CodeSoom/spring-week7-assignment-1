@@ -38,12 +38,12 @@ class AuthenticationServiceTest {
         authenticationService = new AuthenticationService(
                 userRepository, jwtUtil, passwordEncoder);
 
+        String password = passwordEncoder.encode("test");
         User user = User.builder()
-                .password("test")
+                .id(1L)
+                .password(password)
                 .build();
         
-        user.encodePassword(passwordEncoder);
-
         given(userRepository.findByEmail("tester@example.com"))
                 .willReturn(Optional.of(user));
     }
