@@ -27,6 +27,7 @@ class UserTest {
         assertThat(user.getPassword()).isEqualTo("TEST");
     }
 
+
     @Test
     void destroy() {
         User user = User.builder().build();
@@ -49,11 +50,10 @@ class UserTest {
 
             @BeforeEach
             void setUp() {
+                String password = passwordEncoder.encode("test");
                 user = User.builder()
-                        .password("test")
+                        .password(password)
                         .build();
-
-                user.encodePassword(passwordEncoder);
             }
 
             @Test
@@ -72,12 +72,11 @@ class UserTest {
 
             @BeforeEach
             void setUp() {
+                String password = passwordEncoder.encode("test");
                 user = User.builder()
-                        .password("test")
+                        .password(password)
                         .deleted(true)
                         .build();
-
-                user.encodePassword(passwordEncoder);
             }
 
             @Test
@@ -96,11 +95,10 @@ class UserTest {
 
             @BeforeEach
             void setUp() {
+                String password = passwordEncoder.encode("test");
                 user = User.builder()
-                        .password("test")
+                        .password(password)
                         .build();
-
-                user.encodePassword(passwordEncoder);
             }
 
             @Test
@@ -109,41 +107,6 @@ class UserTest {
                 boolean actual = user.authenticate("test1", passwordEncoder);
 
                 assertThat(actual).isFalse();
-            }
-        }
-    }
-
-    @Nested
-    @DisplayName("encodePassword 메소드는")
-    class Describe_encodePassword {
-
-        @Nested
-        @DisplayName("패스워드가 널이 아니면")
-        class Context_when_password_is_nonNull {
-            final User user = User.builder()
-                    .password("test")
-                    .build();
-
-            @Test
-            @DisplayName("처음 생성된 패스워드랑 다르다.")
-            void it_is_different_from_first() {
-                user.encodePassword(passwordEncoder);
-
-                assertThat(user.getPassword()).isNotEqualTo("test");
-            }
-        }
-
-        @Nested
-        @DisplayName("패스워드가 널이면")
-        class Context_when_password_is_null {
-            final User user = User.builder()
-                    .build();
-
-            @Test
-            @DisplayName("IllegalStateException 예외를 던진다.")
-            void it_throws_IllegalStateException() {
-                assertThatThrownBy(() -> user.encodePassword(passwordEncoder))
-                        .isInstanceOf(IllegalStateException.class);
             }
         }
     }
