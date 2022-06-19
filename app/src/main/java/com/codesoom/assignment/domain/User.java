@@ -41,12 +41,4 @@ public class User {
     public boolean authenticate(String password, PasswordEncoder passwordEncoder) {
         return !deleted && passwordEncoder.matches(password, this.password);
     }
-
-    public void encodePassword(PasswordEncoder passwordEncoder) {
-        if (this.password == null) {
-            throw new IllegalStateException("null인 패스워드 생성시 password를 반드시 넣을 것");
-        }
-        
-        this.password = passwordEncoder.encode(this.password);
-    }
 }
