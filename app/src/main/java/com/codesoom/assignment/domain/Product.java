@@ -32,7 +32,7 @@ public class Product {
 
     // TODO: 기존 데이터가 매개변수의 데이터로 수정되어야 한다.
     /**
-     * 기존의 name, maker, price, imageUrl을 매개변수로 주어진 데이터로 바꾼다.
+     * Product 정보를 수정한다.
      *
      * @param newName 수정할 이름
      * @param newMaker 수정할 메이커

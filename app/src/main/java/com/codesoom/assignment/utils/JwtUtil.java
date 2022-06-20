@@ -23,7 +23,7 @@ public class JwtUtil {
 
     // TODO: 토큰을 반환해야 한다.
     /**
-     * userId로 생성한 토큰을 반환한다.
+     * 토큰을 생성한 후 이를 반환한다.
      *
      * @param userId 토큰을 생성할 id
      * @return 생성된 토큰
@@ -37,7 +37,7 @@ public class JwtUtil {
 
     // TODO: 토큰을 디코딩해야 한다.
     /**
-     * 토큰 디코딩을 통해 얻어낸 userId 정보가 들어있는 Claims를 반환한다.
+     * 토큰을 디코딩하고, userId 정보가 들어있는 Claims를 반환한다.
      *
      * @param token 디코딩할 토큰
      * @return userId 정보가 들어있는 Claims
