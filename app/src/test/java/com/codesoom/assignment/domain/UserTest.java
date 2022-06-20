@@ -36,8 +36,8 @@ class UserTest {
     @DisplayName("User는")
     class Describe_user {
         @Nested
-        @DisplayName("빌더를 통해")
-        class Context_by_builder {
+        @DisplayName("빌더로 객체를 생성한다")
+        class It_creates_user_by_builder {
             User subject() {
                 return user = User.builder()
                         .id(ID)
@@ -48,8 +48,7 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("객체를 생성한다")
-            void It_creates_user() {
+            void test() {
                 User user = subject();
 
                 assertThat(user.getId()).isEqualTo(ID);
@@ -66,16 +65,15 @@ class UserTest {
     @DisplayName("encodePassword 메서드는")
     class Describe_encodePassword_method {
         @Nested
-        @DisplayName("사용자가 입력한 비밀번호가 주어지면")
-        class Context_if_raw_password_given {
+        @DisplayName("비밀번호를 암호화한다")
+        class It_encodes_password {
             @BeforeEach
             void setUp() {
                 user.encodePassword(PASSWORD, passwordEncoder);
             }
 
             @Test
-            @DisplayName("그 비밀번호를 암호화한다")
-            void It_encodes_raw_password() {
+            void test() {
                 assertThat(user.getPassword()).isNotEqualTo(PASSWORD);
             }
         }
@@ -87,16 +85,15 @@ class UserTest {
     @DisplayName("authenticate 메서드는")
     class Describe_authenticate_method {
         @Nested
-        @DisplayName("사용자가 입력한 비밀번호가 주어지면")
-        class Context_if_raw_password_given {
+        @DisplayName("비밀번호를 인증한다")
+        class It_authenticates_password {
             @BeforeEach
             void setUp() {
                 user.encodePassword(PASSWORD, passwordEncoder);
             }
 
             @Test
-            @DisplayName("암호화한 비밀번호와 일치하는지 확인한다")
-            void It_authenticates_password() {
+            void test() {
                 assertThat(user.authenticatePassword(PASSWORD, passwordEncoder)).isTrue();
             }
         }
@@ -119,8 +116,8 @@ class UserTest {
         }
 
         @Nested
-        @DisplayName("매개변수로 새로운 데이터가 주어지면")
-        class Context_if_new_data_given {
+        @DisplayName("User를 수정한다")
+        class It_updates_User {
             User subject() {
                 user.update(NEW_NAME, NEW_EMAIL, NEW_PASSWORD);
                 user.encodePassword(NEW_PASSWORD, passwordEncoder);
@@ -129,8 +126,7 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("기존 User의 데이터를 매개변수의 데이터로 수정한다")
-            void It_updates_data_of_existing_user_by_parameter() {
+            void test() {
                 User updatedUser = subject();
 
                 assertThat(updatedUser.getId()).isEqualTo(ID);
@@ -140,5 +136,4 @@ class UserTest {
             }
         }
     }
-
 }

@@ -27,8 +27,8 @@ public class ProductTest {
     @DisplayName("Product는")
     class Describe_product {
         @Nested
-        @DisplayName("빌더를 통해")
-        class Context_by_builder {
+        @DisplayName("빌더로 객체를 생성한다")
+        class It_creates_product_by_builder {
             Product subject() {
                 return product = Product.builder()
                         .id(ID)
@@ -39,8 +39,7 @@ public class ProductTest {
             }
 
             @Test
-            @DisplayName("객체를 생성한다")
-            void It_creates_product() {
+            void test() {
                 Product product = subject();
 
                 assertThat(product.getId()).isEqualTo(ID);
@@ -67,16 +66,15 @@ public class ProductTest {
         }
 
         @Nested
-        @DisplayName("매개변수로 새로운 데이터가 주어지면")
-        class Context_if_new_data_given {
+        @DisplayName("Product를 수정한다")
+        class It_updates_Product {
             Product subject() {
                 product.update(NEW_NAME, NEW_MAKER, NEW_PRICE, NEW_IMAGE_URL);
                 return product;
             }
 
             @Test
-            @DisplayName("기존 Product의 데이터를 매개변수의 데이터로 수정한다")
-            void It_updates_data_of_existing_product_by_parameter() {
+            void test() {
                 Product updatedProduct = subject();
 
                 assertThat(updatedProduct.getId()).isEqualTo(ID);

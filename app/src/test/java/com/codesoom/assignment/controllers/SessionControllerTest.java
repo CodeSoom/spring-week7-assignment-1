@@ -49,8 +49,8 @@ class SessionControllerTest {
     @DisplayName("POST /session 요청 시")
     class Describe_POST_session_request {
         @Nested
-        @DisplayName("맞는 이메일과 비밀번호가 주어지면")
-        class Context_if_right_email_and_password_given {
+        @DisplayName("이메일과 비밀번호가 맞으면")
+        class Context_if_email_and_password_right {
             @BeforeEach
             void setUp() {
                 sessionRequestData = SessionRequestData.builder()
@@ -63,7 +63,7 @@ class SessionControllerTest {
             }
 
             @Nested
-            @DisplayName("201 코드를 응답하고 유효한 토큰을 반환한다")
+            @DisplayName("201 코드와 함께 유효한 토큰을 응답한다")
             class It_response_statusCode_201_and_returns_valid_token {
                 ResultActions subject() throws Exception {
                     return mockMvc.perform(post("/session")
@@ -81,8 +81,8 @@ class SessionControllerTest {
         }
 
         @Nested
-        @DisplayName("틀린 이메일이 주어지면")
-        class Context_if_wrong_email_given {
+        @DisplayName("이메일이 틀리면")
+        class Context_if_email_wrong {
             @BeforeEach
             void setUp() {
                 sessionRequestData = SessionRequestData.builder()
@@ -112,8 +112,8 @@ class SessionControllerTest {
         }
 
         @Nested
-        @DisplayName("틀린 비밀번호가 주어지면")
-        class Context_if_wrong_password_given {
+        @DisplayName("비밀번호가 틀리면")
+        class Context_if_password_wrong {
             @BeforeEach
             void setUp() {
                 sessionRequestData = SessionRequestData.builder()

@@ -1,7 +1,6 @@
 package com.codesoom.assignment.utils;
 
 import com.codesoom.assignment.errors.InvalidTokenException;
-import com.codesoom.assignment.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,15 +35,14 @@ class JwtUtilTest {
     @DisplayName("encodeUserId 메서드는")
     class Describe_encodeUserId_method {
         @Nested
-        @DisplayName("id가 주어지면")
-        class Context_if_id_given {
+        @DisplayName("id에 대한 토큰을 반환한다")
+        class It_returns_token {
             String subject() {
                 return jwtUtil.encodeUserId(ID);
             }
 
             @Test
-            @DisplayName("유효한 토큰을 반환한다")
-            void It_returns_valid_token() {
+            void test() {
                 String token = subject();
 
                 assertThat(token).isEqualTo(VALID_TOKEN);
@@ -59,8 +57,8 @@ class JwtUtilTest {
     @DisplayName("decodeToken 메서드는")
     class Describe_decodeToken_method {
         @Nested
-        @DisplayName("유효한 토큰이 주어지면")
-        class Context_if_valid_token_given {
+        @DisplayName("토큰이 유효하면")
+        class Context_if_token_valid {
             Claims subject() {
                 return jwtUtil.decodeToken(VALID_TOKEN);
             }
@@ -75,8 +73,8 @@ class JwtUtilTest {
         }
 
         @Nested
-        @DisplayName("유효하지 않은 토큰이 주어지면")
-        class Context_if_invalid_token_given {
+        @DisplayName("토큰이 유효하지 않으면")
+        class Context_if_token_invalid {
             @Test
             @DisplayName("InvalidTokenException 예외를 던진다")
             void It_throws_invalidTokenException() {
