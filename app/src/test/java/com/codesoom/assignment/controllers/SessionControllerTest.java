@@ -58,7 +58,7 @@ class SessionControllerTest {
                         .password(RIGHT_PASSWORD)
                         .build();
 
-                given(authenticationService.login(sessionRequestData))
+                given(authenticationService.login(RIGHT_EMAIL, RIGHT_PASSWORD))
                         .willReturn(VALID_TOKEN);
             }
 
@@ -90,7 +90,7 @@ class SessionControllerTest {
                         .password(RIGHT_PASSWORD)
                         .build();
 
-                given(authenticationService.login(sessionRequestData))
+                given(authenticationService.login(WRONG_EMAIL, RIGHT_PASSWORD))
                         .willThrow(new LoginFailException(WRONG_EMAIL));
             }
 
@@ -121,7 +121,7 @@ class SessionControllerTest {
                         .password(WRONG_PASSWORD)
                         .build();
 
-                given(authenticationService.login(sessionRequestData))
+                given(authenticationService.login(RIGHT_EMAIL, WRONG_PASSWORD))
                         .willThrow(new LoginFailException(RIGHT_EMAIL));
             }
 
