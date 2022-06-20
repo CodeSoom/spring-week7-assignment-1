@@ -21,7 +21,6 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    // TODO: 토큰을 반환해야 한다.
     /**
      * 토큰을 생성한 후 이를 반환한다.
      *
@@ -35,7 +34,6 @@ public class JwtUtil {
                 .compact();
     }
 
-    // TODO: 토큰을 디코딩해야 한다.
     /**
      * 토큰을 디코딩하고, userId 정보가 들어있는 Claims를 반환한다.
      *

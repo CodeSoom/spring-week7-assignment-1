@@ -29,7 +29,6 @@ public class User {
 
     private String password;
 
-    // TODO: 기존의 비밀번호를 암호화해야 한다.
     /**
      * 비밀번호를 암호화한다.
      *
@@ -41,7 +40,6 @@ public class User {
         this.password = passwordEncoder.encode(password);
     }
 
-    // TODO: 비밀번호를 인증해야 한다.
     /**
      * 비밀번호 인증에 성공하면 true를 반환한다.
      *
@@ -54,7 +52,6 @@ public class User {
         return passwordEncoder.matches(password, this.password);
     }
 
-    // TODO: 기존 데이터가 매개변수의 데이터로 수정되어야 한다.
     /**
      * User 정보를 수정한다.
      *

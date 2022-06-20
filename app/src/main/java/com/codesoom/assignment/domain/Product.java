@@ -30,7 +30,6 @@ public class Product {
 
     private String imageUrl;
 
-    // TODO: 기존 데이터가 매개변수의 데이터로 수정되어야 한다.
     /**
      * Product 정보를 수정한다.
      *

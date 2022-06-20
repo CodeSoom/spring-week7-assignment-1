@@ -29,8 +29,6 @@ class JwtUtilTest {
         jwtUtil = new JwtUtil(SECRET);
     }
 
-    // TODO: 인코딩 테스트
-    //  - 호출 시 유효한 토큰을 반환해야 한다.
     @Nested
     @DisplayName("encodeUserId 메서드는")
     class Describe_encodeUserId_method {
@@ -50,9 +48,6 @@ class JwtUtilTest {
         }
     }
 
-    // TODO: 디코딩 테스트
-    //  - 유효한 토큰으로 호출 시 반환된 Claim에 유효한 id가 들어있어야 한다.
-    //  - 유효하지 않은 토큰으로 호출 시 InvalidTokenException 예외를 던져야 한다.
     @Nested
     @DisplayName("decodeToken 메서드는")
     class Describe_decodeToken_method {

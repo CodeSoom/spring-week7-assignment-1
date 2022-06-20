@@ -22,7 +22,6 @@ public class ProductTest {
 
     private Product product;
 
-    // TODO: Builder로 Product를 생성할 수 있어야 한다.
     @Nested
     @DisplayName("Product는")
     class Describe_product {
@@ -51,7 +50,6 @@ public class ProductTest {
         }
     }
 
-    // TODO: name, maker, price, imageUrl을 수정할 수 있어야 한다.
     @Nested
     @DisplayName("update 메서드는")
     class Describe_update_method {

@@ -30,8 +30,6 @@ class UserTest {
         passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    // TODO: 객체 생성 테스트
-    //  - Builder로 User를 생성할 수 있어야 한다.
     @Nested
     @DisplayName("User는")
     class Describe_user {
@@ -59,8 +57,6 @@ class UserTest {
         }
     }
 
-    // TODO: 암호화 테스트
-    //  - 비밀번호를 암호화할 수 있어야 한다.
     @Nested
     @DisplayName("encodePassword 메서드는")
     class Describe_encodePassword_method {
@@ -79,8 +75,6 @@ class UserTest {
         }
     }
 
-    // TODO: 인증 테스트
-    //  - 주어진 비밀번호와 암호화된 비밀번호가 일치하는지 인증할 수 있어야 한다.
     @Nested
     @DisplayName("authenticate 메서드는")
     class Describe_authenticate_method {
@@ -99,9 +93,6 @@ class UserTest {
         }
     }
 
-    // TODO: 데이터 수정 테스트
-    //  - name, password를 수정할 수 있어야 한다.
-    //  - 이 때 password는 암호화되어야 한다.
     @Nested
     @DisplayName("update 메서드는")
     class Describe_update_method {
