@@ -34,15 +34,15 @@ public class Product {
     /**
      * Product 정보를 수정한다.
      *
-     * @param newName 수정할 이름
-     * @param newMaker 수정할 메이커
-     * @param newPrice 수정할 가격
-     * @param newImageUrl 수정할 이미지 URL
+     * @param name 수정할 이름
+     * @param maker 수정할 메이커
+     * @param price 수정할 가격
+     * @param imageUrl 수정할 이미지 URL
      */
-    public void update(String newName, String newMaker, int newPrice, String newImageUrl) {
-        this.name = newName;
-        this.maker = newMaker;
-        this.price = newPrice;
-        this.imageUrl = newImageUrl;
+    public void update(String name, String maker, int price, String imageUrl) {
+        this.name = name;
+        this.maker = maker;
+        this.price = price;
+        this.imageUrl = imageUrl;
     }
 }

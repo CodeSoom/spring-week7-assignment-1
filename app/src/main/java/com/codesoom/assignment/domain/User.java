@@ -58,13 +58,13 @@ public class User {
     /**
      * User 정보를 수정한다.
      *
-     * @param newName 수정할 이름
-     * @param newEmail 수정할 이메일
-     * @param newPassword 수정할 비밀번호
+     * @param name 수정할 이름
+     * @param email 수정할 이메일
+     * @param password 수정할 비밀번호
      */
-    public void update(String newName, String newEmail, String newPassword) {
-        this.name = newName;
-        this.email = newEmail;
-        this.password = newPassword;
+    public void update(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
     }
 }
