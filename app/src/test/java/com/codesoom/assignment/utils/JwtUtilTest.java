@@ -3,18 +3,24 @@ package com.codesoom.assignment.utils;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+/**
+ * JwtUtil에 대한 테스트 클래스
+ */
 class JwtUtilTest {
     private static final String SECRET = "12345678901234567890123456789012";
-
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDo";
+
+    private static final Long ID = 1L;
 
     private JwtUtil jwtUtil;
 
@@ -23,35 +29,53 @@ class JwtUtilTest {
         jwtUtil = new JwtUtil(SECRET);
     }
 
-    @Test
-    void encode() {
-        String token = jwtUtil.encode(1L);
+    @Nested
+    @DisplayName("encodeUserId 메서드는")
+    class Describe_encodeUserId_method {
+        @Nested
+        @DisplayName("id에 대한 토큰을 반환한다")
+        class It_returns_token {
+            String subject() {
+                return jwtUtil.encodeUserId(ID);
+            }
 
-        assertThat(token).isEqualTo(VALID_TOKEN);
+            @Test
+            void test() {
+                String token = subject();
+
+                assertThat(token).isEqualTo(VALID_TOKEN);
+            }
+        }
     }
 
-    @Test
-    void decodeWithValidToken() {
-        Claims claims = jwtUtil.decode(VALID_TOKEN);
+    @Nested
+    @DisplayName("decodeToken 메서드는")
+    class Describe_decodeToken_method {
+        @Nested
+        @DisplayName("토큰이 유효하면")
+        class Context_if_token_valid {
+            Claims subject() {
+                return jwtUtil.decodeToken(VALID_TOKEN);
+            }
 
-        assertThat(claims.get("userId", Long.class)).isEqualTo(1L);
-    }
+            @Test
+            @DisplayName("userId 정보가 들어있는 claim을 반환한다")
+            void It_returns_claims_include_userid() {
+                Claims claims = subject();
 
-    @Test
-    void decodeWithInvalidToken() {
-        assertThatThrownBy(() -> jwtUtil.decode(INVALID_TOKEN))
-                .isInstanceOf(InvalidTokenException.class);
-    }
+                assertThat(claims.get("userId", Long.class)).isEqualTo(ID);
+            }
+        }
 
-    @Test
-    void decodeWithEmptyToken() {
-        assertThatThrownBy(() -> jwtUtil.decode(null))
-                .isInstanceOf(InvalidTokenException.class);
-
-        assertThatThrownBy(() -> jwtUtil.decode(""))
-                .isInstanceOf(InvalidTokenException.class);
-
-        assertThatThrownBy(() -> jwtUtil.decode("   "))
-                .isInstanceOf(InvalidTokenException.class);
+        @Nested
+        @DisplayName("토큰이 유효하지 않으면")
+        class Context_if_token_invalid {
+            @Test
+            @DisplayName("InvalidTokenException 예외를 던진다")
+            void It_throws_invalidTokenException() {
+                assertThatThrownBy(() -> jwtUtil.decodeToken(INVALID_TOKEN))
+                        .isInstanceOf(InvalidTokenException.class);
+            }
+        }
     }
 }
