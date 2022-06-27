@@ -128,14 +128,14 @@ describe('Users', () => {
       });
     });
 
-    context('with not existing user', () => {
+    context('with others', () => {
       beforeEach(() => {
         id = 9999;
       });
 
-      it('responses not found', async () => {
+      it('responses Forbidden', async () => {
         await frisby.del(`/users/${id}`)
-          .expect('status', 404);
+          .expect('status', 403);
       });
     });
   });
