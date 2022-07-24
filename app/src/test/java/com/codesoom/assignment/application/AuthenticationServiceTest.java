@@ -7,6 +7,7 @@ import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -27,13 +28,14 @@ class AuthenticationServiceTest {
     private AuthenticationService authenticationService;
 
     private UserRepository userRepository = mock(UserRepository.class);
+    private PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
 
     @BeforeEach
     void setUp() {
         JwtUtil jwtUtil = new JwtUtil(SECRET);
 
         authenticationService = new AuthenticationService(
-                userRepository, jwtUtil);
+                userRepository, jwtUtil, passwordEncoder);
 
         User user = User.builder()
                 .password("test")
