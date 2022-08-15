@@ -3,7 +3,6 @@ package com.codesoom.assignment.filters;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import org.springframework.http.HttpStatus;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpFilter;
