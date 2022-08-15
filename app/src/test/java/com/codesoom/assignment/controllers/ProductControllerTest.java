@@ -159,7 +159,7 @@ class ProductControllerTest {
                         .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
                                 "\"price\":5000}")
                         .header("Authorization", "Bearer " + INVALID_TOKEN)
-        )
+               )
                 .andExpect(status().isUnauthorized());
     }
 

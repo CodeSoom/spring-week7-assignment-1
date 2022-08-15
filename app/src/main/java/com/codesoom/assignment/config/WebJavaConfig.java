@@ -13,6 +13,6 @@ public class WebJavaConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(authenticationInterceptor);
+        // registry.addInterceptor(authenticationInterceptor);
     }
 }
