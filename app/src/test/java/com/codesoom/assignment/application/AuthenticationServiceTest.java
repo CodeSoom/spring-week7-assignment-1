@@ -1,6 +1,5 @@
 package com.codesoom.assignment.application;
 
-import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.LoginFailException;
