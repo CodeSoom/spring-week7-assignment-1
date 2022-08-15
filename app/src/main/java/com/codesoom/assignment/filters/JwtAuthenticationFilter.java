@@ -26,6 +26,11 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             HttpServletResponse response,
             FilterChain chain
     ) throws IOException, ServletException {
+        if (filterWithPathAndMethod(request)) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         String authorization = request.getHeader("Authorization");
 
         if (authorization == null) {
@@ -47,5 +52,23 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         request.setAttribute("userId", userId);
 
         chain.doFilter(request, response);
+    }
+
+    private boolean filterWithPathAndMethod(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        if (!path.startsWith("/products")) {
+            return true;
+        }
+
+        String method = request.getMethod();
+        if (method.equals("GET")) {
+            return true;
+        }
+
+        if (method.equals("OPTIONS")) {
+            return true;
+        }
+
+        return false;
     }
 }
