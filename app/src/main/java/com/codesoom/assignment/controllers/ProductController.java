@@ -44,7 +44,6 @@ public class ProductController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
     public Product create(
-            Authentication authentication,
             @RequestBody @Valid ProductData productData
     ) {
         return productService.createProduct(productData);
@@ -53,7 +52,6 @@ public class ProductController {
     @PatchMapping("{id}")
     @PreAuthorize("isAuthenticated()")
     public Product update(
-            Authentication authentication,
             @PathVariable Long id,
             @RequestBody @Valid ProductData productData
     ) {
@@ -64,7 +62,6 @@ public class ProductController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("isAuthenticated()")
     public void destroy(
-            Authentication authentication,
             @PathVariable Long id
     ) {
         productService.deleteProduct(id);
