@@ -51,6 +51,7 @@ public class ProductController {
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     public Product update(
             @RequestAttribute Long userId,
             @PathVariable Long id,
@@ -61,6 +62,7 @@ public class ProductController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("isAuthenticated()")
     public void destroy(
             @RequestAttribute Long userId,
             @PathVariable Long id

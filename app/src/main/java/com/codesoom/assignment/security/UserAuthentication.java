@@ -29,6 +29,11 @@ public class UserAuthentication extends AbstractAuthenticationToken {
     }
 
     @Override
+    public boolean isAuthenticated() {
+        return true;
+    }
+
+    @Override
     public boolean implies(Subject subject) {
         return super.implies(subject);
     }
