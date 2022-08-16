@@ -3,12 +3,14 @@ package com.codesoom.assignment.domain;
 import lombok.Builder;
 import lombok.Getter;
 
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+@Entity
 @Getter
 public class User {
     @Id
@@ -20,15 +22,14 @@ public class User {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role = Role.USER;
 
-    public User() {}
+    protected User() {}
 
     @Builder
-    public User(String email, String password, String name, Role role) {
+    public User(String email, String password, String name) {
         this.email = email;
         this.password = password;
         this.name = name;
-        this.role = role;
     }
 }

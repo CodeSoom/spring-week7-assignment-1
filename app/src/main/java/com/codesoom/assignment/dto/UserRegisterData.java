@@ -1,7 +1,9 @@
 package com.codesoom.assignment.dto;
 
 import com.codesoom.assignment.domain.User;
+import lombok.Getter;
 
+@Getter
 public class UserRegisterData {
     private final String email;
     private final String password;

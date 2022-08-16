@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -51,7 +52,7 @@ public class UserControllerTest {
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.email", Is.is(EMAIL)))
                         .andExpect(jsonPath("$.name", Is.is(NAME)))
-                        .andExpect(jsonPath("$.authority", Is.is(USER)));
+                        .andExpect(jsonPath("$.role", Is.is(USER)));
             }
         }
     }

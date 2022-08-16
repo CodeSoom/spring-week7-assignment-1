@@ -1,8 +1,6 @@
 package com.codesoom.assignment.application;
 
 import com.codesoom.assignment.domain.Role;
-import com.codesoom.assignment.domain.User;
-import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserInquiryInfo;
 import com.codesoom.assignment.dto.UserRegisterData;
 import org.junit.jupiter.api.DisplayName;
@@ -16,10 +14,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @DisplayName("UserService 인터페이스의")
 public class UserServiceTest {
-    @Autowired
-    private UserRepository userRepository;
 
-    private final UserService userService = new NormalUserService(userRepository);
+    @Autowired
+    private UserService userService;
 
     public static final Role USER = Role.USER;
     public static final String EMAIL = "qjawlsqjacks@naver.com";
@@ -30,7 +27,7 @@ public class UserServiceTest {
     );
 
     private UserInquiryInfo expectInquiryInfo(Long id) {
-        return new UserInquiryInfo(id, EMAIL, NAME, Role.USER);
+        return new UserInquiryInfo(id, EMAIL, NAME, USER);
     }
 
     @Nested
@@ -50,17 +47,4 @@ public class UserServiceTest {
         }
     }
 
-    private static class NormalUserService implements UserService {
-        private final UserRepository userRepository;
-
-        private NormalUserService(UserRepository userRepository) {
-            this.userRepository = userRepository;
-        }
-
-        @Override
-        public UserInquiryInfo register(UserRegisterData registerData) {
-            User user = userRepository.save(registerData.toUser());
-            return UserInquiryInfo.from(user);
-        }
-    }
 }
