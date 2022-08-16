@@ -75,8 +75,8 @@ public class ProductControllerTest {
                                 .content(objectMapper.writeValueAsString(productData(createdUser.get("id")))))
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.name", Is.is(PRODUCT_NAME)))
-                        .andExpect(jsonPath("$.quantity", Is.is(QUANTITY)))
-                        .andExpect(jsonPath("$.price", Is.is(PRICE)));
+                        .andExpect(jsonPath("$.quantity").value(QUANTITY))
+                        .andExpect(jsonPath("$.price").value(PRICE));
             }
         }
     }
