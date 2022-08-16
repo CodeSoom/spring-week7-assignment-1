@@ -3,14 +3,18 @@ package com.codesoom.assignment.controllers;
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
+import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -24,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
+@Import(UserControllerTestConfig.class)
 class UserControllerTest {
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
@@ -36,7 +41,7 @@ class UserControllerTest {
     @MockBean
     private UserService userService;
 
-    @MockBean
+    @Autowired
     private AuthenticationService authenticationService;
 
     @BeforeEach
@@ -180,7 +185,10 @@ class UserControllerTest {
 
     @Test
     void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
+        mockMvc.perform(
+                delete("/users/100")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                )
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
