@@ -14,12 +14,6 @@ import java.util.Set;
 @RestControllerAdvice
 public class ControllerErrorAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(ProductNotFoundException.class)
-    public ErrorResponse handleProductNotFound() {
-        return new ErrorResponse("Product not found");
-    }
-
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserNotFoundException.class)
     public ErrorResponse handleUserNotFound() {
         return new ErrorResponse("User not found");
