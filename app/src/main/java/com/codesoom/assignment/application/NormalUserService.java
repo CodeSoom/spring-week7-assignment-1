@@ -4,6 +4,7 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserInquiryInfo;
 import com.codesoom.assignment.dto.UserRegisterData;
+import com.codesoom.assignment.errors.DuplicatedEmailException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,6 +17,10 @@ class NormalUserService implements UserService {
 
     @Override
     public UserInquiryInfo register(UserRegisterData registerData) {
+        if (userRepository.existsByEmail(registerData.getEmail())) {
+            throw new DuplicatedEmailException(registerData.getEmail());
+        }
+
         User user = userRepository.save(registerData.toUser());
         return UserInquiryInfo.from(user);
     }

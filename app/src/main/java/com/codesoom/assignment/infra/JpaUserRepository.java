@@ -6,4 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface JpaUserRepository extends UserRepository, CrudRepository<User, Long> {
     User save(User user);
+    boolean existsByEmail(String email);
+
+    void deleteAll();
 }
