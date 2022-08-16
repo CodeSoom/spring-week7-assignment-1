@@ -41,9 +41,8 @@ class AuthenticationServiceTest {
                 passwordEncoder
         );
 
-        User user = User.builder()
-                .password("test")
-                .build();
+        User user = User.builder().build();
+        user.changePassword("test", passwordEncoder);
 
         given(userRepository.findByEmail("tester@example.com"))
                 .willReturn(Optional.of(user));
