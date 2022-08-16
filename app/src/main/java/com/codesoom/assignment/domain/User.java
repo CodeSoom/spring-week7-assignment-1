@@ -19,18 +19,20 @@ public class User {
     @GeneratedValue
     private Long id;
 
-    private String email;
+    @Builder.Default
+    private String email = "";
 
-    private String name;
+    @Builder.Default
+    private String name = "";
 
-    private String password;
+    @Builder.Default
+    private String password = "";
 
     @Builder.Default
     private boolean deleted = false;
 
     public void changeWith(User source) {
         name = source.name;
-        password = source.password;
     }
 
     public void destroy() {
