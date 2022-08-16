@@ -1,5 +1,7 @@
 package com.codesoom.assignment.controllers;
 
+import com.codesoom.assignment.dto.UserInquiryInfo;
+import com.codesoom.assignment.dto.UserRegisterData;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +18,7 @@ import javax.validation.Valid;
 public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserInquiryInfo create(@RequestBody @Valid ) {
+    public UserInquiryInfo create(@RequestBody @Valid UserRegisterData data) {
         return null;
     }
 }
