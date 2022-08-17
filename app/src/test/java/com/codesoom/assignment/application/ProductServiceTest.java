@@ -1,9 +1,11 @@
 package com.codesoom.assignment.application;
 
 import com.codesoom.assignment.domain.Product;
+import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.ProductData;
 import com.codesoom.assignment.dto.UserInquiryInfo;
 import com.codesoom.assignment.dto.UserRegisterData;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,6 +29,13 @@ public class ProductServiceTest {
     private UserService userService;
     @Autowired
     private ProductService productService;
+    @Autowired
+    private UserRepository userRepository;
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAll();
+    }
 
     @Nested
     @DisplayName("register 메서드는")
