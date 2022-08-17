@@ -1,5 +1,6 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.Fixture;
 import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserInquiryInfo;
@@ -25,15 +26,12 @@ public class UserServiceTest {
     private UserRepository userRepository;
 
     public static final Role USER = Role.USER;
-    public static final String EMAIL = "qjawlsqjacks@naver.com";
-    public static final String PASSWORD = "1234";
-    public static final String NAME = "박범진";
     private static final UserRegisterData REGISTER_DATA = new UserRegisterData(
-            EMAIL, PASSWORD, NAME
+            Fixture.EMAIL, Fixture.PASSWORD, Fixture.USER_NAME
     );
 
     private UserInquiryInfo expectInquiryInfo(Long id) {
-        return new UserInquiryInfo(id, EMAIL, NAME, USER);
+        return new UserInquiryInfo(id, Fixture.EMAIL, Fixture.USER_NAME, USER);
     }
 
     @AfterEach

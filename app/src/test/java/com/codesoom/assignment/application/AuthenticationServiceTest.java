@@ -1,5 +1,6 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.Fixture;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.SessionRequestData;
@@ -21,19 +22,11 @@ import static org.mockito.Mockito.verify;
 @DisplayName("AuthenticationService 클래스의")
 class AuthenticationServiceTest {
     private static final String SECRET = "12345678901234567890123456789012";
-
-    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
-    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
-    public static final String EMAIL = "qjawlsqjacks@naver.com";
-    public static final String NAME = "박범진";
-    public static final String PASSWORD = "1234";
     public static final User USER = User.builder()
             .id(1L)
-            .email(EMAIL)
-            .name(NAME)
-            .password(PASSWORD)
+            .email(Fixture.EMAIL)
+            .name(Fixture.USER_NAME)
+            .password(Fixture.PASSWORD)
             .build();
 
     private AuthenticationService authenticationService;
@@ -56,8 +49,8 @@ class AuthenticationServiceTest {
             private SessionRequestData requestData;
             @BeforeEach
             void prepare() {
-                requestData = new SessionRequestData(EMAIL, PASSWORD);
-                given(userRepository.findByEmail(EMAIL))
+                requestData = new SessionRequestData(Fixture.EMAIL, Fixture.PASSWORD);
+                given(userRepository.findByEmail(Fixture.EMAIL))
                         .willReturn(Optional.of(USER));
             }
             @Test
@@ -72,7 +65,7 @@ class AuthenticationServiceTest {
                         .containsEntry("userId", 1)
                         .containsEntry("role", "USER");
 
-                verify(userRepository).findByEmail(EMAIL);
+                verify(userRepository).findByEmail(Fixture.EMAIL);
             }
         }
     }

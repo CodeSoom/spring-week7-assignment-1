@@ -24,28 +24,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @DisplayName("ProductController 클래스의")
 public class ProductControllerTest {
-    public static final String QUANTITY = "10";
-    public static final String PRICE = "10000";
-    public static final String USER_NAME = "박범진";
-    public static final String PRODUCT_NAME = "상품명";
     private static final Map<String, String> USER_DATA = Map.of(
             "email", Fixture.EMAIL,
             "password", Fixture.PASSWORD,
-            "name", USER_NAME
+            "name", Fixture.USER_NAME
     );
-    public static final String SESSION_PATH = "/session";
 
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Map<String, String> productData(String userId) {
+    private Map<String, Object> productData(String userId) {
         return Map.of(
                 "userId", userId,
-                "name", PRODUCT_NAME,
-                "quantity", QUANTITY,
-                "price", PRICE
+                "name", Fixture.PRODUCT_NAME,
+                "quantity", Fixture.QUANTITY,
+                "price", Fixture.PRICE
         );
     }
 
@@ -77,7 +72,7 @@ public class ProductControllerTest {
                         "password", Fixture.PASSWORD
                 );
 
-                accessToken = postRequest(loginData, SESSION_PATH).get("accessToken");
+                accessToken = postRequest(loginData, Fixture.SESSION_PATH).get("accessToken");
             }
 
             @Test
@@ -88,9 +83,9 @@ public class ProductControllerTest {
                                 .content(objectMapper.writeValueAsString(productData(userId)))
                                 .header("Authorization", "Bearer " + accessToken))
                         .andExpect(status().isCreated())
-                        .andExpect(jsonPath("$.name", Is.is(PRODUCT_NAME)))
-                        .andExpect(jsonPath("$.quantity").value(QUANTITY))
-                        .andExpect(jsonPath("$.price").value(PRICE));
+                        .andExpect(jsonPath("$.name", Is.is(Fixture.PRODUCT_NAME)))
+                        .andExpect(jsonPath("$.quantity").value(Fixture.QUANTITY))
+                        .andExpect(jsonPath("$.price").value(Fixture.PRICE));
             }
         }
     }

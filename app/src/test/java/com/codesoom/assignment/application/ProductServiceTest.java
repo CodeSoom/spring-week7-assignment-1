@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static com.codesoom.assignment.Fixture.PRICE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -51,7 +50,7 @@ public class ProductServiceTest {
                         .name(Fixture.PRODUCT_NAME)
                         .description(null)
                         .quantity(Fixture.QUANTITY)
-                        .price(PRICE)
+                        .price(Fixture.PRICE)
                         .build();
             }
 
@@ -64,7 +63,7 @@ public class ProductServiceTest {
                         () -> assertThat(product.getName()).isEqualTo(Fixture.PRODUCT_NAME),
                         () -> assertThat(product.getDescription()).isNull(),
                         () -> assertThat(product.getQuantity()).isEqualTo(Fixture.QUANTITY),
-                        () -> assertThat(product.getPrice()).isEqualTo(PRICE)
+                        () -> assertThat(product.getPrice()).isEqualTo(Fixture.PRICE)
                 );
             }
         }
