@@ -1,5 +1,7 @@
 package com.codesoom.assignment.domain;
 
+import java.util.Optional;
+
 public interface UserRepository {
     /**
      * 유저를 저장하고 리턴한다.
@@ -23,4 +25,12 @@ public interface UserRepository {
      * 테스트에서 사용합니다.
      */
     void deleteAll();
+
+    /**
+     * 이메일로 유저를 찾아 리턴합니다.
+     *
+     * @param email 이메일
+     * @return 유저
+     */
+    Optional<User> findByEmail(String email);
 }

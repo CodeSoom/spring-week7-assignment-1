@@ -1,72 +1,50 @@
 package com.codesoom.assignment.controllers;
 
-import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.errors.LoginFailException;
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.mockito.BDDMockito.given;
+import java.util.Map;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(SessionController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@DisplayName("SessionController 클래스의")
 class SessionControllerTest {
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @MockBean
-    private AuthenticationService authenticationService;
+    private final Map<String, String> LOGIN_DATA = Map.of(
+            "email", "qjawlsqjacks@naver.com",
+            "password", "1234"
+    );
 
-    @BeforeEach
-    void setUp() {
-        given(authenticationService.login("tester@example.com", "test"))
-                .willReturn("a.b.c");
-
-        given(authenticationService.login("badguy@example.com", "test"))
-                .willThrow(new LoginFailException("badguy@example.com"));
-
-        given(authenticationService.login("tester@example.com", "xxx"))
-                .willThrow(new LoginFailException("tester@example.com"));
-    }
-
-    @Test
-    void loginWithRightEmailAndPassword() throws Exception {
-        mockMvc.perform(
-                post("/session")
+    @Nested
+    @DisplayName("login 메서드는")
+    class Describe_login {
+        @Nested
+        @DisplayName("일치하는 로그인 정보가 주어지면")
+        class Context_loginData {
+            @Test
+            @DisplayName("토큰을 생성하고 201과 함께 응답한다")
+            void It_returns_token() throws Exception {
+                mockMvc.perform(post("/session")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"tester@example.com\"," +
-                                "\"password\":\"test\"}")
-        )
-                .andExpect(status().isCreated())
-                .andExpect(content().string(containsString(".")));
-    }
-
-    @Test
-    void loginWithWrongEmail() throws Exception {
-        mockMvc.perform(
-                post("/session")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"badguy@example.com\"," +
-                                "\"password\":\"test\"}")
-        )
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void loginWithWrongPassword() throws Exception {
-        mockMvc.perform(
-                post("/session")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"tester@example.com\"," +
-                                "\"password\":\"xxx\"}")
-        )
-                .andExpect(status().isBadRequest());
+                        .content(objectMapper.writeValueAsString(LOGIN_DATA)))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.accessToken").isString());
+            }
+        }
     }
 }

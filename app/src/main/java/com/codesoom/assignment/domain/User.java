@@ -9,6 +9,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -27,9 +28,20 @@ public class User {
     protected User() {}
 
     @Builder
-    public User(String email, String password, String name) {
+    public User(Long id, String email, String password, String name) {
+        this.id = id;
         this.email = email;
         this.password = password;
         this.name = name;
+    }
+
+    /**
+     * 비밀번호를 비교한 결과를 리턴합니다.
+     *
+     * @param password 비밀번호
+     * @return 같으면 true, 같지 않거나 null 값이 있다면 false
+     */
+    public boolean isMatchPassword(String password) {
+        return Objects.equals(this.password, password);
     }
 }
