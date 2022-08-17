@@ -1,8 +1,10 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.Fixture;
+import com.codesoom.assignment.domain.UserRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,6 +30,9 @@ class SessionControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private final Map<String, String> LOGIN_DATA = Map.of(
             "email", Fixture.EMAIL,
             "password", Fixture.PASSWORD
@@ -43,6 +48,11 @@ class SessionControllerTest {
                         .getContentAsString(), new TypeReference<>() {
                 }
         );
+    }
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAll();
     }
 
     @Nested

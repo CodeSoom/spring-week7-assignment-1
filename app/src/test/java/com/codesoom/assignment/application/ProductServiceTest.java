@@ -1,5 +1,6 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.Fixture;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.ProductData;
@@ -13,18 +14,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static com.codesoom.assignment.Fixture.PRICE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
 @DisplayName("ProductService 인터페이스의")
 public class ProductServiceTest {
-    public static final String EMAIL = "qjawlsqjacks@naver.com";
-    public static final String PASSWORD = "1234";
-    public static final String USER_NAME = "박범진";
-    public static final String PRODUCT_NAME = "상품명";
-    public static final int QUANTITY = 10;
-    public static final int PRICE = 10000;
     @Autowired
     private UserService userService;
     @Autowired
@@ -47,12 +43,14 @@ public class ProductServiceTest {
 
             @BeforeEach
             void prepare() {
-                UserInquiryInfo info = userService.register(new UserRegisterData(EMAIL, PASSWORD, USER_NAME));
+                UserInquiryInfo info = userService.register(
+                        new UserRegisterData(Fixture.EMAIL, Fixture.PASSWORD, Fixture.USER_NAME));
+
                 productData = ProductData.builder()
                         .userId(info.getId())
-                        .name(PRODUCT_NAME)
+                        .name(Fixture.PRODUCT_NAME)
                         .description(null)
-                        .quantity(QUANTITY)
+                        .quantity(Fixture.QUANTITY)
                         .price(PRICE)
                         .build();
             }
@@ -63,9 +61,9 @@ public class ProductServiceTest {
                 Product product = productService.register(productData);
 
                 assertAll(
-                        () -> assertThat(product.getName()).isEqualTo(PRODUCT_NAME),
+                        () -> assertThat(product.getName()).isEqualTo(Fixture.PRODUCT_NAME),
                         () -> assertThat(product.getDescription()).isNull(),
-                        () -> assertThat(product.getQuantity()).isEqualTo(QUANTITY),
+                        () -> assertThat(product.getQuantity()).isEqualTo(Fixture.QUANTITY),
                         () -> assertThat(product.getPrice()).isEqualTo(PRICE)
                 );
             }

@@ -1,5 +1,6 @@
 package com.codesoom.assignment.controllers;
 
+import com.codesoom.assignment.Fixture;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.core.Is;
@@ -25,15 +26,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ProductControllerTest {
     public static final String QUANTITY = "10";
     public static final String PRICE = "10000";
-    public static final String USER_PATH = "/users";
-    public static final String PRODUCT_PATH = "/products";
-    public static final String EMAIL = "qjawlsqjacks@naver.com";
-    public static final String PASSWORD = "1234";
     public static final String USER_NAME = "박범진";
     public static final String PRODUCT_NAME = "상품명";
     private static final Map<String, String> USER_DATA = Map.of(
-            "email", EMAIL,
-            "password", PASSWORD,
+            "email", Fixture.EMAIL,
+            "password", Fixture.PASSWORD,
             "name", USER_NAME
     );
     public static final String SESSION_PATH = "/session";
@@ -72,12 +69,12 @@ public class ProductControllerTest {
 
             @BeforeEach
             void prepare() throws Exception {
-                Map<String, String> createdUser = postRequest(USER_DATA, USER_PATH);
+                Map<String, String> createdUser = postRequest(USER_DATA, Fixture.USER_PATH);
                 userId = createdUser.get("id");
 
                 Map<String, String> loginData = Map.of(
-                        "email", EMAIL,
-                        "password", PASSWORD
+                        "email", Fixture.EMAIL,
+                        "password", Fixture.PASSWORD
                 );
 
                 accessToken = postRequest(loginData, SESSION_PATH).get("accessToken");
@@ -86,7 +83,7 @@ public class ProductControllerTest {
             @Test
             @DisplayName("상품을 생성하고 상품 조회 정보와 201을 응답한다")
             void It_returns_productInfo() throws Exception {
-                mockMvc.perform(post(PRODUCT_PATH)
+                mockMvc.perform(post(Fixture.PRODUCT_PATH)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(productData(userId)))
                                 .header("Authorization", "Bearer " + accessToken))
