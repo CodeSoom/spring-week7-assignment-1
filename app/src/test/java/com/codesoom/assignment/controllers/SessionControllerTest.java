@@ -1,6 +1,9 @@
 package com.codesoom.assignment.controllers;
 
+import com.codesoom.assignment.Fixture;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,9 +29,21 @@ class SessionControllerTest {
     private ObjectMapper objectMapper;
 
     private final Map<String, String> LOGIN_DATA = Map.of(
-            "email", "qjawlsqjacks@naver.com",
-            "password", "1234"
+            "email", Fixture.EMAIL,
+            "password", Fixture.PASSWORD
     );
+
+    private Map<String, String> postRequest(String path, Map<String, String> data) throws Exception {
+        return objectMapper.readValue(
+                mockMvc.perform(post(path)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(data)))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString(), new TypeReference<>() {
+                }
+        );
+    }
 
     @Nested
     @DisplayName("login 메서드는")
@@ -36,10 +51,15 @@ class SessionControllerTest {
         @Nested
         @DisplayName("일치하는 로그인 정보가 주어지면")
         class Context_loginData {
+            @BeforeEach
+            void prepare() throws Exception {
+                Map<String, String> createdUser = postRequest(Fixture.USER_PATH, LOGIN_DATA);
+            }
+
             @Test
             @DisplayName("토큰을 생성하고 201과 함께 응답한다")
             void It_returns_token() throws Exception {
-                mockMvc.perform(post("/session")
+                mockMvc.perform(post(Fixture.SESSION_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(LOGIN_DATA)))
                         .andExpect(status().isCreated())
