@@ -3,6 +3,7 @@ package com.codesoom.assignment.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.core.Is;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ public class ProductControllerTest {
             "password", PASSWORD,
             "name", USER_NAME
     );
+    public static final String SESSION_PATH = "/session";
 
     @Autowired
     private MockMvc mockMvc;
@@ -50,7 +52,7 @@ public class ProductControllerTest {
         );
     }
 
-    private Map<String, String> create(Map<String, String> data, String path) throws Exception {
+    private Map<String, String> postRequest(Map<String, String> data, String path) throws Exception {
         return objectMapper.readValue(mockMvc.perform(post(path)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(data)))
@@ -63,16 +65,31 @@ public class ProductControllerTest {
     @DisplayName("register 메서드는")
     class Describe_register {
         @Nested
-        @DisplayName("상품, 유저 정보가 주어지면")
+        @DisplayName("상품 정보와 유효한 토큰이 주어지면")
         class Context_userData {
+            private String accessToken;
+            private String userId;
+
+            @BeforeEach
+            void prepare() throws Exception {
+                Map<String, String> createdUser = postRequest(USER_DATA, USER_PATH);
+                userId = createdUser.get("id");
+
+                Map<String, String> loginData = Map.of(
+                        "email", EMAIL,
+                        "password", PASSWORD
+                );
+
+                accessToken = postRequest(loginData, SESSION_PATH).get("accessToken");
+            }
+
             @Test
             @DisplayName("상품을 생성하고 상품 조회 정보와 201을 응답한다")
             void It_returns_productInfo() throws Exception {
-                Map<String, String> createdUser = create(USER_DATA, USER_PATH);
-
                 mockMvc.perform(post(PRODUCT_PATH)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(productData(createdUser.get("id")))))
+                                .content(objectMapper.writeValueAsString(productData(userId)))
+                                .header("Authorization", "Bearer " + accessToken))
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.name", Is.is(PRODUCT_NAME)))
                         .andExpect(jsonPath("$.quantity").value(QUANTITY))
