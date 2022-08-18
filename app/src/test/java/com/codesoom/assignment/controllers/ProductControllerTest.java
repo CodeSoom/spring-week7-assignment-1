@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -83,6 +84,7 @@ public class ProductControllerTest {
                                 .content(objectMapper.writeValueAsString(productData(userId)))
                                 .header("Authorization", "Bearer " + accessToken))
                         .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.user.id").value(userId))
                         .andExpect(jsonPath("$.name", Is.is(Fixture.PRODUCT_NAME)))
                         .andExpect(jsonPath("$.quantity").value(Fixture.QUANTITY))
                         .andExpect(jsonPath("$.price").value(Fixture.PRICE));

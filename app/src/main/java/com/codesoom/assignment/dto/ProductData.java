@@ -6,15 +6,13 @@ import lombok.Getter;
 
 @Getter
 public class ProductData {
-    private final Long userId;
     private final String name;
     private final String description;
     private final Integer quantity;
     private final Integer price;
 
     @Builder
-    public ProductData(Long userId, String name, String description, Integer quantity, Integer price) {
-        this.userId = userId;
+    public ProductData(String name, String description, Integer quantity, Integer price) {
         this.name = name;
         this.description = description;
         this.quantity = quantity;
@@ -23,7 +21,6 @@ public class ProductData {
 
     public Product toProduct() {
         return Product.builder()
-                .userId(this.userId)
                 .name(this.name)
                 .description(this.description)
                 .quantity(this.quantity)

@@ -33,4 +33,12 @@ public interface UserRepository {
      * @return 유저
      */
     Optional<User> findByEmail(String email);
+
+    /**
+     * 식별자로 유저를 찾아 리턴합니다.
+     *
+     * @param id 식별자
+     * @return 유저
+     */
+    Optional<User> findById(Long id);
 }

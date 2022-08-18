@@ -26,16 +26,12 @@ public class UserAuthentication extends AbstractAuthenticationToken {
 
     @Override
     public Object getCredentials() {
-        return null;
+        return role;
     }
 
     @Override
     public Object getPrincipal() {
         return userId;
-    }
-
-    public Role getRole() {
-        return role;
     }
 
     @Override

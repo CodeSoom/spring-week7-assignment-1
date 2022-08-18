@@ -7,4 +7,5 @@ import org.springframework.data.repository.CrudRepository;
 public interface JpaProductRepository
         extends ProductRepository, CrudRepository<Product, Long> {
     Product save(Product product);
+    void deleteAll();
 }
