@@ -37,8 +37,7 @@ public class AuthenticationService {
         return new SessionResponseData(jwtUtil.encode(user.getId(), user.getRole()));
     }
 
-    public Long parseToken(String accessToken) {
-        Claims claims = jwtUtil.decode(accessToken);
-        return claims.get("userId", Long.class);
+    public Claims parseToken(String accessToken) {
+        return jwtUtil.decode(accessToken);
     }
 }

@@ -1,7 +1,9 @@
-package com.codesoom.assignment.interceptors;
+package com.codesoom.assignment.security;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.security.UserAuthentication;
+import io.jsonwebtoken.Claims;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -25,12 +27,13 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (filterWithPathAndMethod(request)) {
+        String authorization = request.getHeader("Authorization");
+
+        String uri = request.getRequestURI();
+        if (uri.startsWith("/session") || uri.startsWith("/users")) {
             chain.doFilter(request, response);
             return;
         }
-
-        String authorization = request.getHeader("Authorization");
 
         if (authorization == null) {
             response.sendError(HttpStatus.UNAUTHORIZED.value());
@@ -39,30 +42,16 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
         String accessToken = authorization.substring("Bearer ".length());
 
-        Long userId = authenticationService.parseToken(accessToken);
+        Claims claims = authenticationService.parseToken(accessToken);
 
-        Authentication authentication = new UserAuthentication(userId);
+        Role role = Role.valueOf(claims.get("role", String.class));
+        Long userId = claims.get("userId", Long.class);
+
+        Authentication authentication = new UserAuthentication(userId, role);
+
         SecurityContext context = SecurityContextHolder.getContext();
         context.setAuthentication(authentication);
 
         chain.doFilter(request, response);
-    }
-
-    private boolean filterWithPathAndMethod(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        if (!path.startsWith("/products")) {
-            return true;
-        }
-
-        String method = request.getMethod();
-        if (method.equals("GET")) {
-            return true;
-        }
-
-        if (method.equals("OPTIONS")) {
-            return true;
-        }
-
-        return false;
     }
 }

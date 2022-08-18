@@ -1,7 +1,7 @@
 package com.codesoom.assignment.config;
 
 import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.interceptors.JwtAuthenticationFilter;
+import com.codesoom.assignment.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -25,6 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         Filter authenticationFilter = new JwtAuthenticationFilter(authenticationManager(), authenticationService);
 
         Filter authenticationErrorFilter = new AuthenticationErrorFilter();
+
         http.csrf()
                 .disable()
                 .addFilter(authenticationFilter)

@@ -1,5 +1,6 @@
 package com.codesoom.assignment.security;
 
+import com.codesoom.assignment.domain.Role;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -9,17 +10,18 @@ import java.util.List;
 
 public class UserAuthentication extends AbstractAuthenticationToken {
     private final Long userId;
+    private final Role role;
 
-    /**
-     * Creates a token with the supplied array of authorities.
-     *
-     * @param authorities the collection of <tt>GrantedAuthority</tt>s for the principal
-     *                    represented by this authentication object.
-     * @param userId
-     */
-    public UserAuthentication(Long userId) {
-        super(authorities());
+    public UserAuthentication(Long userId, Role role) {
+        super(authorities(role));
+        this.role = role;
         this.userId = userId;
+    }
+
+    private static List<GrantedAuthority> authorities(Role role) {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(role.name()));
+        return authorities;
     }
 
     @Override
@@ -32,14 +34,12 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         return userId;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
     @Override
     public boolean isAuthenticated() {
         return true;
-    }
-
-    private static List<GrantedAuthority> authorities() {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("USER"));
-        return authorities;
     }
 }
