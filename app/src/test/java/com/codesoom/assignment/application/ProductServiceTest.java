@@ -5,6 +5,7 @@ import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.domain.ProductRepository;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.ProductData;
+import com.codesoom.assignment.dto.ProductInquiryInfo;
 import com.codesoom.assignment.dto.UserInquiryInfo;
 import com.codesoom.assignment.dto.UserRegisterData;
 import com.codesoom.assignment.security.UserAuthentication;
@@ -32,8 +33,8 @@ public class ProductServiceTest {
     @Autowired
     private ProductRepository productRepository;
 
-    @AfterEach
-    void tearDown() {
+    @BeforeEach
+    void setUp() {
         productRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -65,7 +66,7 @@ public class ProductServiceTest {
             @Test
             @DisplayName("상품을 생성하고 상품 조회 정보를 리턴한다")
             void It_returns_product() {
-                Product product = productService.register(productData, authentication);
+                ProductInquiryInfo product = productService.register(productData, authentication);
 
                 assertAll(
                         () -> assertThat(product.getName()).isEqualTo(Fixture.PRODUCT_NAME),

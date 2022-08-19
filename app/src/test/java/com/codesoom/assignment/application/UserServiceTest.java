@@ -6,7 +6,7 @@ import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserInquiryInfo;
 import com.codesoom.assignment.dto.UserRegisterData;
 import com.codesoom.assignment.errors.DuplicatedEmailException;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -34,8 +34,8 @@ public class UserServiceTest {
         return new UserInquiryInfo(id, Fixture.EMAIL, Fixture.USER_NAME, USER);
     }
 
-    @AfterEach
-    void tearDown() {
+    @BeforeEach
+    void setUp() {
         userRepository.deleteAll();
     }
 
@@ -58,17 +58,16 @@ public class UserServiceTest {
         @Nested
         @DisplayName("중복된 이메일이 있다면")
         class Context_with_duplicationEmail {
+            @BeforeEach
             void prepare() {
                 userService.register(REGISTER_DATA);
             }
+
             @Test
             @DisplayName("예외를 던진다")
             void It_throws_exception() {
-                prepare();
-
                 assertThatThrownBy(() -> userService.register(REGISTER_DATA))
                         .isExactlyInstanceOf(DuplicatedEmailException.class);
-
             }
         }
     }

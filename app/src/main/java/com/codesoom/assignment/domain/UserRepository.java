@@ -1,5 +1,6 @@
 package com.codesoom.assignment.domain;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository {
@@ -41,4 +42,6 @@ public interface UserRepository {
      * @return 유저
      */
     Optional<User> findById(Long id);
+
+    List<User> findAll();
 }

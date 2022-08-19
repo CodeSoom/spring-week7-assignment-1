@@ -1,9 +1,12 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.Fixture;
+import com.codesoom.assignment.domain.ProductRepository;
+import com.codesoom.assignment.domain.UserRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.core.Is;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,6 +37,10 @@ public class ProductControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     private Map<String, Object> productData(String userId) {
         return Map.of(
@@ -52,6 +58,12 @@ public class ProductControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString(), new TypeReference<>(){});
+    }
+
+    @BeforeEach
+    void setUp() {
+        productRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Nested
@@ -84,7 +96,7 @@ public class ProductControllerTest {
                                 .content(objectMapper.writeValueAsString(productData(userId)))
                                 .header("Authorization", "Bearer " + accessToken))
                         .andExpect(status().isCreated())
-                        .andExpect(jsonPath("$.user.id").value(userId))
+                        .andExpect(jsonPath("$.userId").value(userId))
                         .andExpect(jsonPath("$.name", Is.is(Fixture.PRODUCT_NAME)))
                         .andExpect(jsonPath("$.quantity").value(Fixture.QUANTITY))
                         .andExpect(jsonPath("$.price").value(Fixture.PRICE));

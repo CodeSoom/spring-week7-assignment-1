@@ -5,7 +5,6 @@ import com.codesoom.assignment.domain.UserRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.core.Is;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -49,8 +48,8 @@ public class UserControllerTest {
                 .getContentAsString(), new TypeReference<>(){});
     }
 
-    @AfterEach
-    void tearDown() {
+    @BeforeEach
+    void setUp() {
         userRepository.deleteAll();
     }
 

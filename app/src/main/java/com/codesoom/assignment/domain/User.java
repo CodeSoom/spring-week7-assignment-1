@@ -3,14 +3,18 @@ package com.codesoom.assignment.domain;
 import lombok.Builder;
 import lombok.Getter;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -31,6 +35,9 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private final List<Product> productList = new ArrayList<>();
 
     protected User() {}
 

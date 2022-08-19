@@ -4,7 +4,6 @@ import com.codesoom.assignment.Fixture;
 import com.codesoom.assignment.domain.UserRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -50,8 +49,8 @@ class SessionControllerTest {
         );
     }
 
-    @AfterEach
-    void tearDown() {
+    @BeforeEach
+    void setUp() {
         userRepository.deleteAll();
     }
 

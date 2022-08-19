@@ -4,6 +4,7 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface JpaUserRepository extends UserRepository, CrudRepository<User, Long> {
@@ -12,4 +13,5 @@ public interface JpaUserRepository extends UserRepository, CrudRepository<User, 
     void deleteAll();
     Optional<User> findByEmail(String email);
     Optional<User> findById(Long id);
+    List<User> findAll();
 }
