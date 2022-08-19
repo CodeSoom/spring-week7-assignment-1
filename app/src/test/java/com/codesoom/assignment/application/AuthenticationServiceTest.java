@@ -47,12 +47,15 @@ class AuthenticationServiceTest {
         @DisplayName("입력한 로그인 정보와 일치하는 유저가 있다면")
         class Context_with_validLoginData {
             private SessionRequestData requestData;
+
             @BeforeEach
             void prepare() {
                 requestData = new SessionRequestData(Fixture.EMAIL, Fixture.PASSWORD);
+
                 given(userRepository.findByEmail(Fixture.EMAIL))
                         .willReturn(Optional.of(USER));
             }
+
             @Test
             @DisplayName("토큰을 생성하고 리턴한다")
             void It_returns_createdToken() {
