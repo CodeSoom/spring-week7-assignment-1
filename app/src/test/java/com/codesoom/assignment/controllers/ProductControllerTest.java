@@ -77,9 +77,9 @@ class ProductControllerTest {
         given(productService.deleteProduct(1000L))
                 .willThrow(new ProductNotFoundException(1000L));
 
-        given(authenticationService.parseToken(VALID_TOKEN)).willReturn(1L);
+        given(authenticationService.parseUserId(VALID_TOKEN)).willReturn(1L);
 
-        given(authenticationService.parseToken(INVALID_TOKEN))
+        given(authenticationService.parseUserId(INVALID_TOKEN))
                 .willThrow(new InvalidTokenException(INVALID_TOKEN));
     }
 

@@ -1,9 +1,7 @@
 package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.security.UserAuthentication;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -34,7 +32,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
         if (authorization != null) {
             String accessToken = authorization.substring("Bearer ".length());
-            Long userId = authenticationService.parseToken(accessToken);
+            Long userId = authenticationService.parseUserId(accessToken);
             Authentication authentication = new UserAuthentication(userId);
 
             SecurityContext securityContext = SecurityContextHolder.getContext();

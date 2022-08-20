@@ -78,7 +78,7 @@ class AuthenticationServiceTest {
 
     @Test
     void parseTokenWithValidToken() {
-        Long userId = authenticationService.parseToken(VALID_TOKEN);
+        Long userId = authenticationService.parseUserId(VALID_TOKEN);
 
         assertThat(userId).isEqualTo(1L);
     }
@@ -86,7 +86,7 @@ class AuthenticationServiceTest {
     @Test
     void parseTokenWithInvalidToken() {
         assertThatThrownBy(
-                () -> authenticationService.parseToken(INVALID_TOKEN)
+                () -> authenticationService.parseUserId(INVALID_TOKEN)
         ).isInstanceOf(InvalidTokenException.class);
     }
 }

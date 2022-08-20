@@ -33,7 +33,7 @@ public class AuthenticationService {
         return jwtUtil.encode(1L);
     }
 
-    public Long parseToken(String accessToken) {
+    public Long parseUserId(String accessToken) {
         Claims claims = jwtUtil.decode(accessToken);
         return claims.get("userId", Long.class);
     }
