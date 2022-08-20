@@ -58,4 +58,11 @@ public class User {
     public boolean isMatchPassword(String password) {
         return Objects.equals(this.password, password);
     }
+
+    /**
+     * 관리자 권한을 부여한다.
+     */
+    public void giveAdminPrivileges() {
+        this.role = Role.ADMIN;
+    }
 }

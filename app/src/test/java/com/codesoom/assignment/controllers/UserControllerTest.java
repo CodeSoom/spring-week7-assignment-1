@@ -1,6 +1,7 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.Fixture;
+import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Map;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,20 +34,14 @@ public class UserControllerTest {
     @Autowired
     private UserRepository userRepository;
 
-    public static final String USER = "USER";
-    private static final Map<String, String> USER_DATA = Map.of(
-            "email", Fixture.EMAIL,
-            "password", Fixture.PASSWORD,
-            "name", Fixture.USER_NAME
-    );
-
-    private Map<String, String> createUser(Map<String, String> userData) throws Exception {
-        return objectMapper.readValue(mockMvc.perform(post(Fixture.USER_PATH)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userData)))
+    private Map<String, String> postRequest(Map<String, String> data, String path) throws Exception {
+        return objectMapper.readValue(mockMvc.perform(post(path)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(data)))
                 .andReturn()
                 .getResponse()
-                .getContentAsString(), new TypeReference<>(){});
+                .getContentAsString(), new TypeReference<>() {
+        });
     }
 
     @BeforeEach
@@ -64,11 +60,11 @@ public class UserControllerTest {
             void It_returns_user() throws Exception {
                 mockMvc.perform(post(Fixture.USER_PATH)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(USER_DATA)))
+                                .content(objectMapper.writeValueAsString(Fixture.USER_DATA_MAP)))
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.email", Is.is(Fixture.EMAIL)))
                         .andExpect(jsonPath("$.name", Is.is(Fixture.USER_NAME)))
-                        .andExpect(jsonPath("$.role", Is.is(USER)));
+                        .andExpect(jsonPath("$.role", Is.is(Fixture.ROLE_USER)));
             }
         }
 
@@ -77,7 +73,7 @@ public class UserControllerTest {
         class Context_with_email {
             @BeforeEach
             void prepare() throws Exception {
-                createUser(USER_DATA);
+                postRequest(Fixture.USER_DATA_MAP, Fixture.USER_PATH);
             }
 
             @Test
@@ -85,9 +81,40 @@ public class UserControllerTest {
             void it_returns_exception() throws Exception {
                 mockMvc.perform(post(Fixture.USER_PATH)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(USER_DATA)))
+                                .content(objectMapper.writeValueAsString(Fixture.USER_DATA_MAP)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.message").isString());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("delete 메서드는")
+    class Describe_delete {
+        @Nested
+        @DisplayName("관리자 권한을 가진 토큰과 식별자가 주어지면")
+        class Context_with_adminToken {
+            private String userIdToDelete;
+            private String adminToken;
+
+            @BeforeEach
+            void prepare() throws Exception {
+                userIdToDelete = postRequest(Fixture.USER_DATA_MAP, Fixture.USER_PATH).get("id");
+
+                User admin = Fixture.ADMIN;
+                admin.giveAdminPrivileges();
+                userRepository.save(admin);
+
+                adminToken = postRequest(Fixture.LOGIN_DATA_MAP, Fixture.SESSION_PATH)
+                        .get("accessToken");
+            }
+
+            @Test
+            @DisplayName("유저를 삭제하고 204를 응답한다")
+            void It_respond_noContent() throws Exception {
+                mockMvc.perform(delete(Fixture.USER_PATH + "/" + userIdToDelete)
+                        .header("Authorization", "Bearer " + adminToken))
+                        .andExpect(status().isNoContent());
             }
         }
     }
