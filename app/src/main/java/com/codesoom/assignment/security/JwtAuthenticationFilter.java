@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         String authorization = request.getHeader("Authorization");
 
         String uri = request.getRequestURI();
-        if (uri.startsWith("/session") || uri.startsWith("/users")) {
+        if (uri.startsWith("/session") || (uri.startsWith("/users") && request.getMethod().equals("POST")) {
             chain.doFilter(request, response);
             return;
         }

@@ -105,7 +105,7 @@ public class UserControllerTest {
                 admin.giveAdminPrivileges();
                 userRepository.save(admin);
 
-                adminToken = postRequest(Fixture.LOGIN_DATA_MAP, Fixture.SESSION_PATH)
+                adminToken = postRequest(Fixture.ADMIN_LOGIN_DATA_MAP, Fixture.SESSION_PATH)
                         .get("accessToken");
             }
 
@@ -113,8 +113,31 @@ public class UserControllerTest {
             @DisplayName("유저를 삭제하고 204를 응답한다")
             void It_respond_noContent() throws Exception {
                 mockMvc.perform(delete(Fixture.USER_PATH + "/" + userIdToDelete)
-                        .header("Authorization", "Bearer " + adminToken))
+                                .header("Authorization", "Bearer " + adminToken))
                         .andExpect(status().isNoContent());
+            }
+        }
+
+        @Nested
+        @DisplayName("유저 권한을 가진 토큰과 식별자가 주어지면")
+        class Context_with_userToken {
+            private String userIdToDelete;
+            private String userToken;
+
+            @BeforeEach
+            void prepare() throws Exception {
+                userIdToDelete = postRequest(Fixture.USER_DATA_MAP, Fixture.USER_PATH).get("id");
+
+                userToken = postRequest(Fixture.LOGIN_DATA_MAP, Fixture.SESSION_PATH)
+                        .get("accessToken");
+            }
+
+            @Test
+            @DisplayName("예외를 응답한다")
+            void It_respond_exception() throws Exception {
+                mockMvc.perform(delete(Fixture.USER_PATH + "/" + userIdToDelete)
+                                .header("Authorization", "Bearer " + userToken))
+                        .andExpect(status().isForbidden());
             }
         }
     }

@@ -32,6 +32,11 @@ public class Fixture {
             "password", Fixture.PASSWORD
     );
 
+    public static final Map<String, String> ADMIN_LOGIN_DATA_MAP = Map.of(
+            "email", Fixture.ADMIN_EMAIL,
+            "password", Fixture.PASSWORD
+    );
+
     public static final User USER = User.builder()
             .email(EMAIL)
             .password(PASSWORD)
