@@ -1,6 +1,7 @@
 package com.codesoom.assignment;
 
 import com.codesoom.assignment.domain.User;
+import com.codesoom.assignment.dto.UserRegisterData;
 
 import java.util.Map;
 
@@ -14,6 +15,9 @@ public class Fixture {
     public static final String EMAIL = "qjawlsqjacks@naver.com";
     public static final String PASSWORD = "1234";
     public static final String USER_NAME = "박범진";
+    public static final UserRegisterData USER_REGISTER_DATA = new UserRegisterData(
+            EMAIL, PASSWORD, USER_NAME
+    );
     public static final String PRODUCT_NAME = "상품명";
     public static final Integer QUANTITY = 10;
     public static final Integer PRICE = 10000;

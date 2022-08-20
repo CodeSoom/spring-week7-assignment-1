@@ -24,4 +24,9 @@ class NormalUserService implements UserService {
         User user = userRepository.save(registerData.toUser());
         return UserInquiryInfo.from(user);
     }
+
+    @Override
+    public void delete(Long id) {
+        userRepository.deleteById(id);
+    }
 }

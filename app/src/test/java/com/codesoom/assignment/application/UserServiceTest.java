@@ -4,7 +4,6 @@ import com.codesoom.assignment.Fixture;
 import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserInquiryInfo;
-import com.codesoom.assignment.dto.UserRegisterData;
 import com.codesoom.assignment.errors.DuplicatedEmailException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,14 +20,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class UserServiceTest {
     @Autowired
     private UserService userService;
-
     @Autowired
     private UserRepository userRepository;
 
     public static final Role USER = Role.USER;
-    private static final UserRegisterData REGISTER_DATA = new UserRegisterData(
-            Fixture.EMAIL, Fixture.PASSWORD, Fixture.USER_NAME
-    );
 
     private UserInquiryInfo expectInquiryInfo(Long id) {
         return new UserInquiryInfo(id, Fixture.EMAIL, Fixture.USER_NAME, USER);
@@ -48,7 +43,7 @@ public class UserServiceTest {
             @Test
             @DisplayName("유저 조회 정보를 리턴한다")
             void It_returns_userInquiryInfo() {
-                UserInquiryInfo inquiryInfo = userService.register(REGISTER_DATA);
+                UserInquiryInfo inquiryInfo = userService.register(Fixture.USER_REGISTER_DATA);
 
                 assertThat(inquiryInfo)
                         .isEqualTo(expectInquiryInfo(inquiryInfo.getId()));
@@ -60,16 +55,39 @@ public class UserServiceTest {
         class Context_with_duplicationEmail {
             @BeforeEach
             void prepare() {
-                userService.register(REGISTER_DATA);
+                userService.register(Fixture.USER_REGISTER_DATA);
             }
 
             @Test
             @DisplayName("예외를 던진다")
             void It_throws_exception() {
-                assertThatThrownBy(() -> userService.register(REGISTER_DATA))
+                assertThatThrownBy(() -> userService.register(Fixture.USER_REGISTER_DATA))
                         .isExactlyInstanceOf(DuplicatedEmailException.class);
             }
         }
     }
 
+    @Nested
+    @DisplayName("delete 메서드는")
+    class Describe_delete {
+        @Nested
+        @DisplayName("삭제할 식별자가 주어지면")
+        class Context_with_idToDelete {
+            private Long idToDelete;
+
+            @BeforeEach
+            void prepare() {
+                UserInquiryInfo userInquiryInfo = userService.register(Fixture.USER_REGISTER_DATA);
+                idToDelete = userInquiryInfo.getId();
+            }
+
+            @Test
+            @DisplayName("유저를 삭제한다")
+            void It_delete_user() {
+                userService.delete(idToDelete);
+
+                assertThat(userRepository.existsById(idToDelete)).isFalse();
+            }
+        }
+    }
 }

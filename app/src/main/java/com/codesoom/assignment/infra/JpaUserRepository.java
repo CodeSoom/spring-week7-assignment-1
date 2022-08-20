@@ -10,8 +10,10 @@ import java.util.Optional;
 public interface JpaUserRepository extends UserRepository, CrudRepository<User, Long> {
     User save(User user);
     boolean existsByEmail(String email);
+    boolean existsById(Long id);
     void deleteAll();
     Optional<User> findByEmail(String email);
     Optional<User> findById(Long id);
     List<User> findAll();
+    void deleteById(Long id);
 }

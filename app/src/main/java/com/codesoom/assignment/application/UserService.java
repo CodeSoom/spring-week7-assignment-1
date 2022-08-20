@@ -11,4 +11,11 @@ public interface UserService {
      * @return 유저 조회 정보
      */
     UserInquiryInfo register(UserRegisterData registerData);
+
+    /**
+     * 유저 식별자를 받아 유저를 삭제합니다.
+     *
+     * @param id Long 식별자
+     */
+    void delete(Long id);
 }

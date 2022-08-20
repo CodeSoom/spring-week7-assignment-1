@@ -19,6 +19,7 @@ public interface UserRepository {
      * @return 저장되어 있으면 true, 없으면 false
      */
     boolean existsByEmail(String email);
+    boolean existsById(Long id);
 
     /**
      * 모든 유저를 삭제합니다.
@@ -44,4 +45,5 @@ public interface UserRepository {
     Optional<User> findById(Long id);
 
     List<User> findAll();
+    void deleteById(Long id);
 }
