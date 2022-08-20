@@ -1,5 +1,7 @@
 package com.codesoom.assignment;
 
+import java.util.Map;
+
 /**
  * 고양이 장난감 가게 서비스 테스트에 사용되는 데이터 저장소입니다.
  */
@@ -13,6 +15,16 @@ public class Fixture {
     public static final String PRODUCT_NAME = "상품명";
     public static final Integer QUANTITY = 10;
     public static final Integer PRICE = 10000;
+    public static final Map<String, String> USER_DATA_MAP = Map.of(
+            "email", EMAIL,
+            "password", PASSWORD,
+            "name", USER_NAME
+    );
+
+    public static final Map<String, String> LOGIN_DATA_MAP = Map.of(
+            "email", Fixture.EMAIL,
+            "password", Fixture.PASSWORD
+    );
 
     private Fixture() {
         throw new IllegalStateException("테스트 Util 클래스입니다.");
