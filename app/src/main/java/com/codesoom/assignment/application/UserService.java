@@ -15,15 +15,12 @@ import javax.transaction.Transactional;
 @Service
 @Transactional
 public class UserService {
-    private final Mapper mapper;
-    private final UserRepository userRepository;
-
     private final UserRegistrationService registrationService;
+    private final UserModificationService modificationService;
 
     public UserService(Mapper dozerMapper, UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.mapper = dozerMapper;
-        this.userRepository = userRepository;
         this.registrationService = new UserRegistrationService(dozerMapper, userRepository, passwordEncoder);
+        this.modificationService = new UserModificationService(dozerMapper, userRepository);
     }
 
     public User registerUser(UserRegistrationData registrationData) {
@@ -31,22 +28,10 @@ public class UserService {
     }
 
     public User updateUser(Long id, UserModificationData modificationData) {
-        User user = findUser(id);
-
-        User source = mapper.map(modificationData, User.class);
-        user.changeWith(source);
-
-        return user;
+        return modificationService.updateUser(id, modificationData);
     }
 
     public User deleteUser(Long id) {
-        User user = findUser(id);
-        user.destroy();
-        return user;
-    }
-
-    private User findUser(Long id) {
-        return userRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+        return modificationService.deleteUser(id);
     }
 }
