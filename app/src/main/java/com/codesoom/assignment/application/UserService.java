@@ -17,23 +17,17 @@ import javax.transaction.Transactional;
 public class UserService {
     private final Mapper mapper;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+
+    private final UserRegistrationService registrationService;
 
     public UserService(Mapper dozerMapper, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.mapper = dozerMapper;
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.registrationService = new UserRegistrationService(dozerMapper, userRepository, passwordEncoder);
     }
 
     public User registerUser(UserRegistrationData registrationData) {
-        String email = registrationData.getEmail();
-        if (userRepository.existsByEmail(email)) {
-            throw new UserEmailDuplicationException(email);
-        }
-
-        User user = mapper.map(registrationData, User.class);
-        user.changePassword(registrationData.getPassword(), passwordEncoder);
-        return userRepository.save(user);
+        return registrationService.registerUser(registrationData);
     }
 
     public User updateUser(Long id, UserModificationData modificationData) {
