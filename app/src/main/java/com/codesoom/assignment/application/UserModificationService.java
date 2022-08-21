@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-public class UserModificationService {
+public class UserModificationService implements UserModifiable {
     private final Mapper dozerMapper;
     private final UserRepository userRepository;
 
