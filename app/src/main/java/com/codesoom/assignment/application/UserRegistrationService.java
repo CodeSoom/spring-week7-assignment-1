@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-public class UserRegistrationService {
+public class UserRegistrationService implements UserRegistrable {
     private final Mapper mapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
