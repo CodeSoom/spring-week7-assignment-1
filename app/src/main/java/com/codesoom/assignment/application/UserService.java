@@ -26,12 +26,12 @@ public class UserService {
     public User registerUser(UserRegistrationData registrationData) {
         return registrationService.registerUser(registrationData);
     }
-
-    public User updateUser(Long id, UserModificationData modificationData) {
-        return modificationService.updateUser(id, modificationData);
-    }
-
-    public User deleteUser(Long id) {
-        return modificationService.deleteUser(id);
-    }
+//
+//    public User updateUser(Long id, UserModificationData modificationData) {
+//        return modificationService.updateUser(id, modificationData);
+//    }
+//
+//    public User deleteUser(Long id) {
+//        return modificationService.deleteUser(id);
+//    }
 }

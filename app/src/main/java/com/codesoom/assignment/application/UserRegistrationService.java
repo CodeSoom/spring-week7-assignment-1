@@ -7,8 +7,10 @@ import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.github.dozermapper.core.Mapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class UserRegistrationService {
     private final Mapper mapper;
     private final UserRepository userRepository;

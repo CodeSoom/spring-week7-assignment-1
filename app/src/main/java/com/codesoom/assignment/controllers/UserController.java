@@ -1,5 +1,6 @@
 package com.codesoom.assignment.controllers;
 
+import com.codesoom.assignment.application.UserModificationService;
 import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
@@ -16,9 +17,11 @@ import javax.validation.Valid;
 @CrossOrigin
 public class UserController {
     private final UserService userService;
+    private final UserModificationService userModificationService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserModificationService userModificationService) {
         this.userService = userService;
+        this.userModificationService = userModificationService;
     }
 
     @PostMapping
@@ -34,7 +37,7 @@ public class UserController {
             @PathVariable Long id,
             @RequestBody @Valid UserModificationData modificationData
     ) {
-        User user = userService.updateUser(id, modificationData);
+        User user = userModificationService.updateUser(id, modificationData);
         return getUserResultData(user);
     }
 
@@ -42,7 +45,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthentication
     void destroy(@PathVariable Long id) {
-        userService.deleteUser(id);
+        userModificationService.deleteUser(id);
     }
 
     private UserResultData getUserResultData(User user) {

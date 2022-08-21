@@ -1,6 +1,7 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.application.UserModificationService;
 import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
@@ -41,6 +42,9 @@ class UserControllerTest {
     @MockBean
     private UserService userService;
 
+    @MockBean
+    private UserModificationService modificationService;
+
     @Autowired
     private AuthenticationService authenticationService;
 
@@ -57,7 +61,7 @@ class UserControllerTest {
                 });
 
 
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
+        given(modificationService.updateUser(eq(1L), any(UserModificationData.class)))
                 .will(invocation -> {
                     Long id = invocation.getArgument(0);
                     UserModificationData modificationData =
@@ -69,10 +73,10 @@ class UserControllerTest {
                             .build();
                 });
 
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
+        given(modificationService.updateUser(eq(100L), any(UserModificationData.class)))
                 .willThrow(new UserNotFoundException(100L));
 
-        given(userService.deleteUser(100L))
+        given(modificationService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
     }
 
@@ -124,7 +128,7 @@ class UserControllerTest {
                         containsString("\"name\":\"TEST\"")
                 ));
 
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
+        verify(modificationService).updateUser(eq(1L), any(UserModificationData.class));
     }
 
     @Test
@@ -159,7 +163,7 @@ class UserControllerTest {
                 )
                 .andExpect(status().isNotFound());
 
-        verify(userService)
+        verify(modificationService)
                 .updateUser(eq(100L), any(UserModificationData.class));
     }
 
@@ -171,7 +175,7 @@ class UserControllerTest {
                 )
                 .andExpect(status().isNoContent());
 
-        verify(userService).deleteUser(1L);
+        verify(modificationService).deleteUser(1L);
     }
 
     @Test
@@ -191,6 +195,6 @@ class UserControllerTest {
                 )
                 .andExpect(status().isNotFound());
 
-        verify(userService).deleteUser(100L);
+        verify(modificationService).deleteUser(100L);
     }
 }
