@@ -26,7 +26,7 @@ class UserServiceTest {
     private static final String EXISTED_EMAIL_ADDRESS = "existed@example.com";
     private static final Long DELETED_USER_ID = 200L;
 
-    private UserService userService;
+    private UserRegistrationService userRegistrationService;
     private UserModificationService userModificationService;
 
     private final UserRepository userRepository = mock(UserRepository.class);
@@ -36,7 +36,7 @@ class UserServiceTest {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-        userService = new UserService(mapper, userRepository, passwordEncoder);
+        userRegistrationService = new UserRegistrationService(mapper, userRepository, passwordEncoder);
         userModificationService = new UserModificationService(mapper, userRepository);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
@@ -75,7 +75,7 @@ class UserServiceTest {
                 .password("test")
                 .build();
 
-        User user = userService.registerUser(registrationData);
+        User user = userRegistrationService.registerUser(registrationData);
 
         assertThat(user.getId()).isEqualTo(13L);
         assertThat(user.getEmail()).isEqualTo("tester@example.com");
@@ -92,7 +92,7 @@ class UserServiceTest {
                 .password("test")
                 .build();
 
-        assertThatThrownBy(() -> userService.registerUser(registrationData))
+        assertThatThrownBy(() -> userRegistrationService.registerUser(registrationData))
                 .isInstanceOf(UserEmailDuplicationException.class);
 
         verify(userRepository).existsByEmail(EXISTED_EMAIL_ADDRESS);

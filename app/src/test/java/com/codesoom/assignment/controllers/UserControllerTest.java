@@ -2,19 +2,16 @@ package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserModificationService;
-import com.codesoom.assignment.application.UserService;
+import com.codesoom.assignment.application.UserRegistrationService;
 import com.codesoom.assignment.domain.User;
-import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserNotFoundException;
-import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -40,17 +37,17 @@ class UserControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private UserService userService;
+    private UserRegistrationService userRegistrationService;
 
     @MockBean
-    private UserModificationService modificationService;
+    private UserModificationService userModificationService;
 
     @Autowired
     private AuthenticationService authenticationService;
 
     @BeforeEach
     void setUp() {
-        given(userService.registerUser(any(UserRegistrationData.class)))
+        given(userRegistrationService.registerUser(any(UserRegistrationData.class)))
                 .will(invocation -> {
                     UserRegistrationData registrationData = invocation.getArgument(0);
                     return User.builder()
@@ -61,7 +58,7 @@ class UserControllerTest {
                 });
 
 
-        given(modificationService.updateUser(eq(1L), any(UserModificationData.class)))
+        given(userModificationService.updateUser(eq(1L), any(UserModificationData.class)))
                 .will(invocation -> {
                     Long id = invocation.getArgument(0);
                     UserModificationData modificationData =
@@ -73,10 +70,10 @@ class UserControllerTest {
                             .build();
                 });
 
-        given(modificationService.updateUser(eq(100L), any(UserModificationData.class)))
+        given(userModificationService.updateUser(eq(100L), any(UserModificationData.class)))
                 .willThrow(new UserNotFoundException(100L));
 
-        given(modificationService.deleteUser(100L))
+        given(userModificationService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
     }
 
@@ -99,7 +96,7 @@ class UserControllerTest {
                         containsString("\"name\":\"Tester\"")
                 ));
 
-        verify(userService).registerUser(any(UserRegistrationData.class));
+        verify(userRegistrationService).registerUser(any(UserRegistrationData.class));
     }
 
     @Test
@@ -128,7 +125,7 @@ class UserControllerTest {
                         containsString("\"name\":\"TEST\"")
                 ));
 
-        verify(modificationService).updateUser(eq(1L), any(UserModificationData.class));
+        verify(userModificationService).updateUser(eq(1L), any(UserModificationData.class));
     }
 
     @Test
@@ -163,7 +160,7 @@ class UserControllerTest {
                 )
                 .andExpect(status().isNotFound());
 
-        verify(modificationService)
+        verify(userModificationService)
                 .updateUser(eq(100L), any(UserModificationData.class));
     }
 
@@ -175,7 +172,7 @@ class UserControllerTest {
                 )
                 .andExpect(status().isNoContent());
 
-        verify(modificationService).deleteUser(1L);
+        verify(userModificationService).deleteUser(1L);
     }
 
     @Test
@@ -195,6 +192,6 @@ class UserControllerTest {
                 )
                 .andExpect(status().isNotFound());
 
-        verify(modificationService).deleteUser(100L);
+        verify(userModificationService).deleteUser(100L);
     }
 }

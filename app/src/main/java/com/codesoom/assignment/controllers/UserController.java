@@ -1,7 +1,7 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.UserModificationService;
-import com.codesoom.assignment.application.UserService;
+import com.codesoom.assignment.application.UserRegistrationService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
@@ -16,18 +16,21 @@ import javax.validation.Valid;
 @RequestMapping("/users")
 @CrossOrigin
 public class UserController {
-    private final UserService userService;
+    private final UserRegistrationService userRegistrationService;
     private final UserModificationService userModificationService;
 
-    public UserController(UserService userService, UserModificationService userModificationService) {
-        this.userService = userService;
+    public UserController(
+            UserRegistrationService userRegistrationService,
+            UserModificationService userModificationService
+    ) {
+        this.userRegistrationService = userRegistrationService;
         this.userModificationService = userModificationService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     UserResultData create(@RequestBody @Valid UserRegistrationData registrationData) {
-        User user = userService.registerUser(registrationData);
+        User user = userRegistrationService.registerUser(registrationData);
         return getUserResultData(user);
     }
 
