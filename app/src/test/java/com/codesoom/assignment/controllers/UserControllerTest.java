@@ -1,7 +1,8 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.application.UserService;
+import com.codesoom.assignment.application.UserModificationService;
+import com.codesoom.assignment.application.UserRegistrationService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -24,19 +26,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
+@Import(UserControllerTestConfig.class)
 class UserControllerTest {
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private UserService userService;
+    private UserRegistrationService userRegistrationService;
 
     @MockBean
+    private UserModificationService userModificationService;
+
+    @Autowired
     private AuthenticationService authenticationService;
 
     @BeforeEach
     void setUp() {
-        given(userService.registerUser(any(UserRegistrationData.class)))
+        given(userRegistrationService.registerUser(any(UserRegistrationData.class)))
                 .will(invocation -> {
                     UserRegistrationData registrationData = invocation.getArgument(0);
                     return User.builder()
@@ -47,7 +58,7 @@ class UserControllerTest {
                 });
 
 
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
+        given(userModificationService.updateUser(eq(1L), any(UserModificationData.class)))
                 .will(invocation -> {
                     Long id = invocation.getArgument(0);
                     UserModificationData modificationData =
@@ -59,15 +70,15 @@ class UserControllerTest {
                             .build();
                 });
 
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
+        given(userModificationService.updateUser(eq(100L), any(UserModificationData.class)))
                 .willThrow(new UserNotFoundException(100L));
 
-        given(userService.deleteUser(100L))
+        given(userModificationService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
     }
 
     @Test
-    void registerUserWithValidAttributes() throws Exception {
+    void registerUserWithValidTokenAndValidAttributes() throws Exception {
         mockMvc.perform(
                 post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -85,7 +96,7 @@ class UserControllerTest {
                         containsString("\"name\":\"Tester\"")
                 ));
 
-        verify(userService).registerUser(any(UserRegistrationData.class));
+        verify(userRegistrationService).registerUser(any(UserRegistrationData.class));
     }
 
     @Test
@@ -99,12 +110,13 @@ class UserControllerTest {
     }
 
     @Test
-    void updateUserWithValidAttributes() throws Exception {
+    void updateUserWithValidTokenValidAttributes() throws Exception {
         mockMvc.perform(
                 patch("/users/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
-        )
+                )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
                         containsString("\"id\":1")
@@ -113,16 +125,28 @@ class UserControllerTest {
                         containsString("\"name\":\"TEST\"")
                 ));
 
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
+        verify(userModificationService).updateUser(eq(1L), any(UserModificationData.class));
+    }
+
+    @Test
+    void updateUserWithInvalidTokenValidAttributes() throws Exception {
+        mockMvc.perform(
+                        patch("/users/1")
+                                .header("Authorization", "Bearer " + INVALID_TOKEN)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                )
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void updateUserWithInvalidAttributes() throws Exception {
         mockMvc.perform(
                 patch("/users/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
-        )
+                )
                 .andExpect(status().isBadRequest());
     }
 
@@ -130,28 +154,44 @@ class UserControllerTest {
     void updateUserWithNotExsitedId() throws Exception {
         mockMvc.perform(
                 patch("/users/100")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
-        )
+                )
                 .andExpect(status().isNotFound());
 
-        verify(userService)
+        verify(userModificationService)
                 .updateUser(eq(100L), any(UserModificationData.class));
     }
 
     @Test
-    void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
+    void destroyWithValidTokenAndExistedId() throws Exception {
+        mockMvc.perform(
+                delete("/users/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                )
                 .andExpect(status().isNoContent());
 
-        verify(userService).deleteUser(1L);
+        verify(userModificationService).deleteUser(1L);
+    }
+
+    @Test
+    void destroyWithInvalidTokenExistedId() throws Exception {
+        mockMvc.perform(
+                delete("/users/1")
+                        .header("Authorization", "Bearer " + INVALID_TOKEN)
+                )
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
+        mockMvc.perform(
+                delete("/users/100")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                )
                 .andExpect(status().isNotFound());
 
-        verify(userService).deleteUser(100L);
+        verify(userModificationService).deleteUser(100L);
     }
 }

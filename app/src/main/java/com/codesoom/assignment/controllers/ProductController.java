@@ -8,6 +8,7 @@ import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
+import com.codesoom.assignment.security.PreAuthentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,16 +41,16 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthentication
     public Product create(
-            @RequestAttribute Long userId,
             @RequestBody @Valid ProductData productData
     ) {
         return productService.createProduct(productData);
     }
 
     @PatchMapping("{id}")
+    @PreAuthentication
     public Product update(
-            @RequestAttribute Long userId,
             @PathVariable Long id,
             @RequestBody @Valid ProductData productData
     ) {
@@ -58,8 +59,8 @@ public class ProductController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthentication
     public void destroy(
-            @RequestAttribute Long userId,
             @PathVariable Long id
     ) {
         productService.deleteProduct(id);

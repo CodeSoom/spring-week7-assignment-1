@@ -4,6 +4,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  h2:
+    console:
+      enabled: true
 
 jwt:
   secret: "12345678901234567890123456789010"
