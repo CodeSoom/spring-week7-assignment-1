@@ -1,12 +1,18 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.UserService;
-import com.codesoom.assignment.domain.User;
-import com.codesoom.assignment.dto.UserModificationData;
-import com.codesoom.assignment.dto.UserRegistrationData;
-import com.codesoom.assignment.dto.UserResultData;
+import com.codesoom.assignment.dto.UserInquiryInfo;
+import com.codesoom.assignment.dto.UserRegisterData;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
@@ -22,31 +28,14 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    UserResultData create(@RequestBody @Valid UserRegistrationData registrationData) {
-        User user = userService.registerUser(registrationData);
-        return getUserResultData(user);
+    public UserInquiryInfo create(@RequestBody @Valid UserRegisterData data) {
+        return userService.register(data);
     }
 
-    @PatchMapping("{id}")
-    UserResultData update(
-            @PathVariable Long id,
-            @RequestBody @Valid UserModificationData modificationData
-    ) {
-        User user = userService.updateUser(id, modificationData);
-        return getUserResultData(user);
-    }
-
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void destroy(@PathVariable Long id) {
-        userService.deleteUser(id);
-    }
-
-    private UserResultData getUserResultData(User user) {
-        return UserResultData.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .build();
+    public void delete(@PathVariable("id") Long id) {
+        userService.delete(id);
     }
 }
