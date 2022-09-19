@@ -2,6 +2,7 @@ package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.dto.ErrorResponse;
 import com.codesoom.assignment.errors.*;
+import com.codesoom.assignment.filters.AuthenticationErrorFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -39,11 +40,16 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Log-in failed");
     }
 
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(InvalidTokenException.class)
-    public ErrorResponse handleInvalidAccessTokenException() {
-        return new ErrorResponse("Invalid access token");
-    }
+    /**
+     * JWT 인증을 스프링 시큐리티 필터로 옮기면서 주석 처리
+     *
+     * @see AuthenticationErrorFilter 인증 관련 예외는 해당 필터에서 처리된다.
+     */
+//    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+//    @ExceptionHandler(InvalidTokenException.class)
+//    public ErrorResponse handleInvalidAccessTokenException() {
+//        return new ErrorResponse("Invalid access token");
+//    }
 
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
