@@ -13,6 +13,7 @@ public class WebJavaConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(authenticationInterceptor);
+        // SpringSecurity Filter 추가로 인해 주석 처리
+//        registry.addInterceptor(authenticationInterceptor);
     }
 }
