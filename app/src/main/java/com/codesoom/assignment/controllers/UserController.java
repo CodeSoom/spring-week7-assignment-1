@@ -6,6 +6,7 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -36,6 +37,7 @@ public class UserController {
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     UserResultData update(
             @PathVariable Long id,
             @RequestBody @Valid UserModificationData modificationData
@@ -45,6 +47,7 @@ public class UserController {
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void destroy(@PathVariable Long id) {
         userService.deleteUser(id);
