@@ -9,6 +9,8 @@ import com.codesoom.assignment.errors.UserNotFoundException;
 import com.codesoom.assignment.utils.JwtUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,7 +33,9 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 //@WebMvcTest(UserController.class)
@@ -60,27 +65,37 @@ class UserControllerTest {
             @DisplayName("수정자와 등록자가 서로 다르다면")
             class Context_ModifierNotEqualsRegister{
 
-                private final Long registeredId = 1L;
-                private final Long modifierId = 2L;
-                private UserRegistrationData registrationData;
-                private String registerContent;
+                private Long registeredId;
+
                 private String modifierContent;
                 private String modifierToken;
 
                 @BeforeEach
                 void setUp() throws JsonProcessingException {
-                    registrationData = new UserRegistrationData("register@google.com" , "register" , "register");
-                    registerContent = objectMapper.writeValueAsString(registrationData);
-                    modifierToken = jwtUtil.encode(modifierId);
+                    UserRegistrationData registrationData = new UserRegistrationData("register@google.com", "register", "register");
+                    registeredId = userService.registerUser(registrationData).getId();
+
+                    UserModificationData modificationData = new UserModificationData("modifier", "modifier");
+                    modifierContent = objectMapper.writeValueAsString(modificationData);
+                    modifierToken = jwtUtil.encode(registeredId + 1L);
+                }
+
+                @AfterEach
+                void tearDown() {
+                    userService.deleteUser(registeredId);
                 }
 
                 @Test
                 @DisplayName("예외를 던진다.")
                 void It_ThrowException() throws Exception {
-                    mockMvc.perform(patch("/users/" + registeredId)
+                    ResultActions result = mockMvc.perform(patch("/users/" + registeredId)
                             .content(modifierContent)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization" , "Bearer " + modifierToken))
+                            .header("Authorization", "Bearer " + modifierToken));
+                    result.andDo(print())
+                            .andExpect(status().isUnauthorized())
+                            .andExpect(handler().handlerType(UserController.class))
+                            .andExpect(handler().methodName("update"));
                 }
             }
         }
