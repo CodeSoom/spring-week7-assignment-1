@@ -43,17 +43,6 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Log-in failed");
     }
 
-    /**
-     * JWT 인증을 스프링 시큐리티 필터로 옮기면서 주석 처리
-     *
-     * @see AuthenticationErrorFilter 인증 관련 예외는 해당 필터에서 처리된다.
-     */
-//    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-//    @ExceptionHandler(InvalidTokenException.class)
-//    public ErrorResponse handleInvalidAccessTokenException() {
-//        return new ErrorResponse("Invalid access token");
-//    }
-
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
