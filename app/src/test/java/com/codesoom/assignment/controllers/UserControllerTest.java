@@ -86,7 +86,7 @@ class UserControllerTest {
                 }
 
                 @Test
-                @DisplayName("예외를 던진다.")
+                @DisplayName("인증 자격 증명이 부족하다는 상태를 반환하고 예외를 던진다.")
                 void It_ThrowException() throws Exception {
                     ResultActions result = mockMvc.perform(patch("/users/" + registeredId)
                             .content(modifierContent)
