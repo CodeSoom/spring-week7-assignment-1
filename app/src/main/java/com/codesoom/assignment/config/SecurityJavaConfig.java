@@ -27,17 +27,14 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
     public void configure(HttpSecurity http) throws Exception {
         Filter authenticationFilter = new JwtAuthenticationFilter(authenticationManager(), authenticationService);
         Filter authenticationErrorFilter = new AuthenticationErrorFilter();
-
-        http.csrf().disable()
-                .addFilter(authenticationFilter)
-                // authenticationFilter를 필터로 등록
-                // authenticationFilter의 전처리 필터 authenticationErrorFilter를 등록
+        http.csrf()
+                .disable()
+            .addFilter(authenticationFilter)
                 .addFilterBefore(authenticationErrorFilter , JwtAuthenticationFilter.class)
-                .sessionManagement()
+            .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .exceptionHandling()
+            .exceptionHandling()
                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
-//        super.configure(http);
     }
 }

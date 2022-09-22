@@ -3,6 +3,7 @@ package com.codesoom.assignment.filters;
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.security.UserAuthentication;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -15,6 +16,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Set;
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
@@ -27,7 +29,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-//        super.doFilterInternal(request, response, chain);
         if(filterWithPathAndMethod(request)){
             chain.doFilter(request , response);
             return;
@@ -49,19 +50,11 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     private boolean filterWithPathAndMethod(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (!path.startsWith("/products")) {
+        if (!path.startsWith("/session")) {
             return true;
         }
 
-        String method = request.getMethod();
-        if (method.equals("GET")) {
-            return true;
-        }
-
-        if (method.equals("OPTIONS")) {
-            return true;
-        }
-
-        return false;
+        HttpMethod method = HttpMethod.resolve(request.getMethod());
+        return method == null || method.matches("GET") || method.matches("OPTIONS");
     }
 }
