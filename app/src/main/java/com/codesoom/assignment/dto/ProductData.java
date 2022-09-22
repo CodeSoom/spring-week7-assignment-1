@@ -34,6 +34,7 @@ public class ProductData {
         Product.ProductBuilder productBuilder = Product.builder()
                                 .id(this.id)
                                 .name(this.name)
+                                .maker(this.maker)
                                 .price(this.price);
 
         if(StringUtils.hasText(this.imageUrl)){
