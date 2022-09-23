@@ -43,6 +43,8 @@ public class Product {
 
     private String imageUrl;
 
+    private String regId;
+
     public void changeWith(Product source) {
         this.name = source.name;
         this.maker = source.maker;

@@ -31,9 +31,6 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 .disable()
             .addFilter(authenticationFilter)
                 .addFilterBefore(authenticationErrorFilter , JwtAuthenticationFilter.class)
-            .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
             .exceptionHandling()
                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
     }

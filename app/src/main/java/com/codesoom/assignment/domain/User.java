@@ -1,5 +1,6 @@
 package com.codesoom.assignment.domain;
 
+import com.codesoom.assignment.security.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,6 +33,9 @@ public class User {
 
     @Builder.Default
     private boolean deleted = false;
+
+    @Builder.Default
+    private Role role = Role.USER;
 
     public void changeWith(User source) {
         this.name = source.name;

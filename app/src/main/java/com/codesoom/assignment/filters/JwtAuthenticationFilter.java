@@ -4,9 +4,10 @@ import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.security.UserAuthentication;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -16,7 +17,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * JWT를 분석하는 Spring Security Filter이다.
@@ -29,6 +32,7 @@ import java.util.Set;
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     private final AuthenticationService authenticationService;
+    private final Long ADMIN_ID = -1L;
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager, AuthenticationService authenticationService) {
         super(authenticationManager);
@@ -47,7 +51,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         if (authorization != null) {
             String accessToken = authorization.substring("Bearer ".length());
             Long userId = authenticationService.parseToken(accessToken);
-            Authentication authentication = new UserAuthentication(userId);
+            Authentication authentication = new UserAuthentication(userId , authorities(userId));
 
             SecurityContext context = SecurityContextHolder.getContext();
             context.setAuthentication(authentication);
@@ -56,9 +60,17 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         chain.doFilter(request , response);
     }
 
+    private List<GrantedAuthority> authorities(Long userId) {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        if(Objects.equals(userId, ADMIN_ID)){
+            authorities.add(new SimpleGrantedAuthority("ADMIN"));
+        }
+        return authorities;
+    }
+
     private boolean filterWithPathAndMethod(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (!path.startsWith("/session")) {
+        if (path.startsWith("/session")) {
             return true;
         }
 

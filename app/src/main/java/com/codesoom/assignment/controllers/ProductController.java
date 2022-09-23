@@ -47,7 +47,7 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
+    @PreAuthorize("isAuthenticated()")
     public Product create(
             @RequestBody @Valid ProductData productData
     ) {
@@ -55,7 +55,7 @@ public class ProductController {
     }
 
     @PatchMapping("{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN')")
     public Product update(
             @PathVariable Long id,
             @RequestBody @Valid ProductData productData

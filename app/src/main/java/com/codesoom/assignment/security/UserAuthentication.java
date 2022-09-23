@@ -2,24 +2,17 @@ package com.codesoom.assignment.security;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 public class UserAuthentication extends AbstractAuthenticationToken {
 
     private final Long userId;
+    private final Collection<GrantedAuthority> authorities;
 
-    private static List<GrantedAuthority> authorities() {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        // TODO : userId에 따라서 권한을 따로 부여
-        authorities.add(new SimpleGrantedAuthority("USER"));
-        return authorities;
-    }
-
-    public UserAuthentication(Long userId) {
-        super(authorities());
+    public UserAuthentication(Long userId , Collection<GrantedAuthority> authorities) {
+        super(authorities);
+        this.authorities = authorities;
         this.userId = userId;
     }
 
@@ -35,6 +28,6 @@ public class UserAuthentication extends AbstractAuthenticationToken {
 
     @Override
     public Object getPrincipal() {
-        return true;
+        return userId;
     }
 }
