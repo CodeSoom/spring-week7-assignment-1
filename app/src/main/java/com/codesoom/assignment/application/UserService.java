@@ -6,9 +6,11 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -29,7 +31,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(Long id, UserModificationData modificationData) {
+    public User updateUser(Long id, UserModificationData modificationData , Long userId) throws AccessDeniedException {
+        if(!Objects.equals(id, userId)){
+            throw new AccessDeniedException("자원 접근이 거부되었습니다.");
+        }
         User user = findUser(id);
 
         User source = modificationData.toUser();

@@ -7,6 +7,7 @@ import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.nio.file.AccessDeniedException;
 
 @RestController
 @RequestMapping("/users")
@@ -39,10 +41,12 @@ public class UserController {
     @PatchMapping("{id}")
     @PreAuthorize("isAuthenticated()")
     UserResultData update(
+            Authentication authentication,
             @PathVariable Long id,
             @RequestBody @Valid UserModificationData modificationData
     ) {
-        User user = userService.updateUser(id, modificationData);
+        Long userId = (Long) authentication.getPrincipal();
+        User user = userService.updateUser(id, modificationData , userId);
         return getUserResultData(user);
     }
 

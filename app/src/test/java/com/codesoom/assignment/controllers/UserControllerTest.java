@@ -43,7 +43,8 @@ class UserControllerTest {
     private final String MODIFIER = "modifier";
 
     private static final String ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOi0xfQ.QJ8Lac_HWq1-tmNfZ9iV4Hewi-sWssOuKHpK4fhUaw0";
-    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String USERID_1_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String USERID_2_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjJ9.TEM6MULsZeqkBbUKziCR4Dg_8kymmZkyxsCXlfNJ3g0";
 
     private UserModificationData newUserModificationData(String name , String password){
         return new UserModificationData(name, password);
@@ -76,7 +77,7 @@ class UserControllerTest {
                 final ResultActions result = mockMvc.perform(patch("/users/" + registeredId)
                         .content(registrationContent)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + VALID_TOKEN));
+                        .header("Authorization", "Bearer " + USERID_1_TOKEN));
                 result.andDo(print())
                         .andExpect(status().isCreated())
                         .andExpect(handler().handlerType(UserController.class))
@@ -160,14 +161,14 @@ class UserControllerTest {
                     }
 
                     @Test
-                    @DisplayName("인증 자격 증명이 부족하다는 상태를 반환하고 예외를 던진다.")
+                    @DisplayName("접근을 거부한다는 상태를 반환하고 예외를 던진다.")
                     void It_ThrowException() throws Exception {
                         final ResultActions result = mockMvc.perform(patch("/users/" + registeredId)
                                 .content(modifierContent)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header("Authorization", "Bearer " + modifierToken));
                         result.andDo(print())
-                                .andExpect(status().isUnauthorized())
+                                .andExpect(status().isForbidden())
                                 .andExpect(handler().handlerType(UserController.class))
                                 .andExpect(handler().methodName("update"));
                     }
