@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -59,32 +60,29 @@ class UserControllerTest {
     class Describe_Create{
 
         @Nested
-        @DisplayName("인증을 통과한다면")
+        @DisplayName("사용자 등록 DTO 검증을 통과한다면")
         class Context_ValidToken{
 
-            private final Long registeredId = 1L;
+            private final UserRegistrationData registrationData = newUserRegistrationData(REGISTER, REGISTER, REGISTER);
             private String registrationContent;
 
             @BeforeEach
             void setUp() throws JsonProcessingException {
-                final UserRegistrationData registrationData = newUserRegistrationData(REGISTER, REGISTER, REGISTER);
                 registrationContent = objectMapper.writeValueAsString(registrationData);
             }
 
             @Test
-            @DisplayName("상품을 생성하고 자원을 생성했다는 상태 코드와 생성된 상품을 반환한다.")
+            @DisplayName("사용자를 생성하고 자원을 생성했다는 상태 코드와 생성된 사용자를 반환한다.")
             void It_() throws Exception {
-                final ResultActions result = mockMvc.perform(patch("/users/" + registeredId)
+                final ResultActions result = mockMvc.perform(post("/users")
                         .content(registrationContent)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + USERID_1_TOKEN));
+                        .contentType(MediaType.APPLICATION_JSON));
                 result.andDo(print())
                         .andExpect(status().isCreated())
                         .andExpect(handler().handlerType(UserController.class))
                         .andExpect(handler().methodName("create"))
-                        .andExpect(jsonPath("$.response.email" , is(REGISTER)))
-                        .andExpect(jsonPath("$.response.name" , is(REGISTER)))
-                        .andExpect(jsonPath("$.response.password" , is(REGISTER)));
+                        .andExpect(jsonPath("$.email" , is(REGISTER)))
+                        .andExpect(jsonPath("$.name" , is(REGISTER)));
             }
         }
     }
@@ -117,18 +115,18 @@ class UserControllerTest {
 
                 @BeforeEach
                 void setUp() {
-                    modifierToken = jwtUtil.encode(registeredId + 1L);
+                    modifierToken = jwtUtil.encode(registeredId);
                 }
 
                 @Nested
-                @DisplayName("등록자는 아니지만 관리자라면")
+                @DisplayName("등록자와 수정자가 같다면")
                 class Context_RoleAdmin{
 
+                    private final UserModificationData modificationData = newUserModificationData(MODIFIER , MODIFIER);
                     private String modifierContent;
 
                     @BeforeEach
                     void setUp() throws JsonProcessingException {
-                        final UserModificationData modificationData = newUserModificationData(MODIFIER , MODIFIER);
                         modifierContent = objectMapper.writeValueAsString(modificationData);
                     }
 
@@ -143,8 +141,8 @@ class UserControllerTest {
                                 .andExpect(status().isOk())
                                 .andExpect(handler().handlerType(UserController.class))
                                 .andExpect(handler().methodName("update"))
-                                .andExpect(jsonPath("$.response.name" , is(MODIFIER)))
-                                .andExpect(jsonPath("$.response.password" , is(MODIFIER)));
+                                .andExpect(jsonPath("$.id" , is(Math.toIntExact(registeredId))))
+                                .andExpect(jsonPath("$.name" , is(MODIFIER)));
                     }
                 }
 
