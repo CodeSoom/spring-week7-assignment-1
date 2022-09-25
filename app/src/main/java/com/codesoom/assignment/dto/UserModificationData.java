@@ -19,6 +19,10 @@ public class UserModificationData {
     @Size(min = 4, max = 1024)
     private String password;
 
+    private UserModificationData(){
+
+    }
+
     public User toUser(){
         return User.builder()
                 .name(name)

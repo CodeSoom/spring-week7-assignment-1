@@ -23,6 +23,9 @@ public class UserRegistrationData {
     @Size(min = 4, max = 1024)
     private String password;
 
+    private UserRegistrationData() {
+    }
+
     public User toUser(){
         return User.builder()
                 .email(this.email)
