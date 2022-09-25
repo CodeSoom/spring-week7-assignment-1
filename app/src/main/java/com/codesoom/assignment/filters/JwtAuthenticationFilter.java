@@ -24,9 +24,6 @@ import java.util.Objects;
 /**
  * JWT를 분석하는 Spring Security Filter이다.
  *
- * {@link org.springframework.web.filter.OncePerRequestFilter#doFilterInternal(HttpServletRequest, HttpServletResponse, FilterChain)} 메소드를 재정의 하여
- * 서블릿 필터에서 JWT의 payload를 분석하여 {@link org.springframework.security.core.context.SecurityContextHolder}에 넣는다.
- *
  * @throws InvalidTokenException JWT 분석 실패할 경우
  */
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
