@@ -1,5 +1,6 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.RoleRepository;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.errors.InvalidTokenException;
@@ -7,6 +8,8 @@ import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -25,18 +28,19 @@ class AuthenticationServiceTest {
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
 
     private AuthenticationService authenticationService;
-
+    private PasswordEncoder passwordEncoder;
     private UserRepository userRepository = mock(UserRepository.class);
-
+    private RoleRepository roleRepository = mock(RoleRepository.class);
+    private final String PASSWORD = "TEST";
     @BeforeEach
     void setUp() {
         JwtUtil jwtUtil = new JwtUtil(SECRET);
-
+        passwordEncoder = new BCryptPasswordEncoder();
         authenticationService = new AuthenticationService(
-                userRepository, jwtUtil);
+                passwordEncoder , userRepository, roleRepository, jwtUtil);
 
         User user = User.builder()
-                .password("test")
+                .password(passwordEncoder.encode(PASSWORD))
                 .build();
 
         given(userRepository.findByEmail("tester@example.com"))
@@ -46,7 +50,7 @@ class AuthenticationServiceTest {
     @Test
     void loginWithRightEmailAndPassword() {
         String accessToken = authenticationService.login(
-                "tester@example.com", "test");
+                "tester@example.com", PASSWORD);
 
         assertThat(accessToken).isEqualTo(VALID_TOKEN);
 

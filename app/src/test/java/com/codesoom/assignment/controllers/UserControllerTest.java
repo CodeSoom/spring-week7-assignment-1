@@ -1,157 +1,245 @@
 package com.codesoom.assignment.controllers;
 
-import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
-import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.utils.JwtUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(UserController.class)
+//@WebMvcTest(UserController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 class UserControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
+    @Autowired
     private UserService userService;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private JwtUtil jwtUtil;
 
-    @MockBean
-    private AuthenticationService authenticationService;
+    private final String REGISTER = "register";
+    private final String MODIFIER = "modifier";
 
-    @BeforeEach
-    void setUp() {
-        given(userService.registerUser(any(UserRegistrationData.class)))
-                .will(invocation -> {
-                    UserRegistrationData registrationData = invocation.getArgument(0);
-                    return User.builder()
-                            .id(13L)
-                            .email(registrationData.getEmail())
-                            .name(registrationData.getName())
-                            .build();
-                });
+    private static final String ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOi0xfQ.QJ8Lac_HWq1-tmNfZ9iV4Hewi-sWssOuKHpK4fhUaw0";
+    private static final String USERID_1_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String USERID_2_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjJ9.TEM6MULsZeqkBbUKziCR4Dg_8kymmZkyxsCXlfNJ3g0";
 
-
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
-                .will(invocation -> {
-                    Long id = invocation.getArgument(0);
-                    UserModificationData modificationData =
-                            invocation.getArgument(1);
-                    return User.builder()
-                            .id(id)
-                            .email("tester@example.com")
-                            .name(modificationData.getName())
-                            .build();
-                });
-
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
-                .willThrow(new UserNotFoundException(100L));
-
-        given(userService.deleteUser(100L))
-                .willThrow(new UserNotFoundException(100L));
+    private UserModificationData newUserModificationData(String name , String password){
+        return new UserModificationData(name, password);
     }
 
-    @Test
-    void registerUserWithValidAttributes() throws Exception {
-        mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"tester@example.com\"," +
-                                "\"name\":\"Tester\",\"password\":\"test\"}")
-        )
-                .andExpect(status().isCreated())
-                .andExpect(content().string(
-                        containsString("\"id\":13")
-                ))
-                .andExpect(content().string(
-                        containsString("\"email\":\"tester@example.com\"")
-                ))
-                .andExpect(content().string(
-                        containsString("\"name\":\"Tester\"")
-                ));
-
-        verify(userService).registerUser(any(UserRegistrationData.class));
+    private UserRegistrationData newUserRegistrationData(String email , String name , String password){
+        return new UserRegistrationData(email , name , password);
     }
 
-    @Test
-    void registerUserWithInvalidAttributes() throws Exception {
-        mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}")
-        )
-                .andExpect(status().isBadRequest());
+    @Nested
+    @DisplayName("create()")
+    class Describe_Create{
+
+        @Nested
+        @DisplayName("사용자 등록 DTO 검증을 통과한다면")
+        class Context_ValidToken{
+
+            private final UserRegistrationData registrationData = newUserRegistrationData(REGISTER, REGISTER, REGISTER);
+            private String registrationContent;
+
+            @BeforeEach
+            void setUp() throws JsonProcessingException {
+                registrationContent = objectMapper.writeValueAsString(registrationData);
+            }
+
+            @Test
+            @DisplayName("사용자를 생성하고 자원을 생성했다는 상태 코드와 생성된 사용자를 반환한다.")
+            void It_CreateUser() throws Exception {
+                final ResultActions result = mockMvc.perform(post("/users")
+                        .content(registrationContent)
+                        .contentType(MediaType.APPLICATION_JSON));
+                result.andDo(print())
+                        .andExpect(status().isCreated())
+                        .andExpect(handler().handlerType(UserController.class))
+                        .andExpect(handler().methodName("create"))
+                        .andExpect(jsonPath("$.email" , is(REGISTER)))
+                        .andExpect(jsonPath("$.name" , is(REGISTER)));
+            }
+        }
     }
 
-    @Test
-    void updateUserWithValidAttributes() throws Exception {
-        mockMvc.perform(
-                patch("/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
-        )
-                .andExpect(status().isOk())
-                .andExpect(content().string(
-                        containsString("\"id\":1")
-                ))
-                .andExpect(content().string(
-                        containsString("\"name\":\"TEST\"")
-                ));
 
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
+    @Nested
+    @DisplayName("update()")
+    class Describe_Update{
+
+        @Nested
+        @DisplayName("식별자에 해당하는 사용자가 존재한다면")
+        class Context_ExistedUser{
+            private Long registeredId;
+
+            @BeforeEach
+            void setUp() {
+                final UserRegistrationData registrationData = new UserRegistrationData("register@google.com", "register", "register");
+                registeredId = userService.registerUser(registrationData).getId();
+            }
+
+            @AfterEach
+            void tearDown() {
+                userService.deleteUser(registeredId);
+            }
+
+            @Nested
+            @DisplayName("인증을 통과한다면")
+            class Context_ValidToken{
+                private String modifierToken;
+
+                @BeforeEach
+                void setUp() {
+                    modifierToken = jwtUtil.encode(registeredId);
+                }
+
+                @Nested
+                @DisplayName("등록자와 수정자가 같다면")
+                class Context_RoleAdmin{
+
+                    private final UserModificationData modificationData = newUserModificationData(MODIFIER , MODIFIER);
+                    private String modifierContent;
+
+                    @BeforeEach
+                    void setUp() throws JsonProcessingException {
+                        modifierContent = objectMapper.writeValueAsString(modificationData);
+                    }
+
+                    @Test
+                    @DisplayName("수정한다.")
+                    void It_Update() throws Exception {
+                        final ResultActions result = mockMvc.perform(patch("/users/" + registeredId)
+                                .content(modifierContent)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + modifierToken));
+                        result.andDo(print())
+                                .andExpect(status().isOk())
+                                .andExpect(handler().handlerType(UserController.class))
+                                .andExpect(handler().methodName("update"))
+                                .andExpect(jsonPath("$.id" , is(Math.toIntExact(registeredId))))
+                                .andExpect(jsonPath("$.name" , is(MODIFIER)));
+                    }
+                }
+
+                @Nested
+                @DisplayName("수정자와 등록자가 서로 다르다면")
+                class Context_ModifierNotEqualsRegister{
+
+                    private String modifierContent;
+                    private String modifierToken;
+
+                    @BeforeEach
+                    void setUp() throws JsonProcessingException {
+                        final UserModificationData modificationData = newUserModificationData(MODIFIER , MODIFIER);
+                        modifierContent = objectMapper.writeValueAsString(modificationData);
+                        modifierToken = jwtUtil.encode(registeredId + 1L);
+                    }
+
+                    @Test
+                    @DisplayName("접근을 거부한다는 상태를 반환하고 예외를 던진다.")
+                    void It_ThrowException() throws Exception {
+                        final ResultActions result = mockMvc.perform(patch("/users/" + registeredId)
+                                .content(modifierContent)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + modifierToken));
+                        result.andDo(print())
+                                .andExpect(status().isForbidden())
+                                .andExpect(handler().handlerType(UserController.class))
+                                .andExpect(handler().methodName("update"));
+                    }
+                }
+            }
+        }
     }
 
-    @Test
-    void updateUserWithInvalidAttributes() throws Exception {
-        mockMvc.perform(
-                patch("/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"password\":\"\"}")
-        )
-                .andExpect(status().isBadRequest());
-    }
+    @Nested
+    @DisplayName("destory()")
+    class Describe_Destroy{
 
-    @Test
-    void updateUserWithNotExsitedId() throws Exception {
-        mockMvc.perform(
-                patch("/users/100")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
-        )
-                .andExpect(status().isNotFound());
+        @Nested
+        @DisplayName("식별자에 해당하는 사용자가 존재한다면")
+        class Context_ExistedUser {
 
-        verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
-    }
+            private final UserRegistrationData registrationData = newUserRegistrationData(REGISTER, REGISTER, REGISTER);
+            private Long registeredId;
 
-    @Test
-    void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
-                .andExpect(status().isNoContent());
+            @BeforeEach
+            void setUp() {
+                registeredId = userService.registerUser(registrationData).getId();
+            }
 
-        verify(userService).deleteUser(1L);
-    }
+            @AfterEach
+            void tearDown() {
+                try {
+                    userService.deleteUser(registeredId);
+                } catch (UserNotFoundException e){
+                    // ignore
+                }
+            }
 
-    @Test
-    void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
-                .andExpect(status().isNotFound());
+            @Nested
+            @DisplayName("인증을 통과하면")
+            class Context_ValidToken{
 
-        verify(userService).deleteUser(100L);
+                @Nested
+                @DisplayName("사용자 권한이라면")
+                class Context_UserRoleToken{
+
+                    @Test
+                    @DisplayName("접근을 거부한다는 상태를 반환하고 예외를 던진다.")
+                    void It_ThrowException() throws Exception {
+                        final ResultActions result = mockMvc.perform(delete("/users/" + registeredId)
+                                .header("Authorization", "Bearer " + USERID_1_TOKEN));
+                        result.andDo(print())
+                                .andExpect(status().isForbidden())
+                                .andExpect(handler().handlerType(UserController.class))
+                                .andExpect(handler().methodName("destroy"));
+                    }
+                }
+                @Nested
+                @DisplayName("관리자 권한이라면")
+                class Context_AdminRoleToken{
+
+                    @Test
+                    @DisplayName("요청을 성공적으로 수행했다는 상태를 반환하고 식별자에 해당하는 사용자 정보를 삭제한다.")
+                    void It_DeleteUser() throws Exception {
+                        final ResultActions result = mockMvc.perform(delete("/users/" + registeredId)
+                                .header("Authorization", "Bearer " + ADMIN_TOKEN));
+                        result.andDo(print())
+                                .andExpect(status().isNoContent())
+                                .andExpect(handler().handlerType(UserController.class))
+                                .andExpect(handler().methodName("destroy"));
+                    }
+                }
+            }
+        }
     }
 }

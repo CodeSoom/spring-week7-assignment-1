@@ -6,6 +6,8 @@ import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.ProductNotFoundException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,29 +40,38 @@ class ProductControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @MockBean
     private ProductService productService;
 
     @MockBean
     private AuthenticationService authenticationService;
 
-    @BeforeEach
-    void setUp() {
-        Product product = Product.builder()
-                .id(1L)
-                .name("쥐돌이")
-                .maker("냥이월드")
-                .price(5000)
-                .build();
-        given(productService.getProducts()).willReturn(List.of(product));
+    private final String NAME = "쥐돌이";
+    private final String MAKER = "냥이월드";
+    private final int PRICE = 5000;
+    private final Product PRODUCT = Product.builder()
+                                            .id(1L)
+                                            .name(NAME)
+                                            .maker(MAKER)
+                                            .price(PRICE)
+                                            .build();
+    private String productContent;
 
-        given(productService.getProduct(1L)).willReturn(product);
+    @BeforeEach
+    void setUp() throws JsonProcessingException {
+        productContent = objectMapper.writeValueAsString(productContent);
+        given(productService.getProducts()).willReturn(List.of(PRODUCT));
+
+        given(productService.getProduct(1L)).willReturn(PRODUCT);
 
         given(productService.getProduct(1000L))
                 .willThrow(new ProductNotFoundException(1000L));
 
         given(productService.createProduct(any(ProductData.class)))
-                .willReturn(product);
+                .willReturn(PRODUCT);
 
         given(productService.updateProduct(eq(1L), any(ProductData.class)))
                 .will(invocation -> {
@@ -90,7 +104,7 @@ class ProductControllerTest {
                         .accept(MediaType.APPLICATION_JSON_UTF8)
         )
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("쥐돌이")));
+                .andExpect(content().string(containsString(NAME)));
     }
 
     @Test
@@ -100,7 +114,7 @@ class ProductControllerTest {
                         .accept(MediaType.APPLICATION_JSON_UTF8)
         )
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("쥐돌이")));
+                .andExpect(content().string(containsString(NAME)));
     }
 
     @Test
@@ -115,8 +129,7 @@ class ProductControllerTest {
                 post("/products")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
+                        .content(productContent)
                         .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isCreated())
@@ -131,8 +144,7 @@ class ProductControllerTest {
                 post("/products")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"maker\":\"\"," +
-                                "\"price\":0}")
+                        .content(productContent)
                         .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isBadRequest());
@@ -144,8 +156,7 @@ class ProductControllerTest {
                 post("/products")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
+                        .content(productContent)
         )
                 .andExpect(status().isUnauthorized());
     }
@@ -156,8 +167,7 @@ class ProductControllerTest {
                 post("/products")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
+                        .content(productContent)
                         .header("Authorization", "Bearer " + INVALID_TOKEN)
         )
                 .andExpect(status().isUnauthorized());
@@ -169,8 +179,7 @@ class ProductControllerTest {
                 patch("/products/1")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
+                        .content(productContent)
                         .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isOk())
@@ -184,8 +193,7 @@ class ProductControllerTest {
         mockMvc.perform(
                 patch("/products/1000")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
+                        .content(productContent)
                         .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isNotFound());
@@ -199,8 +207,7 @@ class ProductControllerTest {
                 patch("/products/1")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"maker\":\"\"," +
-                                "\"price\":0}")
+                        .content(productContent)
                         .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isBadRequest());
@@ -212,8 +219,7 @@ class ProductControllerTest {
                 patch("/products/1")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
+                        .content(productContent)
         )
                 .andExpect(status().isUnauthorized());
     }
@@ -224,8 +230,7 @@ class ProductControllerTest {
                 patch("/products/1")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
+                        .content(productContent)
                         .header("Authorization", "Bearer " + INVALID_TOKEN)
         )
                 .andExpect(status().isUnauthorized());
@@ -259,10 +264,20 @@ class ProductControllerTest {
                 patch("/products/1")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                "\"price\":5000}")
+                        .content(productContent)
                         .header("Authorization", "Bearer " + INVALID_TOKEN)
         )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void destroyWithoutAccessToken() throws Exception {
+        mockMvc.perform(
+                        patch("/products/1")
+                                .accept(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(productContent)
+                )
                 .andExpect(status().isUnauthorized());
     }
 }

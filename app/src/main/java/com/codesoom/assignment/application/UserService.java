@@ -6,19 +6,18 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
-import com.github.dozermapper.core.Mapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Objects;
 
 @Service
 @Transactional
 public class UserService {
-    private final Mapper mapper;
     private final UserRepository userRepository;
 
-    public UserService(Mapper dozerMapper, UserRepository userRepository) {
-        this.mapper = dozerMapper;
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -28,14 +27,17 @@ public class UserService {
             throw new UserEmailDuplicationException(email);
         }
 
-        User user = mapper.map(registrationData, User.class);
+        User user = registrationData.toUser();
         return userRepository.save(user);
     }
 
-    public User updateUser(Long id, UserModificationData modificationData) {
+    public User updateUser(Long id, UserModificationData modificationData , Long userId) throws AccessDeniedException {
+        if(!Objects.equals(id, userId)){
+            throw new AccessDeniedException("자원 접근이 거부되었습니다.");
+        }
         User user = findUser(id);
 
-        User source = mapper.map(modificationData, User.class);
+        User source = modificationData.toUser();
         user.changeWith(source);
 
         return user;

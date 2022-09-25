@@ -1,7 +1,12 @@
 package com.codesoom.assignment.dto;
 
-import com.github.dozermapper.core.Mapping;
-import lombok.*;
+import com.codesoom.assignment.domain.Product;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -15,17 +20,26 @@ public class ProductData {
     private Long id;
 
     @NotBlank
-    @Mapping("name")
     private String name;
 
     @NotBlank
-    @Mapping("maker")
     private String maker;
 
     @NotNull
-    @Mapping("price")
     private Integer price;
 
-    @Mapping("imageUrl")
     private String imageUrl;
+
+    public Product toProduct(){
+        Product.ProductBuilder productBuilder = Product.builder()
+                                .id(this.id)
+                                .name(this.name)
+                                .maker(this.maker)
+                                .price(this.price);
+
+        if(StringUtils.hasText(this.imageUrl)){
+           productBuilder.imageUrl(this.imageUrl);
+        }
+        return productBuilder.build();
+    }
 }
