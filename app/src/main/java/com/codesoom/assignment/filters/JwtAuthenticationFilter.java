@@ -2,6 +2,7 @@ package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.errors.InvalidTokenException;
+import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.security.UserAuthentication;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * JWT를 분석하는 Spring Security Filter이다.
@@ -48,7 +50,8 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         if (authorization != null) {
             String accessToken = authorization.substring("Bearer ".length());
             Long userId = authenticationService.parseToken(accessToken);
-            Authentication authentication = new UserAuthentication(userId , authorities(userId));
+            List<Role> roles = authenticationService.roles(userId);
+            Authentication authentication = new UserAuthentication(userId , authorities(roles));
 
             SecurityContext context = SecurityContextHolder.getContext();
             context.setAuthentication(authentication);
@@ -57,12 +60,10 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         chain.doFilter(request , response);
     }
 
-    private List<GrantedAuthority> authorities(Long userId) {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        if(Objects.equals(userId, ADMIN_ID)){
-            authorities.add(new SimpleGrantedAuthority("ADMIN"));
-        }
-        return authorities;
+    private List<GrantedAuthority> authorities(List<Role> roles) {
+        return roles.stream()
+                    .map(role -> new SimpleGrantedAuthority(role.getName()))
+                    .collect(Collectors.toList());
     }
 
     private boolean filterWithPathAndMethod(HttpServletRequest request) {

@@ -14,18 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.registerCustomDateFormat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 class UserServiceTest {
@@ -60,7 +50,6 @@ class UserServiceTest {
                 @Test
                 @DisplayName("접근을 거부한다는 상태를 반환하고 예외를 던진다.")
                 void It_ThrowException() {
-                    System.out.println(registeredId + " " + modifierId);
                     assertThatThrownBy(() -> userService.updateUser(registeredId , modificationData , modifierId))
                             .isInstanceOf(AccessDeniedException.class);
                 }
