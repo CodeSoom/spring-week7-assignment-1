@@ -3,6 +3,8 @@ package com.codesoom.assignment.controllers;
 import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.UserEmailDuplicationException;
+import com.codesoom.assignment.errors.UserNotFoundException;
 import com.codesoom.assignment.utils.JwtUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -73,7 +76,7 @@ class UserControllerTest {
 
             @Test
             @DisplayName("사용자를 생성하고 자원을 생성했다는 상태 코드와 생성된 사용자를 반환한다.")
-            void It_() throws Exception {
+            void It_CreateUser() throws Exception {
                 final ResultActions result = mockMvc.perform(post("/users")
                         .content(registrationContent)
                         .contentType(MediaType.APPLICATION_JSON));
@@ -151,11 +154,13 @@ class UserControllerTest {
                 class Context_ModifierNotEqualsRegister{
 
                     private String modifierContent;
+                    private String modifierToken;
 
                     @BeforeEach
                     void setUp() throws JsonProcessingException {
                         final UserModificationData modificationData = newUserModificationData(MODIFIER , MODIFIER);
                         modifierContent = objectMapper.writeValueAsString(modificationData);
+                        modifierToken = jwtUtil.encode(registeredId + 1L);
                     }
 
                     @Test
@@ -171,7 +176,69 @@ class UserControllerTest {
                                 .andExpect(handler().methodName("update"));
                     }
                 }
+            }
+        }
+    }
 
+    @Nested
+    @DisplayName("destory()")
+    class Describe_Destroy{
+
+        @Nested
+        @DisplayName("식별자에 해당하는 사용자가 존재한다면")
+        class Context_ExistedUser {
+
+            private final UserRegistrationData registrationData = newUserRegistrationData(REGISTER, REGISTER, REGISTER);
+            private Long registeredId;
+
+            @BeforeEach
+            void setUp() {
+                registeredId = userService.registerUser(registrationData).getId();
+            }
+
+            @AfterEach
+            void tearDown() {
+                try {
+                    userService.deleteUser(registeredId);
+                } catch (UserNotFoundException e){
+                    // ignore
+                }
+            }
+
+            @Nested
+            @DisplayName("인증을 통과하면")
+            class Context_ValidToken{
+
+                @Nested
+                @DisplayName("사용자 권한이라면")
+                class Context_UserRoleToken{
+
+                    @Test
+                    @DisplayName("접근을 거부한다는 상태를 반환하고 예외를 던진다.")
+                    void It_ThrowException() throws Exception {
+                        final ResultActions result = mockMvc.perform(delete("/users/" + registeredId)
+                                .header("Authorization", "Bearer " + USERID_1_TOKEN));
+                        result.andDo(print())
+                                .andExpect(status().isForbidden())
+                                .andExpect(handler().handlerType(UserController.class))
+                                .andExpect(handler().methodName("destroy"));
+                    }
+                }
+                @Nested
+                @DisplayName("관리자 권한이라면")
+                class Context_AdminRoleToken{
+
+                    @Test
+                    @DisplayName("요청을 성공적으로 수행했다는 상태를 반환하고 식별자에 해당하는 사용자 정보를 삭제한다.")
+                    void It_DeleteUser() throws Exception {
+                        final ResultActions result = mockMvc.perform(delete("/users/" + registeredId)
+                                .header("Authorization", "Bearer " + ADMIN_TOKEN));
+                        result.andDo(print())
+                                .andExpect(status().isNoContent())
+                                .andExpect(handler().handlerType(UserController.class))
+                                .andExpect(handler().methodName("destroy"));
+                    }
+                }
             }
         }
     }
