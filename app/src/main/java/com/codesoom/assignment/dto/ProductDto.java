@@ -16,8 +16,6 @@ public class ProductDto {
     @Setter
     @Getter
     public static class RegisterParam {
-        private Long id;
-
         @NotBlank
         private String name;
 
