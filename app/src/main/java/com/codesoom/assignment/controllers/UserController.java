@@ -1,10 +1,10 @@
 package com.codesoom.assignment.controllers;
 
+import com.codesoom.assignment.application.UserCommand;
 import com.codesoom.assignment.application.UserService;
-import com.codesoom.assignment.domain.User;
-import com.codesoom.assignment.dto.UserModificationData;
-import com.codesoom.assignment.dto.UserRegistrationData;
-import com.codesoom.assignment.dto.UserResultData;
+import com.codesoom.assignment.dto.UserDto;
+import com.codesoom.assignment.dto.UserDto.UserInfo;
+import com.codesoom.assignment.mapper.UserMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,38 +15,35 @@ import javax.validation.Valid;
 @CrossOrigin
 public class UserController {
     private final UserService userService;
+    private final UserMapper userMapper;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
+        this.userMapper = userMapper;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    UserResultData create(@RequestBody @Valid UserRegistrationData registrationData) {
-        User user = userService.registerUser(registrationData);
-        return getUserResultData(user);
+    UserInfo createUser(@RequestBody @Valid UserDto.RegisterParam request) {
+        final UserCommand.Register command = userMapper.of(request);
+
+        return new UserInfo(userService.registerUser(command));
     }
 
     @PatchMapping("{id}")
-    UserResultData update(
+    UserInfo updateUser(
             @PathVariable Long id,
-            @RequestBody @Valid UserModificationData modificationData
+            @RequestBody @Valid UserDto.UpdateParam request
     ) {
-        User user = userService.updateUser(id, modificationData);
-        return getUserResultData(user);
+        final UserCommand.Update command = userMapper.of(id, request);
+
+        return new UserInfo(userService.updateUser(command));
     }
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void destroy(@PathVariable Long id) {
+    void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
     }
 
-    private UserResultData getUserResultData(User user) {
-        return UserResultData.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .build();
-    }
 }

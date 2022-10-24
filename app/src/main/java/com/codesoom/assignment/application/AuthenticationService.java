@@ -12,25 +12,24 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
-    public AuthenticationService(UserRepository userRepository,
-                                 JwtUtil jwtUtil) {
+    public AuthenticationService(UserRepository userRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
     }
 
-    public String login(String email, String password) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new LoginFailException(email));
+    public String login(SessionCommand.SessionRequest command) {
+        final User user = userRepository.findByEmail(command.getEmail())
+                .orElseThrow(() -> new LoginFailException(command.getEmail()));
 
-        if (!user.authenticate(password)) {
-            throw new LoginFailException(email);
+        if (!user.authenticate(command.getPassword())) {
+            throw new LoginFailException(command.getEmail());
         }
 
-        return jwtUtil.encode(1L);
+        return jwtUtil.encode(user.getId());
     }
 
     public Long parseToken(String accessToken) {
-        Claims claims = jwtUtil.decode(accessToken);
+        final Claims claims = jwtUtil.decode(accessToken);
         return claims.get("userId", Long.class);
     }
 }

@@ -1,8 +1,10 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.dto.SessionRequestData;
-import com.codesoom.assignment.dto.SessionResponseData;
+import com.codesoom.assignment.application.SessionCommand;
+import com.codesoom.assignment.dto.SessionDto;
+import com.codesoom.assignment.dto.SessionDto.SessionInfo;
+import com.codesoom.assignment.mapper.SessionMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,24 +12,22 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/session")
 @CrossOrigin
 public class SessionController {
-    private AuthenticationService authenticationService;
+    private final AuthenticationService authenticationService;
 
-    public SessionController(AuthenticationService authenticationService) {
+    private final SessionMapper sessionMapper;
+
+    public SessionController(AuthenticationService authenticationService, SessionMapper sessionMapper) {
         this.authenticationService = authenticationService;
+        this.sessionMapper = sessionMapper;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public SessionResponseData login(
-            @RequestBody SessionRequestData sessionRequestData
+    public SessionInfo login(
+            @RequestBody SessionDto.SessionRequestData request
     ) {
-        String email = sessionRequestData.getEmail();
-        String password = sessionRequestData.getPassword();
+        final SessionCommand.SessionRequest command = sessionMapper.of(request);
 
-        String accessToken = authenticationService.login(email, password);
-
-        return SessionResponseData.builder()
-                .accessToken(accessToken)
-                .build();
+        return new SessionInfo(authenticationService.login(command));
     }
 }
