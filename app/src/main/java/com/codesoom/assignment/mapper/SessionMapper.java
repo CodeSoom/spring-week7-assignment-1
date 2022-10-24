@@ -16,6 +16,11 @@ public interface SessionMapper {
 
     SessionMapper INSTANCE = Mappers.getMapper(SessionMapper.class);
 
+    /**
+     * 세션 Dto 객체를 세션 커맨드 객체로 변환한다.
+     * @param request 세션 Dto
+     * @return 세션 커맨드
+     */
     SessionCommand.SessionRequest of(SessionDto.SessionRequestData request);
 
 }
