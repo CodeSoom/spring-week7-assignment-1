@@ -17,6 +17,12 @@ public class AuthenticationService {
         this.jwtUtil = jwtUtil;
     }
 
+    /**
+     * 로그인 정보로 인증 후 인증토큰을 리턴한다.
+     * @param command 로그인 정보
+     * @return 인증토큰
+     * @throws LoginFailException 로그인 인증에 실패한 경우
+     */
     public String login(SessionCommand.SessionRequest command) {
         final User user = userRepository.findByEmail(command.getEmail())
                 .orElseThrow(() -> new LoginFailException(command.getEmail()));
@@ -28,6 +34,11 @@ public class AuthenticationService {
         return jwtUtil.encode(user.getId());
     }
 
+    /**
+     * 인증토큰을 검증 후 복호화된 사용자 ID를 리턴한다.
+     * @param accessToken 인증토큰
+     * @return 사용자 ID
+     */
     public Long parseToken(String accessToken) {
         final Claims claims = jwtUtil.decode(accessToken);
         return claims.get("userId", Long.class);

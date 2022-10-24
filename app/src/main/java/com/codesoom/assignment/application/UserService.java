@@ -20,6 +20,11 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
+    /**
+     * 신규 회원을 등록하고, 등록된 회원정보를 리턴한다.
+     * @param command 신규 회원정보
+     * @return 등록된 회원정보
+     */
     public User registerUser(UserCommand.Register command) {
         final String email = command.getEmail();
         if (userRepository.existsByEmail(email)) {
@@ -30,6 +35,12 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    /**
+     * 회원정보를 수정하고, 수정된 회원정보를 리턴한다.
+     * @param command 수정 회원정보
+     * @return 수정된 상품정보
+     * @throws UserNotFoundException 회원을 찾지 못한 경우
+     */
     public User updateUser(UserCommand.Update command) {
         final User user = findUser(command.getId());
 
@@ -38,6 +49,12 @@ public class UserService {
         return user;
     }
 
+    /**
+     * 회원정보를 삭제하고, 삭제된 회원정보를 리턴한다.
+     * @param id 삭제할 회원 ID
+     * @return 삭제된 회원정보
+     * @throws UserNotFoundException 회원을 찾지 못한 경우
+     */
     public User deleteUser(Long id) {
         final User user = findUser(id);
         user.deleteUser();
