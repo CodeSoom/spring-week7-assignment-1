@@ -1,6 +1,6 @@
 package com.codesoom.assignment.mapper;
 
-import com.codesoom.assignment.application.UserCommand;
+import com.codesoom.assignment.application.dto.UserCommand;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserDto;
 import org.mapstruct.InjectionStrategy;

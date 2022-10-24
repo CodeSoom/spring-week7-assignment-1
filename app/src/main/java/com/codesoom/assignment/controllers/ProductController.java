@@ -5,7 +5,7 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.application.ProductCommand;
+import com.codesoom.assignment.application.dto.ProductCommand;
 import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.dto.ProductDto;
 import com.codesoom.assignment.dto.ProductDto.ProductInfo;

@@ -1,6 +1,6 @@
 package com.codesoom.assignment.mapper;
 
-import com.codesoom.assignment.application.SessionCommand;
+import com.codesoom.assignment.application.dto.SessionCommand;
 import com.codesoom.assignment.dto.SessionDto;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;

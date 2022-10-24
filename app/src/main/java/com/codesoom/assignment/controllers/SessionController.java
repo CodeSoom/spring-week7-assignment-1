@@ -1,7 +1,7 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.application.SessionCommand;
+import com.codesoom.assignment.application.dto.SessionCommand;
 import com.codesoom.assignment.dto.SessionDto;
 import com.codesoom.assignment.dto.SessionDto.SessionInfo;
 import com.codesoom.assignment.mapper.SessionMapper;

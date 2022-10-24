@@ -1,4 +1,4 @@
-package com.codesoom.assignment.application;
+package com.codesoom.assignment.application.dto;
 
 import lombok.Builder;
 import lombok.Generated;

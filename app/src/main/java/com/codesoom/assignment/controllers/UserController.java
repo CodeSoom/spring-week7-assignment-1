@@ -1,6 +1,6 @@
 package com.codesoom.assignment.controllers;
 
-import com.codesoom.assignment.application.UserCommand;
+import com.codesoom.assignment.application.dto.UserCommand;
 import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.dto.UserDto;
 import com.codesoom.assignment.dto.UserDto.UserInfo;
