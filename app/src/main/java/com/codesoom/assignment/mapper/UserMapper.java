@@ -39,6 +39,7 @@ public interface UserMapper {
      * @return 유저 엔티티
      */
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
     User toEntity(UserCommand.Register command);
 
     /**
@@ -47,5 +48,6 @@ public interface UserMapper {
      * @return 유저 엔티티
      */
     @Mapping(target = "email", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
     User toEntity(UserCommand.Update command);
 }

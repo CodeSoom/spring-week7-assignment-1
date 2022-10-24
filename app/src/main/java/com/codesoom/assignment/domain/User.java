@@ -37,8 +37,8 @@ public class User {
     }
 
     @Builder
-    public User(Long id, String name, String password, String email) {
-        if (Strings.isBlank(name)){
+    public User(Long id, String name, String password, String email, boolean deleted) {
+        if (Strings.isBlank(name)) {
             throw new InvalidParamException("이름이 비어있습니다.");
         }
         if (Strings.isBlank(password)) {
@@ -49,7 +49,7 @@ public class User {
         this.name = name;
         this.password = password;
         this.email = email;
-        this.deleted = false;
+        this.deleted = deleted;
     }
 
     public void modifyUserInfo(User source) {
