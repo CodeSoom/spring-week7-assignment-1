@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.nio.file.AccessDeniedException;
 import java.util.Set;
 
 @ResponseBody
@@ -43,6 +44,12 @@ public class ControllerErrorAdvice {
     @ExceptionHandler(InvalidTokenException.class)
     public ErrorResponse handleInvalidAccessTokenException() {
         return new ErrorResponse("Invalid access token");
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ErrorResponse handleAccessDeniedException() {
+        return new ErrorResponse("Access Denied");
     }
 
     @ResponseBody

@@ -1,11 +1,10 @@
 package com.codesoom.assignment.domain;
 
-import com.codesoom.assignment.errors.InvalidParamException;
 import lombok.Builder;
 import lombok.Generated;
 import lombok.Getter;
 import lombok.ToString;
-import org.apache.logging.log4j.util.Strings;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,38 +29,32 @@ public class User {
 
     private String password;
 
-    @Builder.Default
     private boolean deleted = false;
 
     protected User() {
     }
 
     @Builder
-    public User(Long id, String name, String password, String email, boolean deleted) {
-        if (Strings.isBlank(name)) {
-            throw new InvalidParamException("이름이 비어있습니다.");
-        }
-        if (Strings.isBlank(password)) {
-            throw new InvalidParamException("비밀번호가 비어있습니다.");
-        }
-
+    public User(Long id, String name, String email, Boolean deleted) {
         this.id = id;
         this.name = name;
-        this.password = password;
         this.email = email;
-        this.deleted = deleted;
+        this.deleted = deleted != null && deleted;
     }
 
     public void modifyUserInfo(User source) {
         name = source.name;
-        password = source.password;
+    }
+
+    public void modifyPassword(String password, PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(password);
     }
 
     public void deleteUser() {
         deleted = true;
     }
 
-    public boolean authenticate(String password) {
-        return !deleted && password.equals(this.password);
+    public boolean authenticate(String password, PasswordEncoder passwordEncoder) {
+        return !deleted && passwordEncoder.matches(password, this.password);
     }
 }

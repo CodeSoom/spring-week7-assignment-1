@@ -1,7 +1,3 @@
-// REST
-// /products -> Create, Read
-// /products/{id} -> Read, Update, Delete
-
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
@@ -11,6 +7,8 @@ import com.codesoom.assignment.dto.ProductDto;
 import com.codesoom.assignment.dto.ProductDto.ProductInfo;
 import com.codesoom.assignment.mapper.ProductMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -50,19 +48,21 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("isAuthenticated()")
     public ProductInfo createProduct(
-            @RequestAttribute Long userId,
-            @RequestBody @Valid ProductDto.RegisterParam request
+            @RequestBody @Valid ProductDto.RegisterParam request,
+            Authentication authentication
     ) {
         final ProductCommand.Register command = productMapper.of(request);
         return new ProductInfo(productService.createProduct(command));
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     public ProductInfo updateProduct(
-            @RequestAttribute Long userId,
             @PathVariable Long id,
-            @RequestBody @Valid ProductDto.RegisterParam request
+            @RequestBody @Valid ProductDto.RegisterParam request,
+            Authentication authentication
     ) {
         final ProductCommand.Update command = productMapper.of(id, request);
         return new ProductInfo(productService.updateProduct(command));
@@ -70,9 +70,10 @@ public class ProductController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("isAuthenticated()")
     public void deleteProduct (
-            @RequestAttribute Long userId,
-            @PathVariable Long id
+            @PathVariable Long id,
+            Authentication authentication
     ) {
         productService.deleteProduct(id);
     }

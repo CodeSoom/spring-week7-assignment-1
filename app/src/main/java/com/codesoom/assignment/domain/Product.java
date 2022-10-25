@@ -1,11 +1,8 @@
 package com.codesoom.assignment.domain;
 
-import com.codesoom.assignment.errors.InvalidParamException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.util.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -42,18 +39,6 @@ public class Product {
             Integer price,
             String imageUrl
     ) {
-        if (Strings.isBlank(name)) {
-            throw new InvalidParamException("이름이 비어있습니다.");
-        }
-
-        if (Strings.isBlank(maker)) {
-            throw new InvalidParamException("제조사가 비어있습니다.");
-        }
-
-        if (price == null) {
-            throw new InvalidParamException("가격이 비어있습니다.");
-        }
-
         this.id = id;
         this.name = name;
         this.maker = maker;
