@@ -34,7 +34,6 @@ public class ProductService {
      * @param id 상품 ID
      * @return 검색된 상품
      * @throws ProductNotFoundException 상품을 찾지 못한 경우
-     *
      */
     public Product getProduct(Long id) {
         return findProduct(id);
