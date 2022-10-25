@@ -1,8 +1,6 @@
 package com.codesoom.assignment.dto;
 
 import com.codesoom.assignment.domain.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Generated;
 import lombok.Getter;
 import lombok.Setter;
