@@ -4,7 +4,7 @@ import com.codesoom.assignment.application.dto.ProductCommand;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.domain.ProductRepository;
 import com.codesoom.assignment.errors.ProductNotFoundException;
-import com.codesoom.assignment.mapper.ProductMapper;
+import com.codesoom.assignment.mapper.ProductFactory;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -14,11 +14,11 @@ import java.util.List;
 @Transactional
 public class ProductService {
     private final ProductRepository productRepository;
-    private final ProductMapper productMapper;
+    private final ProductFactory productFactory;
 
-    public ProductService(ProductRepository productRepository, ProductMapper productMapper) {
+    public ProductService(ProductRepository productRepository, ProductFactory productFactory) {
         this.productRepository = productRepository;
-        this.productMapper = productMapper;
+        this.productFactory = productFactory;
     }
 
     /**
@@ -46,7 +46,7 @@ public class ProductService {
      * @return 등록된 상품
      */
     public Product createProduct(ProductCommand.Register command) {
-        final Product product = productMapper.toEntity(command);
+        final Product product = productFactory.toEntity(command);
         return productRepository.save(product);
     }
 
@@ -59,7 +59,7 @@ public class ProductService {
     public Product updateProduct(ProductCommand.Update command) {
         final Product product = findProduct(command.getId());
 
-        product.modifyProduct(productMapper.toEntity(command));
+        product.modifyProduct(productFactory.toEntity(command));
 
         return product;
     }

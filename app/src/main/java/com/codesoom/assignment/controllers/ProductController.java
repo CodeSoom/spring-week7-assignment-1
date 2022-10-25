@@ -5,7 +5,7 @@ import com.codesoom.assignment.application.dto.ProductCommand;
 import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.dto.ProductDto;
 import com.codesoom.assignment.dto.ProductDto.ProductInfo;
-import com.codesoom.assignment.mapper.ProductMapper;
+import com.codesoom.assignment.mapper.ProductFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -23,11 +23,11 @@ public class ProductController {
 
     private final AuthenticationService authenticationService;
 
-    private final ProductMapper productMapper;
+    private final ProductFactory productMapper;
 
     public ProductController(ProductService productService,
                              AuthenticationService authenticationService,
-                             ProductMapper productMapper) {
+                             ProductFactory productMapper) {
         this.productService = productService;
         this.authenticationService = authenticationService;
         this.productMapper = productMapper;

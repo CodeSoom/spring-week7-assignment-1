@@ -5,7 +5,7 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
-import com.codesoom.assignment.mapper.UserMapper;
+import com.codesoom.assignment.mapper.UserFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +15,12 @@ import javax.transaction.Transactional;
 @Transactional
 public class UserService {
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
+    private final UserFactory userFactory;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, UserFactory userFactory, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.userMapper = userMapper;
+        this.userFactory = userFactory;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -36,7 +36,7 @@ public class UserService {
             throw new UserEmailDuplicationException(email);
         }
 
-        final User user = userMapper.toEntity(command);
+        final User user = userFactory.toEntity(command);
         user.modifyPassword(command.getPassword(), passwordEncoder);
 
         return userRepository.save(user);
@@ -51,7 +51,7 @@ public class UserService {
     public User updateUser(UserCommand.Update command) {
         final User user = findUser(command.getId());
 
-        user.modifyUserInfo(userMapper.toEntity(command));
+        user.modifyUserInfo(userFactory.toEntity(command));
         user.modifyPassword(command.getPassword(), passwordEncoder);
 
         return user;

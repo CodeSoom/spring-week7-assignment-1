@@ -5,7 +5,7 @@ import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.application.dto.UserCommand;
 import com.codesoom.assignment.dto.UserDto;
 import com.codesoom.assignment.dto.UserDto.UserInfo;
-import com.codesoom.assignment.mapper.UserMapper;
+import com.codesoom.assignment.mapper.UserFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,18 +28,18 @@ import javax.validation.Valid;
 public class UserController {
     private final UserService userService;
     private final AuthenticationService authenticationService;
-    private final UserMapper userMapper;
+    private final UserFactory userFactory;
 
-    public UserController(UserService userService, AuthenticationService authenticationService, UserMapper userMapper) {
+    public UserController(UserService userService, AuthenticationService authenticationService, UserFactory userFactory) {
         this.userService = userService;
         this.authenticationService = authenticationService;
-        this.userMapper = userMapper;
+        this.userFactory = userFactory;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     UserInfo createUser(@RequestBody @Valid UserDto.RegisterParam request) {
-        final UserCommand.Register command = userMapper.of(request);
+        final UserCommand.Register command = userFactory.of(request);
 
         return new UserInfo(userService.registerUser(command));
     }
@@ -55,7 +55,7 @@ public class UserController {
             throw new AccessDeniedException("Access Denied");
         }
         System.out.println("id = " + id);
-        final UserCommand.Update command = userMapper.of(id, request);
+        final UserCommand.Update command = userFactory.of(id, request);
 
         return new UserInfo(userService.updateUser(command));
     }
