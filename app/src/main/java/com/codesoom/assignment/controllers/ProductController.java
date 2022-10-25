@@ -1,18 +1,19 @@
-// REST
-// /products -> Create, Read
-// /products/{id} -> Read, Update, Delete
-
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.application.dto.ProductCommand;
 import com.codesoom.assignment.application.ProductService;
-import com.codesoom.assignment.domain.Product;
-import com.codesoom.assignment.dto.ProductData;
+import com.codesoom.assignment.dto.ProductDto;
+import com.codesoom.assignment.dto.ProductDto.ProductInfo;
+import com.codesoom.assignment.mapper.ProductFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/products")
@@ -22,45 +23,57 @@ public class ProductController {
 
     private final AuthenticationService authenticationService;
 
+    private final ProductFactory productMapper;
+
     public ProductController(ProductService productService,
-                             AuthenticationService authenticationService) {
+                             AuthenticationService authenticationService,
+                             ProductFactory productMapper) {
         this.productService = productService;
         this.authenticationService = authenticationService;
+        this.productMapper = productMapper;
     }
 
     @GetMapping
-    public List<Product> list() {
-        return productService.getProducts();
+    public List<ProductInfo> list() {
+        return productService.getProducts()
+                .stream()
+                .map(ProductInfo::new)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("{id}")
-    public Product detail(@PathVariable Long id) {
-        return productService.getProduct(id);
+    public ProductInfo detail(@PathVariable Long id) {
+        return new ProductInfo(productService.getProduct(id));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Product create(
-            @RequestAttribute Long userId,
-            @RequestBody @Valid ProductData productData
+    @PreAuthorize("isAuthenticated()")
+    public ProductInfo createProduct(
+            @RequestBody @Valid ProductDto.RegisterParam request,
+            Authentication authentication
     ) {
-        return productService.createProduct(productData);
+        final ProductCommand.Register command = productMapper.of(request);
+        return new ProductInfo(productService.createProduct(command));
     }
 
     @PatchMapping("{id}")
-    public Product update(
-            @RequestAttribute Long userId,
+    @PreAuthorize("isAuthenticated()")
+    public ProductInfo updateProduct(
             @PathVariable Long id,
-            @RequestBody @Valid ProductData productData
+            @RequestBody @Valid ProductDto.RegisterParam request,
+            Authentication authentication
     ) {
-        return productService.updateProduct(id, productData);
+        final ProductCommand.Update command = productMapper.of(id, request);
+        return new ProductInfo(productService.updateProduct(command));
     }
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void destroy(
-            @RequestAttribute Long userId,
-            @PathVariable Long id
+    @PreAuthorize("isAuthenticated()")
+    public void deleteProduct (
+            @PathVariable Long id,
+            Authentication authentication
     ) {
         productService.deleteProduct(id);
     }

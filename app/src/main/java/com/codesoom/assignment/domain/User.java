@@ -1,22 +1,26 @@
 package com.codesoom.assignment.domain;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Generated;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
+@Generated
 @Entity
 @Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@ToString(of = {"id", "name", "password", "email"})
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue
+    @Column(name = "user_id")
     private Long id;
 
     private String email;
@@ -25,19 +29,32 @@ public class User {
 
     private String password;
 
-    @Builder.Default
     private boolean deleted = false;
 
-    public void changeWith(User source) {
-        name = source.name;
-        password = source.password;
+    protected User() {
     }
 
-    public void destroy() {
+    @Builder
+    public User(Long id, String name, String email, Boolean deleted) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.deleted = deleted != null && deleted;
+    }
+
+    public void modifyUserInfo(User source) {
+        name = source.name;
+    }
+
+    public void modifyPassword(String password, PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(password);
+    }
+
+    public void deleteUser() {
         deleted = true;
     }
 
-    public boolean authenticate(String password) {
-        return !deleted && password.equals(this.password);
+    public boolean authenticate(String password, PasswordEncoder passwordEncoder) {
+        return !deleted && passwordEncoder.matches(password, this.password);
     }
 }

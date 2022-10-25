@@ -1,10 +1,10 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.application.dto.ProductCommand;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.domain.ProductRepository;
-import com.codesoom.assignment.dto.ProductData;
 import com.codesoom.assignment.errors.ProductNotFoundException;
-import com.github.dozermapper.core.Mapper;
+import com.codesoom.assignment.mapper.ProductFactory;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -13,40 +13,65 @@ import java.util.List;
 @Service
 @Transactional
 public class ProductService {
-    private final Mapper mapper;
     private final ProductRepository productRepository;
+    private final ProductFactory productFactory;
 
-    public ProductService(
-            Mapper dozerMapper,
-            ProductRepository productRepository
-    ) {
-        this.mapper = dozerMapper;
+    public ProductService(ProductRepository productRepository, ProductFactory productFactory) {
         this.productRepository = productRepository;
+        this.productFactory = productFactory;
     }
 
+    /**
+     * 전체 상품 목록을 리턴한다.
+     * @return 전체 상품 목록
+     */
     public List<Product> getProducts() {
         return productRepository.findAll();
     }
 
+    /**
+     * 상품ID에 해당하는 상품을 리턴한다.
+     * @param id 상품 ID
+     * @return 검색된 상품
+     * @throws ProductNotFoundException 상품을 찾지 못한 경우
+     */
     public Product getProduct(Long id) {
         return findProduct(id);
     }
 
-    public Product createProduct(ProductData productData) {
-        Product product = mapper.map(productData, Product.class);
+
+    /**
+     * 새로운 상품을 등록하고, 등록된 상품을 리턴한다.
+     * @param command 신규 상품정보
+     * @return 등록된 상품
+     */
+    public Product createProduct(ProductCommand.Register command) {
+        final Product product = productFactory.toEntity(command);
         return productRepository.save(product);
     }
 
-    public Product updateProduct(Long id, ProductData productData) {
-        Product product = findProduct(id);
+    /**
+     * 상품을 수정하고, 수정된 상품을 리턴한다.
+     * @param command 수정 상품정보
+     * @return 수정된 상품
+     * @throws ProductNotFoundException 상품을 찾지 못한 경우
+     */
+    public Product updateProduct(ProductCommand.Update command) {
+        final Product product = findProduct(command.getId());
 
-        product.changeWith(mapper.map(productData, Product.class));
+        product.modifyProduct(productFactory.toEntity(command));
 
         return product;
     }
 
+    /**
+     * 상품을 삭제하고, 삭제된 상품을 리턴한다.
+     * @param id 삭제할 상품 ID
+     * @return 삭제된 상품
+     * @throws ProductNotFoundException 상품을 찾지 못한 경우
+     */
     public Product deleteProduct(Long id) {
-        Product product = findProduct(id);
+        final Product product = findProduct(id);
 
         productRepository.delete(product);
 
