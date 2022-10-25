@@ -89,7 +89,7 @@ class JwtUtilTest {
             @NullAndEmptySource
             @ValueSource(strings = {"\n", "\t", " "})
             @DisplayName("false를 반환한다")
-            void it_throws_exception(String token) {
+            void it_returns_false(String token) {
                 assertThat(jwtUtil.validateToken(token)).isFalse();
             }
         }
@@ -106,7 +106,7 @@ class JwtUtilTest {
                     "eyJhbGciOJ9.eyJ1ciOjQ0fQ.eAG4OudK2g0s"
             })
             @DisplayName("false를 반환한다")
-            void it_throws_exception(String token) {
+            void it_returns_false(String token) {
                 assertThat(jwtUtil.validateToken(token)).isFalse();
             }
         }
