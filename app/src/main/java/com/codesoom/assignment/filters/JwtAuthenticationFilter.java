@@ -1,10 +1,8 @@
 package com.codesoom.assignment.filters;
 
-import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.security.UserAuthentication;
+import com.codesoom.assignment.security.JwtTokenProvider;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -15,23 +13,22 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
-    private final AuthenticationService authenticationService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, AuthenticationService authenticationService) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider){
         super(authenticationManager);
-        this.authenticationService = authenticationService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String authorization = request.getHeader("Authorization");
+        String authorization = jwtTokenProvider.getHeader(request);
         if (authorization != null) {
             String accessToken = authorization.substring("Bearer ".length());
-            Long userId = authenticationService.parseToken(accessToken);
-            Authentication authentication = new UserAuthentication(userId);
 
-            SecurityContext context = SecurityContextHolder.getContext();
-            context.setAuthentication(authentication);
+            Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         chain.doFilter(request, response);
