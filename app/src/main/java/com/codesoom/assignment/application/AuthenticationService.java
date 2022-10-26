@@ -4,7 +4,6 @@ import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.RequiredTypeException;
 import org.springframework.stereotype.Service;
 
@@ -30,9 +29,8 @@ public class AuthenticationService {
         return userRepository.findByEmail(email)
                 .map(user -> {
                     if (!user.authenticate(password)) {
-                        throw new LoginFailException(email);
+                        return null;
                     }
-
                     return jwtUtil.encode(user.getId());
                 }).orElseThrow(() -> new LoginFailException(email));
     }
@@ -44,13 +42,9 @@ public class AuthenticationService {
      * @throws InvalidTokenException 토큰의 클레임에서 회원 정보를 꺼낼 수 없는 경우
      */
     public Long parseToken(String accessToken) {
-        Claims claims = jwtUtil.decode(accessToken);
         try {
-            Long userId = claims.get("userId", Long.class);
-            if (userId == null) {
-                throw new InvalidTokenException("토큰의 클레임 값이 비어있습니다.");
-            }
-            return userId;
+            return jwtUtil.decode(accessToken)
+                    .get("userId", Long.class);
         } catch (RequiredTypeException e) {
             throw new InvalidTokenException("토큰의 클레임 값이 잘못되었습니다.");
         }

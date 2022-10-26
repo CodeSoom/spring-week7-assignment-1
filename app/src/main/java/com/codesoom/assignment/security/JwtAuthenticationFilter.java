@@ -13,6 +13,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Authorization 헤더를 통해 회원 인증을 수행하는 필터.
@@ -38,26 +39,29 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain chain) throws IOException, ServletException {
-        String accessToken = resolveToken(request);
-
-        if (StringUtils.hasText(accessToken) && jwtUtil.validateToken(accessToken)) {
-            Long userId = authenticationService.parseToken(accessToken);
-
-            SecurityContext context = SecurityContextHolder.getContext();
-            UserAuthentication userAuthentication = new UserAuthentication(userId);
-            context.setAuthentication(userAuthentication);
-        }
+        resolveToken(request)
+                .map(accessToken -> {
+                    if (jwtUtil.validateToken(accessToken)) {
+                        return authenticationService.parseToken(accessToken);
+                    }
+                    return null;
+                })
+                .ifPresent(userId -> {
+                    SecurityContext context = SecurityContextHolder.getContext();
+                    UserAuthentication userAuthentication = new UserAuthentication(userId);
+                    context.setAuthentication(userAuthentication);
+                });
 
         chain.doFilter(request, response);
     }
 
-    private String resolveToken(HttpServletRequest request) {
+    private Optional<String> resolveToken(HttpServletRequest request) {
         String authorization = request.getHeader(AUTHORIZATION_HEADER);
 
         if (StringUtils.hasText(authorization) && authorization.startsWith(BEARER)) {
-            return authorization.substring(BEARER.length());
+            return Optional.of(authorization.substring(BEARER.length()));
         }
 
-        return null;
+        return Optional.empty();
     }
 }

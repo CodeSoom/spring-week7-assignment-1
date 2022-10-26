@@ -7,6 +7,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 회원의 인증 정보를 저장합니다.
+ */
 public class UserAuthentication extends AbstractAuthenticationToken {
 
     private final Long userId;
