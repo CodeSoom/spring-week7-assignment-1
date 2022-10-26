@@ -51,7 +51,6 @@ public class UserController {
         if (!authentication.getPrincipal().equals(id)) {
             throw new AccessDeniedException("Access Denied");
         }
-        System.out.println("id = " + id);
         final UserCommand.Update command = userFactory.of(id, request);
 
         return new UserInfo(userService.updateUser(command));

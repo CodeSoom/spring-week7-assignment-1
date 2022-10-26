@@ -17,7 +17,6 @@ public class AuthenticationErrorFilter extends HttpFilter {
         try {
             chain.doFilter(request, response);
         } catch (InvalidTokenException e) {
-            System.out.println(e);
             response.sendError(HttpStatus.UNAUTHORIZED.value());
         }
     }
