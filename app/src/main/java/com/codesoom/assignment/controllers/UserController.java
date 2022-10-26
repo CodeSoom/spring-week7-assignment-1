@@ -1,6 +1,5 @@
 package com.codesoom.assignment.controllers;
 
-import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.application.dto.UserCommand;
 import com.codesoom.assignment.dto.UserDto;
@@ -27,12 +26,10 @@ import javax.validation.Valid;
 @CrossOrigin
 public class UserController {
     private final UserService userService;
-    private final AuthenticationService authenticationService;
     private final UserFactory userFactory;
 
-    public UserController(UserService userService, AuthenticationService authenticationService, UserFactory userFactory) {
+    public UserController(UserService userService, UserFactory userFactory) {
         this.userService = userService;
-        this.authenticationService = authenticationService;
         this.userFactory = userFactory;
     }
 
