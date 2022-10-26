@@ -57,8 +57,6 @@ public class ProductController {
             @RequestBody @Valid ProductDto.RegisterParam request,
             Authentication authentication
     ) {
-        System.out.println("adsfasfasd");
-        System.out.println("authentication = " + authentication.getPrincipal());
         final ProductCommand.Register command = productMapper.of(request);
         return new ProductInfo(productService.createProduct(command));
     }
