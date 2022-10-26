@@ -5,17 +5,21 @@ import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import io.jsonwebtoken.RequiredTypeException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthenticationService(UserRepository userRepository,
-                                 JwtUtil jwtUtil) {
+                                 JwtUtil jwtUtil,
+                                 PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -28,10 +32,10 @@ public class AuthenticationService {
     public String login(String email, String password) {
         return userRepository.findByEmail(email)
                 .map(user -> {
-                    if (!user.authenticate(password)) {
-                        return null;
+                    if (!user.isDeleted() && passwordEncoder.matches(password, user.getPassword())) {
+                        return jwtUtil.encode(user.getId());
                     }
-                    return jwtUtil.encode(user.getId());
+                    return null;
                 }).orElseThrow(() -> new LoginFailException(email));
     }
 

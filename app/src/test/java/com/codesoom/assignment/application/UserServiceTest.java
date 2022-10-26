@@ -10,6 +10,7 @@ import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
@@ -32,7 +33,7 @@ class UserServiceTest {
     void setUp() {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
 
-        userService = new UserService(mapper, userRepository);
+        userService = new UserService(mapper, userRepository, new BCryptPasswordEncoder());
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
                 .willReturn(true);

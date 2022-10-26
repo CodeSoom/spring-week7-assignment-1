@@ -14,6 +14,8 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,12 +34,13 @@ class AuthenticationServiceTest {
     private JpaUserRepository userRepository;
 
     private JwtUtil jwtUtil = new JwtUtil(SECRET);
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private AuthenticationService authenticationService;
 
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
-        authenticationService = new AuthenticationService(userRepository, jwtUtil);
+        authenticationService = new AuthenticationService(userRepository, jwtUtil, passwordEncoder);
     }
 
     @Nested
@@ -53,7 +56,7 @@ class AuthenticationServiceTest {
             void setUp() {
                 User user = userRepository.save(User.builder()
                         .email(EMAIL)
-                        .password(PASSWORD)
+                        .password(passwordEncoder.encode(PASSWORD))
                         .build());
 
                 userId = user.getId();
@@ -77,7 +80,7 @@ class AuthenticationServiceTest {
             void setUp() {
                 userRepository.save(User.builder()
                         .email(EMAIL)
-                        .password(PASSWORD)
+                        .password(passwordEncoder.encode(PASSWORD))
                         .build());
             }
 
@@ -107,7 +110,8 @@ class AuthenticationServiceTest {
             void setUp() {
                 User user = userRepository.save(User.builder()
                         .email(EMAIL)
-                        .password(PASSWORD).build());
+                        .password(passwordEncoder.encode(PASSWORD))
+                        .build());
 
                 userId = user.getId();
                 token = jwtUtil.encode(userId);
@@ -128,7 +132,7 @@ class AuthenticationServiceTest {
 
             @ParameterizedTest
             @NullAndEmptySource
-            @DisplayName("예외를 던진")
+            @DisplayName("예외를 던진다")
             void it_throws_exception(String token) {
                 assertThatThrownBy(() -> authenticationService.parseToken(token))
                         .isInstanceOf(InvalidTokenException.class);

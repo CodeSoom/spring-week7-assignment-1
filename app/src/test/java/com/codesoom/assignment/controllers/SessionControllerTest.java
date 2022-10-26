@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -27,13 +28,12 @@ class SessionControllerTest {
 
     private static final String EMAIL = "tester@example.com";
     private static final String PASSWORD = "TEST1234";
-    private static final User USER = User.builder()
-            .email(EMAIL)
-            .password(PASSWORD)
-            .build();
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private MockMvc mockMvc;
@@ -61,7 +61,7 @@ class SessionControllerTest {
 
             @BeforeEach
             void setUp() {
-                User user = userRepository.save(USER);
+                User user = userRepository.save(getUser());
                 userId = user.getId();
             }
 
@@ -87,7 +87,7 @@ class SessionControllerTest {
 
             @BeforeEach
             void setUp() {
-                userRepository.save(USER);
+                userRepository.save(getUser());
             }
 
             @Test
@@ -104,5 +104,12 @@ class SessionControllerTest {
                         .andExpect(status().isBadRequest());
             }
         }
+    }
+
+    private User getUser() {
+        return User.builder()
+                .email(EMAIL)
+                .password(passwordEncoder.encode(PASSWORD))
+                .build();
     }
 }
