@@ -8,6 +8,8 @@ import io.jsonwebtoken.RequiredTypeException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
@@ -31,11 +33,12 @@ public class AuthenticationService {
      */
     public String login(String email, String password) {
         return userRepository.findByEmail(email)
-                .map(user -> {
-                    if (!user.isDeleted() && passwordEncoder.matches(password, user.getPassword())) {
-                        return jwtUtil.encode(user.getId());
+                .flatMap(user -> {
+                    if (!user.isDeleted()
+                            && passwordEncoder.matches(password, user.getPassword())) {
+                        return Optional.of(jwtUtil.encode(user.getId()));
                     }
-                    return null;
+                    return Optional.empty();
                 }).orElseThrow(() -> new LoginFailException(email));
     }
 

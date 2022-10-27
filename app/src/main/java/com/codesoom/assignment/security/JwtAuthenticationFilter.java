@@ -46,22 +46,21 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                     }
                     return null;
                 })
-                .ifPresent(userId -> {
-                    SecurityContext context = SecurityContextHolder.getContext();
-                    UserAuthentication userAuthentication = new UserAuthentication(userId);
-                    context.setAuthentication(userAuthentication);
-                });
+                .map(UserAuthentication::new)
+                .ifPresent(userAuthentication -> SecurityContextHolder.getContext()
+                            .setAuthentication(userAuthentication)
+                );
 
         chain.doFilter(request, response);
     }
 
     private Optional<String> resolveToken(HttpServletRequest request) {
-        String authorization = request.getHeader(AUTHORIZATION_HEADER);
-
-        if (StringUtils.hasText(authorization) && authorization.startsWith(BEARER)) {
-            return Optional.of(authorization.substring(BEARER.length()));
-        }
-
-        return Optional.empty();
+        return Optional.ofNullable(request.getHeader(AUTHORIZATION_HEADER))
+                .flatMap(authorization -> {
+                    if (authorization.startsWith(BEARER)) {
+                        return Optional.of(authorization.substring(BEARER.length()));
+                    }
+                    return Optional.empty();
+                });
     }
 }
