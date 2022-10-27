@@ -13,7 +13,9 @@ public class UserAuthentication extends AbstractAuthenticationToken {
     public UserAuthentication(Long userId) {
         super(authorities());
         this.userId = userId;
-        super.setAuthenticated(true);
+        if (userId != null) {
+            super.setAuthenticated(true);
+        }
     }
 
     @Override
