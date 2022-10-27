@@ -1,8 +1,8 @@
 package com.codesoom.assignment.security;
 
 import com.codesoom.assignment.application.UserService;
+import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.errors.InvalidTokenException;
-import com.codesoom.assignment.security.UserAuthentication;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -12,11 +12,10 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
+import java.util.Optional;
 
 @Component
 public class JwtTokenProvider {
-    private static final Long TOKEN_VALID_TIME = 1000L * 60 * 60; //60 분
-
     private final Key key;
 
     private final UserService userService;
@@ -34,7 +33,9 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        return new UserAuthentication(getUserId(token));
+        Optional<User> user = userService.findUserById(getUserId(token));
+
+        return new UserAuthentication(user.isEmpty() ? null : user.get().getId());
     }
 
     public Long getUserId(String token) {
@@ -55,7 +56,7 @@ public class JwtTokenProvider {
         }
     }
 
-    public String getHeader(HttpServletRequest request) {
+    public String getHeaderAuthorization(HttpServletRequest request) {
         return request.getHeader("Authorization");
     }
 }

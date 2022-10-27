@@ -22,7 +22,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String authorization = jwtTokenProvider.getHeader(request);
+        String authorization = jwtTokenProvider.getHeaderAuthorization(request);
         if (authorization != null) {
             String accessToken = authorization.substring("Bearer ".length());
 
