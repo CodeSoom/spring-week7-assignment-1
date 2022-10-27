@@ -1,6 +1,7 @@
 package com.codesoom.assignment.dto;
 
 import com.codesoom.assignment.domain.User;
+import com.codesoom.assignment.validator.SameConsecutiveChar;
 import lombok.Generated;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,7 +25,8 @@ public class UserDto {
         private String name;
 
         @NotBlank
-        @Size(min = 4, max = 1024)
+        @Size(min = 13, max = 1024)
+        @SameConsecutiveChar
         private String password;
     }
 
@@ -36,7 +38,8 @@ public class UserDto {
         private String name;
 
         @NotBlank
-        @Size(min = 4, max = 1024)
+        @Size(min = 13, max = 1024)
+        @SameConsecutiveChar
         private String password;
 
     }
