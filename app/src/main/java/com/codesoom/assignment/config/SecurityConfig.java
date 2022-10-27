@@ -1,6 +1,7 @@
 package com.codesoom.assignment.config;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.security.JwtAccessDeniedHandler;
 import com.codesoom.assignment.security.JwtAuthenticationFilter;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
                 // 예외 처리
                 .exceptionHandling()
-                    .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+                    .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                    .accessDeniedHandler(new JwtAccessDeniedHandler());
     }
 }
