@@ -6,7 +6,6 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
-import com.github.dozermapper.core.Mapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,14 +14,11 @@ import javax.transaction.Transactional;
 @Service
 @Transactional
 public class UserService {
-    private final Mapper mapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(Mapper dozerMapper,
-                       UserRepository userRepository,
+    public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder) {
-        this.mapper = dozerMapper;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -38,16 +34,19 @@ public class UserService {
                 .email(registrationData.getEmail())
                 .password(passwordEncoder.encode(registrationData.getPassword()))
                 .build();
+
         return userRepository.save(user);
     }
 
     public User updateUser(Long id, UserModificationData modificationData) {
-        User user = findUser(id);
-
-        User source = mapper.map(modificationData, User.class);
-        user.changeWith(source);
-
-        return user;
+        return userRepository.findByIdAndDeletedIsFalse(id)
+                .map(user -> {
+                    user.update(
+                            modificationData.getName(),
+                            passwordEncoder.encode(modificationData.getPassword())
+                    );
+                    return user;
+                }).orElseThrow(() -> new UserNotFoundException(id));
     }
 
     public User deleteUser(Long id) {

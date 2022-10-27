@@ -28,9 +28,14 @@ public class User {
     @Builder.Default
     private boolean deleted = false;
 
-    public void changeWith(User source) {
-        name = source.name;
-        password = source.password;
+    /**
+     * 회원 정보를 수정합니다.
+     * @param name 변경할 이름
+     * @param password 변경할 비밀번호
+     */
+    public void update(String name, String password) {
+        this.name = name;
+        this.password = password;
     }
 
     public void destroy() {
