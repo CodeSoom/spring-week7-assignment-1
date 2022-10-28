@@ -3,10 +3,8 @@ package com.codesoom.assignment.security;
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.util.StringUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -40,27 +38,18 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                                     HttpServletResponse response,
                                     FilterChain chain) throws IOException, ServletException {
         resolveToken(request)
-                .map(accessToken -> {
-                    if (jwtUtil.validateToken(accessToken)) {
-                        return authenticationService.parseToken(accessToken);
-                    }
-                    return null;
-                })
+                .filter(accessToken -> jwtUtil.validateToken(accessToken))
+                .map(accessToken -> authenticationService.parseToken(accessToken))
                 .map(UserAuthentication::new)
                 .ifPresent(userAuthentication -> SecurityContextHolder.getContext()
-                            .setAuthentication(userAuthentication)
-                );
+                        .setAuthentication(userAuthentication));
 
         chain.doFilter(request, response);
     }
 
     private Optional<String> resolveToken(HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(AUTHORIZATION_HEADER))
-                .flatMap(authorization -> {
-                    if (authorization.startsWith(BEARER)) {
-                        return Optional.of(authorization.substring(BEARER.length()));
-                    }
-                    return Optional.empty();
-                });
+                .filter(authorization -> authorization.startsWith(BEARER))
+                .map(bearer -> bearer.substring(BEARER.length()));
     }
 }
