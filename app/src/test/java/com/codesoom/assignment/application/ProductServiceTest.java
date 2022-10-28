@@ -5,7 +5,7 @@ import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.domain.ProductRepository;
 import com.codesoom.assignment.dto.ProductDto;
 import com.codesoom.assignment.errors.ProductNotFoundException;
-import com.codesoom.assignment.mapper.ProductMapper;
+import com.codesoom.assignment.mapper.ProductFactory;
 import com.codesoom.assignment.utils.ProductSampleFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,9 +30,9 @@ class ProductServiceTest {
         ProductRepository repository;
         ProductService service;
 
-        private final ProductMapper productMapper = ProductMapper.INSTANCE;
+        private final ProductFactory productMapper = ProductFactory.INSTANCE;
 
-        public ProductMapper getProductMapper() {
+        public ProductFactory getProductMapper() {
             return productMapper;
         }
 

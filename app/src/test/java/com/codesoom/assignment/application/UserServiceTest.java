@@ -6,7 +6,7 @@ import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserDto;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
-import com.codesoom.assignment.mapper.UserMapper;
+import com.codesoom.assignment.mapper.UserFactory;
 import com.codesoom.assignment.utils.UserSampleFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -24,10 +26,10 @@ class UserServiceTest {
         @Autowired
         private UserRepository repository;
         private UserService service;
+        private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        private final UserFactory userMapper = UserFactory.INSTANCE;
 
-        private final UserMapper userMapper = UserMapper.INSTANCE;
-
-        public UserMapper getUserMapper() {
+        public UserFactory getUserMapper() {
             return userMapper;
         }
 
@@ -35,9 +37,13 @@ class UserServiceTest {
             return repository;
         }
 
+        public PasswordEncoder getPasswordEncoder() {
+            return passwordEncoder;
+        }
+
         public UserService getUserService() {
             if (service == null) {
-                service = new UserService(repository, userMapper);
+                service = new UserService(repository, userMapper, passwordEncoder);
             }
             return service;
         }
@@ -113,7 +119,8 @@ class UserServiceTest {
 
                 assertThat(updatedUser.getId()).isEqualTo(savedUser.getId());
                 assertThat(updatedUser.getName()).isEqualTo(givenCommand.getName());
-                assertThat(updatedUser.getPassword()).isEqualTo(givenCommand.getPassword());
+                assertThat(updatedUser.authenticate(givenCommand.getPassword(), getPasswordEncoder())).isTrue();
+
             }
         }
 
@@ -121,7 +128,7 @@ class UserServiceTest {
         @DisplayName("유효하지않은 ID가 주어지면")
         class Context_with_invalid_id extends JpaTest {
             private final Long INVALID_USER_ID = 9999L;
-            private final UserCommand.Update givenCommand = UserMapper.INSTANCE.of(INVALID_USER_ID, UserSampleFactory.createUpdateParam());
+            private final UserCommand.Update givenCommand = UserFactory.INSTANCE.of(INVALID_USER_ID, UserSampleFactory.createUpdateParam());
 
             @Test
             @DisplayName("예외를 던진다")
