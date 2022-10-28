@@ -4,7 +4,6 @@ import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.infra.JpaUserRepository;
-import com.codesoom.assignment.utils.JwtUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -35,8 +34,7 @@ public class UserAuthenticateControllerTest {
 
     @Autowired
     private AuthenticationService authenticationService;
-    @Autowired
-    private JwtUtil jwtUtil;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -107,13 +105,25 @@ public class UserAuthenticateControllerTest {
 
         @DisplayName("다른 유저가 요청한 경우")
         @Nested
-        class Context_with_valid_token_and_not_own {
+        class Context_with_valid_token_but_different_user {
+            private String savedUser2Token;
+
+            @BeforeEach
+            void setUp() {
+                User savedUser2 = jpaUserRepository.save(User.builder()
+                        .email("b@b.com")
+                        .name("김b")
+                        .password(passwordEncoder.encode("12345"))
+                        .build()
+                );
+                savedUser2Token = "Bearer " + authenticationService.login(savedUser2.getEmail(), "12345");
+            }
 
             @DisplayName("403을 응답한다")
             @Test
             void it_returns_403() throws Exception {
                 mockMvc.perform(patch("/users/" + savedUser.getId())
-                                .header("Authorization", validToken)
+                                .header("Authorization", savedUser2Token)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(requestBody)
                         )
