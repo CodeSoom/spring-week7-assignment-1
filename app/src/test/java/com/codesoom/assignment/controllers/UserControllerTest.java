@@ -1,157 +1,187 @@
 package com.codesoom.assignment.controllers;
 
-import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
-import com.codesoom.assignment.domain.User;
-import com.codesoom.assignment.dto.UserModificationData;
-import com.codesoom.assignment.dto.UserRegistrationData;
-import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.dto.UserDto;
+import com.codesoom.assignment.mapper.UserFactory;
+import com.codesoom.assignment.security.JwtTokenProvider;
+import com.codesoom.assignment.utils.UserSampleFactory;
+import com.codesoom.assignment.utils.UserSampleFactory.FieldName;
+import com.codesoom.assignment.utils.UserSampleFactory.ValueType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.filter.CharacterEncodingFilter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(UserController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@DisplayName("UserController 클래스")
 class UserControllerTest {
+    @Autowired
+    private WebApplicationContext ctx;
+
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private UserFactory userFactory;
+
+    @Autowired
     private UserService userService;
 
-    @MockBean
-    private AuthenticationService authenticationService;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     @BeforeEach
-    void setUp() {
-        given(userService.registerUser(any(UserRegistrationData.class)))
-                .will(invocation -> {
-                    UserRegistrationData registrationData = invocation.getArgument(0);
-                    return User.builder()
-                            .id(13L)
-                            .email(registrationData.getEmail())
-                            .name(registrationData.getName())
-                            .build();
-                });
-
-
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
-                .will(invocation -> {
-                    Long id = invocation.getArgument(0);
-                    UserModificationData modificationData =
-                            invocation.getArgument(1);
-                    return User.builder()
-                            .id(id)
-                            .email("tester@example.com")
-                            .name(modificationData.getName())
-                            .build();
-                });
-
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
-                .willThrow(new UserNotFoundException(100L));
-
-        given(userService.deleteUser(100L))
-                .willThrow(new UserNotFoundException(100L));
+    void setup() {
+        // ResponseBody JSON에 한글이 깨지는 문제로 추가
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(ctx)
+                .addFilter(new CharacterEncodingFilter("UTF-8", true))
+                .build();
     }
 
-    @Test
-    void registerUserWithValidAttributes() throws Exception {
-        mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"tester@example.com\"," +
-                                "\"name\":\"Tester\",\"password\":\"test\"}")
-        )
-                .andExpect(status().isCreated())
-                .andExpect(content().string(
-                        containsString("\"id\":13")
-                ))
-                .andExpect(content().string(
-                        containsString("\"email\":\"tester@example.com\"")
-                ))
-                .andExpect(content().string(
-                        containsString("\"name\":\"Tester\"")
-                ));
+    @Nested
+    @DisplayName("createUser[/users::POST] 메소드는")
+    class Describe_createUser {
+        ResultActions subject(UserDto.RegisterParam request) throws Exception {
+            return mockMvc.perform(post("/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)));
+        }
+        @Nested
+        @DisplayName("유효한 사용자 정보가 주어지면")
+        class Context_with_valid_user_info {
+            private final UserDto.RegisterParam givenUser = UserSampleFactory.createRequestParam();
 
-        verify(userService).registerUser(any(UserRegistrationData.class));
-    }
+            @Test
+            @DisplayName("CREATED(201)와 등록된 회원정보를 리턴한다")
+            void it_returns_201_and_registered_user() throws Exception {
+                final ResultActions resultActions = subject(givenUser);
 
-    @Test
-    void registerUserWithInvalidAttributes() throws Exception {
-        mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}")
-        )
-                .andExpect(status().isBadRequest());
-    }
+                resultActions.andExpect(status().isCreated())
+                        .andExpect(jsonPath("email").value(equalTo(givenUser.getEmail())))
+                        .andExpect(jsonPath("name").value(equalTo(givenUser.getName())))
+                        .andDo(print());
+            }
+        }
 
-    @Test
-    void updateUserWithValidAttributes() throws Exception {
-        mockMvc.perform(
-                patch("/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
-        )
-                .andExpect(status().isOk())
-                .andExpect(content().string(
-                        containsString("\"id\":1")
-                ))
-                .andExpect(content().string(
-                        containsString("\"name\":\"TEST\"")
-                ));
+        @Nested
+        @DisplayName("필수항목에 빈 값이 주어지면")
+        class Context_with_blank_value {
+            private final List<UserDto.RegisterParam> givenUsers = new ArrayList<>();
 
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
-    }
+            @BeforeEach
+            void prepare() {
+                givenUsers.add(UserSampleFactory.createRequestParamWith(FieldName.EMAIL, ValueType.NULL));
+                givenUsers.add(UserSampleFactory.createRequestParamWith(FieldName.EMAIL, ValueType.EMPTY));
+                givenUsers.add(UserSampleFactory.createRequestParamWith(FieldName.NAME, ValueType.NULL));
+                givenUsers.add(UserSampleFactory.createRequestParamWith(FieldName.NAME, ValueType.EMPTY));
+                givenUsers.add(UserSampleFactory.createRequestParamWith(FieldName.NAME, ValueType.WHITESPACE));
+                givenUsers.add(UserSampleFactory.createRequestParamWith(FieldName.PASSWORD, ValueType.NULL));
+                givenUsers.add(UserSampleFactory.createRequestParamWith(FieldName.PASSWORD, ValueType.EMPTY));
+                givenUsers.add(UserSampleFactory.createRequestParamWith(FieldName.PASSWORD, ValueType.WHITESPACE));
+            }
 
-    @Test
-    void updateUserWithInvalidAttributes() throws Exception {
-        mockMvc.perform(
-                patch("/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"password\":\"\"}")
-        )
-                .andExpect(status().isBadRequest());
-    }
+            @Test
+            @DisplayName("BAD_REQUEST(400)와 에러메세지를 리턴한다")
+            void it_returns_400_and_error_message() throws Exception {
+                givenUsers.forEach(this::test);
+            }
 
-    @Test
-    void updateUserWithNotExsitedId() throws Exception {
-        mockMvc.perform(
-                patch("/users/100")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
-        )
-                .andExpect(status().isNotFound());
+            private void test(UserDto.RegisterParam givenUser) {
+                try {
+                    final ResultActions resultActions = subject(givenUser);
 
-        verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
-    }
+                    resultActions.andExpect(status().isBadRequest())
+                            .andDo(print());
+                } catch (Exception e) {}
+            }
+        }
 
-    @Test
-    void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
-                .andExpect(status().isNoContent());
+        @Nested
+        @DisplayName("유효하지않은 이메일 형식이 주어지면")
+        class Context_with_invalid_email_format {
+            private final UserDto.RegisterParam givenUser = UserSampleFactory.createRequestParam();
 
-        verify(userService).deleteUser(1L);
-    }
+            @BeforeEach
+            void prepare() {
+                givenUser.setEmail("@invalid.email");
+            }
 
-    @Test
-    void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
-                .andExpect(status().isNotFound());
+            @Test
+            @DisplayName("BAD_REQUEST(400)와 에러메세지를 리턴한다")
+            void it_returns_400_and_error_message() throws Exception {
+                final ResultActions resultActions = subject(givenUser);
 
-        verify(userService).deleteUser(100L);
+                resultActions.andExpect(status().isBadRequest())
+                        .andExpect(content().string(containsString("well-formed email address")))
+                        .andDo(print());
+            }
+        }
+
+        @Nested
+        @DisplayName("패스워드 길이가 13자 미만이면")
+        class Context_with_password_length_under_13_chars {
+            private final UserDto.RegisterParam givenUser = UserSampleFactory.createRequestParam();
+
+            @BeforeEach
+            void prepare() {
+                givenUser.setPassword("abcde");
+            }
+
+            @Test
+            @DisplayName("BAD_REQUEST(400)와 에러메세지를 리턴한다")
+            void it_returns_400_and_error_message() throws Exception {
+                final ResultActions resultActions = subject(givenUser);
+
+                resultActions.andExpect(status().isBadRequest())
+                        .andExpect(content().string(containsString("size must be between 13 and 1024")))
+                        .andDo(print());
+            }
+        }
+
+        @Nested
+        @DisplayName("패스워드에 같은문자가 3번이상 반복되면")
+        class Context_with_password_consecutive_same_chars {
+            private final UserDto.RegisterParam givenUser = UserSampleFactory.createRequestParam();
+
+            @BeforeEach
+            void prepare() {
+                givenUser.setPassword("invaliddddpassowrd");
+            }
+
+            @Test
+            @DisplayName("BAD_REQUEST(400)와 에러메세지를 리턴한다")
+            void it_returns_400_and_error_message() throws Exception {
+                final ResultActions resultActions = subject(givenUser);
+
+                resultActions.andExpect(status().isBadRequest())
+                        .andExpect(content().string(containsString("같은 문자가 3번이상 반복되면 안됩니다.")))
+                        .andDo(print());
+            }
+        }
     }
 }
