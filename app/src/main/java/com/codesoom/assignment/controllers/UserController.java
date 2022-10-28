@@ -5,11 +5,10 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
+import com.codesoom.assignment.security.UserAuthentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -33,9 +32,10 @@ public class UserController {
 
     @PatchMapping("{id}")
     @PreAuthorize("isAuthenticated()")
-    UserResultData update(@PathVariable Long id, @RequestBody @Valid UserModificationData modificationData) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!id.equals(authentication.getPrincipal())) {
+    UserResultData update(@PathVariable Long id,
+                          @RequestBody @Valid UserModificationData modificationData,
+                          UserAuthentication authentication) {
+        if (!authentication.isSameUser(id)) {
             throw new AccessDeniedException("다른 회원의 정보를 변경할 수 없습니다.");
         }
 

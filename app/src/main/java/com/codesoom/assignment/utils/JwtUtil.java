@@ -78,8 +78,7 @@ public class JwtUtil {
         } catch (SecurityException
                  | MalformedJwtException
                  | ExpiredJwtException
-                 | UnsupportedJwtException
-                 | IllegalArgumentException e) {
+                 | UnsupportedJwtException e) {
             log.error(e.getMessage());
             return false;
         }
