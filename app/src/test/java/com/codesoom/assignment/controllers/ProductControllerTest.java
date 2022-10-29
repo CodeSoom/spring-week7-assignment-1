@@ -123,7 +123,6 @@ class ProductControllerTest {
                 )
                 .andExpect(status().isCreated())
                 .andExpect(content().string(containsString("쥐돌이")));
-//                .andExpect(content().json("쥐돌이"))
 
         verify(productService).createProduct(any(ProductData.class));
     }
