@@ -31,7 +31,8 @@ public class AuthenticationService {
      */
     public String login(String email, String password) {
         return userRepository.findByEmail(email)
-                .filter(user -> !user.isDeleted() && passwordEncoder.matches(password, user.getPassword()))
+                .filter(user -> !user.isDeleted())
+                .filter(user -> passwordEncoder.matches(password, user.getPassword()))
                 .map(user -> jwtUtil.encode(user.getId()))
                 .orElseThrow(() -> new LoginFailException(email));
     }
