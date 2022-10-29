@@ -154,18 +154,18 @@ class UserControllerTest {
         @Nested
         @DisplayName("찾을 수 있는 회원 정보가 주어지면")
         class Context_with_exist_user {
-            private Long id;
+            private Long userId;
 
             @BeforeEach
             void setUp() {
                 User user = userService.registerUser(getCreateUserRequest());
-                id = user.getId();
+                userId = user.getId();
             }
 
             @Test
             @DisplayName("204 응답을 생성한다")
             void it_creates_no_content() throws Exception {
-                mockMvc.perform(delete("/users/{id}", id))
+                mockMvc.perform(delete("/users/{id}", userId))
                         .andExpect(status().isNoContent());
             }
         }
@@ -173,19 +173,19 @@ class UserControllerTest {
         @Nested
         @DisplayName("존재하지 않는 회원 정보가 주어지면")
         class Context_with_not_exist_user {
-            private Long id;
+            private Long invalidUserId;
 
             @BeforeEach
             void setUp() {
                 User user = userService.registerUser(getCreateUserRequest());
-                id = user.getId();
-                userService.deleteUser(id);
+                invalidUserId = user.getId();
+                userService.deleteUser(invalidUserId);
             }
 
             @Test
             @DisplayName("404 응답을 생성한다")
             void it_creates_not_found() throws Exception {
-                mockMvc.perform(delete("/users/{id}", id))
+                mockMvc.perform(delete("/users/{id}", invalidUserId))
                         .andExpect(status().isNotFound());
             }
         }
