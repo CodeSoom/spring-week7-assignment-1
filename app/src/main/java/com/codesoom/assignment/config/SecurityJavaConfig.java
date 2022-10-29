@@ -1,7 +1,6 @@
 package com.codesoom.assignment.config;
 
 import com.codesoom.assignment.application.AuthenticationService;
-import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.filters.AuthenticationErrorFilter;
 import com.codesoom.assignment.filters.JwtAuthenticationFilter;
 import com.codesoom.assignment.security.UserEditVoter;
@@ -16,6 +15,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.web.filter.CharacterEncodingFilter;
 
 import javax.servlet.Filter;
 import java.util.List;
@@ -25,8 +25,6 @@ import java.util.List;
 public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private AuthenticationService authenticationService;
-    @Autowired
-    private UserRepository userRepository;
 
     @Override
     public void configure(WebSecurity web) throws Exception {
@@ -41,6 +39,7 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .addFilter(authenticationFilter)
                 .addFilterBefore(authenticationErrorFilter, JwtAuthenticationFilter.class)
+                .addFilterBefore(new CharacterEncodingFilter("UTF-8", true), AuthenticationErrorFilter.class)
                 .authorizeRequests()
                 .mvcMatchers("/users/*").hasAuthority("USER")
                 .accessDecisionManager(accessDecisionManager())
