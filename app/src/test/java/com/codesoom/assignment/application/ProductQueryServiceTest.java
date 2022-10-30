@@ -1,7 +1,6 @@
 package com.codesoom.assignment.application;
 
 import com.codesoom.assignment.domain.Product;
-import com.codesoom.assignment.domain.ProductRepository;
 import com.codesoom.assignment.errors.ProductNotFoundException;
 import com.codesoom.assignment.infra.JpaProductRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -81,9 +80,9 @@ class ProductQueryServiceTest {
 
             @Test
             @DisplayName("해당 아이디의 상품을 반환한다")
-            void it_returns_all_products() {
+            void it_returns_product() {
                 Product product = productQueryService.get(productId);
-                assertThat(product).isNotNull();
+                assertThat(product.getId()).isEqualTo(productId);
             }
         }
 
