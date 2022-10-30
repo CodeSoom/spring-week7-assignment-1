@@ -6,6 +6,8 @@ import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.ProductNotFoundException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,14 +45,34 @@ class ProductControllerTest {
     @MockBean
     private AuthenticationService authenticationService;
 
+    private String requestBodyForPost;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private String requestBodyForPatch;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws JsonProcessingException {
         Product product = Product.builder()
                 .id(1L)
                 .name("쥐돌이")
                 .maker("냥이월드")
                 .price(5000)
                 .build();
+
+        requestBodyForPost = objectMapper.writeValueAsString(
+                ProductData.builder()
+                        .name("쥐돌이")
+                        .maker("냥이월드")
+                        .price(5000)
+                        .build()
+        );
+        requestBodyForPatch = objectMapper.writeValueAsString(
+                ProductData.builder()
+                        .name("쥐순이")
+                        .maker("냥이월드")
+                        .price(5000)
+                        .build()
+        );
+
         given(productService.getProducts()).willReturn(List.of(product));
 
         given(productService.getProduct(1L)).willReturn(product);
@@ -117,8 +139,7 @@ class ProductControllerTest {
                         post("/products")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
-                                        "\"price\":5000}")
+                                .content(requestBodyForPost)
                                 .header("Authorization", "Bearer " + VALID_TOKEN)
                 )
                 .andExpect(status().isCreated())
@@ -129,12 +150,18 @@ class ProductControllerTest {
 
     @Test
     void createWithInvalidAttributes() throws Exception {
+        String requestBody = objectMapper.writeValueAsString(ProductData.builder()
+                .name("")
+                .maker("")
+                .price(0)
+                .build()
+        );
+
         mockMvc.perform(
                         post("/products")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"\",\"maker\":\"\"," +
-                                        "\"price\":0}")
+                                .content(requestBody)
                                 .header("Authorization", "Bearer " + VALID_TOKEN)
                 )
                 .andExpect(status().isBadRequest());
@@ -146,8 +173,7 @@ class ProductControllerTest {
                         post("/products")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
-                                        "\"price\":5000}")
+                                .content(requestBodyForPost)
                 )
                 .andExpect(status().isUnauthorized());
     }
@@ -158,8 +184,7 @@ class ProductControllerTest {
                         post("/products")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
-                                        "\"price\":5000}")
+                                .content(requestBodyForPost)
                                 .header("Authorization", "Bearer " + INVALID_TOKEN)
                 )
                 .andExpect(status().isUnauthorized());
@@ -171,8 +196,7 @@ class ProductControllerTest {
                         patch("/products/1")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                        "\"price\":5000}")
+                                .content(requestBodyForPatch)
                                 .header("Authorization", "Bearer " + VALID_TOKEN)
                 )
                 .andExpect(status().isOk())
@@ -186,8 +210,7 @@ class ProductControllerTest {
         mockMvc.perform(
                         patch("/products/1000")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                        "\"price\":5000}")
+                                .content(requestBodyForPatch)
                                 .header("Authorization", "Bearer " + VALID_TOKEN)
                 )
                 .andExpect(status().isNotFound());
@@ -197,12 +220,18 @@ class ProductControllerTest {
 
     @Test
     void updateWithInvalidAttributes() throws Exception {
+        String requestBody = objectMapper.writeValueAsString(ProductData.builder()
+                .name("")
+                .maker("")
+                .price(0)
+                .build()
+        );
+
         mockMvc.perform(
                         patch("/products/1")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"\",\"maker\":\"\"," +
-                                        "\"price\":0}")
+                                .content(requestBody)
                                 .header("Authorization", "Bearer " + VALID_TOKEN)
                 )
                 .andExpect(status().isBadRequest());
@@ -214,8 +243,7 @@ class ProductControllerTest {
                         patch("/products/1")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                        "\"price\":5000}")
+                                .content(requestBodyForPatch)
                 )
                 .andExpect(status().isUnauthorized());
     }
@@ -226,8 +254,7 @@ class ProductControllerTest {
                         patch("/products/1")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                        "\"price\":5000}")
+                                .content(requestBodyForPatch)
                                 .header("Authorization", "Bearer " + INVALID_TOKEN)
                 )
                 .andExpect(status().isUnauthorized());
@@ -258,11 +285,9 @@ class ProductControllerTest {
     @Test
     void destroyWithInvalidAccessToken() throws Exception {
         mockMvc.perform(
-                        patch("/products/1")
+                        delete("/products/1")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                        "\"price\":5000}")
                                 .header("Authorization", "Bearer " + INVALID_TOKEN)
                 )
                 .andExpect(status().isUnauthorized());
@@ -271,11 +296,9 @@ class ProductControllerTest {
     @Test
     void destroyWithoutAccessToken() throws Exception {
         mockMvc.perform(
-                        patch("/products/1")
+                        delete("/products/1")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"쥐순이\",\"maker\":\"냥이월드\"," +
-                                        "\"price\":5000}")
                 )
                 .andExpect(status().isUnauthorized());
     }
