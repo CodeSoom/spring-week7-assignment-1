@@ -3,7 +3,6 @@ package com.codesoom.assignment.domain;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Entity;
@@ -13,7 +12,6 @@ import javax.persistence.Id;
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class User {
     @Id
@@ -31,6 +29,9 @@ public class User {
 
     @Builder.Default
     private boolean deleted = false;
+
+    public User() {
+    }
 
     public void changeWith(User source) {
         name = source.name;
