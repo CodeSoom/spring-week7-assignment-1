@@ -12,7 +12,6 @@ import javax.persistence.Table;
 
 @Entity
 @Getter
-@ToString(of = {"id", "name", "maker", "price", "imageUrl"})
 @Table(name = "products")
 public class Product {
     @Id
