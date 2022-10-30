@@ -103,6 +103,20 @@ public class UserAuthenticateControllerTest {
             }
         }
 
+        @DisplayName("token 헤더 없이 요청한 경우")
+        @Nested
+        class Context_without_token {
+            @DisplayName("401을 응답한다")
+            @Test
+            void it_returns_401() throws Exception {
+                mockMvc.perform(patch("/users/" + savedUser.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody)
+                        )
+                        .andExpect(status().isUnauthorized());
+            }
+        }
+
         @DisplayName("다른 유저가 요청한 경우")
         @Nested
         class Context_with_valid_token_but_different_user {
