@@ -26,7 +26,7 @@ public class UserDto {
         private String name;
 
         @NotBlank
-        @Size(min = 13, max = 1024)
+        @Size(min = 8, max = 1024)
         @SameConsecutiveChar
         private String password;
     }
@@ -39,7 +39,7 @@ public class UserDto {
         private String name;
 
         @NotBlank
-        @Size(min = 13, max = 1024)
+        @Size(min = 8, max = 1024)
         @SameConsecutiveChar
         private String password;
 
