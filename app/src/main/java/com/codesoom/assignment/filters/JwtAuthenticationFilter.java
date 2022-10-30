@@ -1,6 +1,7 @@
 package com.codesoom.assignment.filters;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.security.UserAuthentication;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -31,16 +32,17 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
         String authorization = request.getHeader("Authorization");
 
-        if (authorization != null) {
-
-            String accessToken = authorization.substring("Bearer ".length());
-
-            Long userId = authenticationService.parseToken(accessToken);
-
-            SecurityContext context = SecurityContextHolder.getContext();
-            Authentication authentication = new UserAuthentication(userId);
-            context.setAuthentication(authentication);
+        if (authorization == null) {
+            throw new InvalidTokenException("토큰이 필요합니다");
         }
+
+        String accessToken = authorization.substring("Bearer ".length());
+
+        Long userId = authenticationService.parseToken(accessToken);
+
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = new UserAuthentication(userId);
+        context.setAuthentication(authentication);
 
         chain.doFilter(request, response);
     }
@@ -60,6 +62,11 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         if (path.startsWith("/users")) {
             return method.equals("POST");
         }
+
+        if (path.startsWith("/session")) {
+            return true;
+        }
+
         return false;
     }
 }
