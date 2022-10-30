@@ -24,8 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class UserAuthenticateControllerTest {
-    private String invalidToken;
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -40,7 +38,8 @@ public class UserAuthenticateControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private String validToken;
+    private String authorizationHeader;
+    private String invalidAuthorizationHeader;
 
     @DisplayName("update 메서드")
     @Nested
@@ -64,8 +63,8 @@ public class UserAuthenticateControllerTest {
 
             requestBody = objectMapper.writeValueAsString(userModificationData);
 
-            validToken = "Bearer " + authenticationService.login(savedUser.getEmail(), "12345");
-            invalidToken = validToken + "0";
+            authorizationHeader = "Bearer " + authenticationService.login(savedUser.getEmail(), "12345");
+            invalidAuthorizationHeader = authorizationHeader + "0";
         }
 
         @AfterEach
@@ -80,7 +79,7 @@ public class UserAuthenticateControllerTest {
             @Test
             void it_returns_401() throws Exception {
                 mockMvc.perform(patch("/users/" + savedUser.getId())
-                                .header("Authorization", invalidToken)
+                                .header("Authorization", invalidAuthorizationHeader)
                                 .accept(MediaType.APPLICATION_JSON)
                                 .content(requestBody)
                         )
@@ -95,7 +94,7 @@ public class UserAuthenticateControllerTest {
             @Test
             void it_returns_200() throws Exception {
                 mockMvc.perform(patch("/users/" + savedUser.getId())
-                                .header("Authorization", validToken)
+                                .header("Authorization", authorizationHeader)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(requestBody)
                         )
@@ -120,7 +119,7 @@ public class UserAuthenticateControllerTest {
         @DisplayName("다른 유저가 요청한 경우")
         @Nested
         class Context_with_valid_token_but_different_user {
-            private String savedUser2Token;
+            private String otherUserAuthorizationHeader;
 
             @BeforeEach
             void setUp() {
@@ -130,14 +129,14 @@ public class UserAuthenticateControllerTest {
                         .password(passwordEncoder.encode("12345"))
                         .build()
                 );
-                savedUser2Token = "Bearer " + authenticationService.login(savedUser2.getEmail(), "12345");
+                otherUserAuthorizationHeader = "Bearer " + authenticationService.login(savedUser2.getEmail(), "12345");
             }
 
             @DisplayName("403을 응답한다")
             @Test
             void it_returns_403() throws Exception {
                 mockMvc.perform(patch("/users/" + savedUser.getId())
-                                .header("Authorization", savedUser2Token)
+                                .header("Authorization", otherUserAuthorizationHeader)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(requestBody)
                         )
