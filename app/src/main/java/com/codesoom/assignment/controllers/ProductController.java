@@ -65,8 +65,7 @@ public class ProductController {
     @PreAuthorize("isAuthenticated()")
     public ProductInfo updateProduct(
             @PathVariable Long id,
-            @RequestBody @Valid ProductDto.RegisterParam request,
-            Authentication authentication
+            @RequestBody @Valid ProductDto.RegisterParam request
     ) {
         final ProductCommand.Update command = productMapper.of(id, request);
         return new ProductInfo(productService.updateProduct(command));
