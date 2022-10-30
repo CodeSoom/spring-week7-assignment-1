@@ -156,11 +156,14 @@ class ProductCommandServiceTest {
     }
 
     private ProductData updateData() {
+        ProductData createdData = createData();
+
+        final String updated = "updated ";
         return ProductData.builder()
-                .name("TOY 2")
-                .maker("SHOP 2")
-                .price(12000)
-                .imageUrl("toy2.jpg")
+                .name(updated + createdData.getName())
+                .maker(updated + createdData.getMaker())
+                .price(createdData.getPrice() + 5000)
+                .imageUrl(updated + createdData.getName())
                 .build();
     }
 }
