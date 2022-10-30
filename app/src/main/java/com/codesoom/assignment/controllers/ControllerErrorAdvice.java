@@ -44,37 +44,6 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Log-in failed");
     }
 
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(InvalidTokenException.class)
-    public ErrorResponse handleInvalidAccessTokenException() {
-        return new ErrorResponse("Invalid access token");
-    }
-
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler(AccessDeniedException.class)
-    public ErrorResponse handleAccessDeniedException() {
-        return new ErrorResponse("Access Denied");
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ErrorResponse handleConstraintValidateError(
-            ConstraintViolationException exception
-    ) {
-        String messageTemplate = getViolatedMessage(exception);
-        return new ErrorResponse(messageTemplate);
-    }
-
-    private String getViolatedMessage(ConstraintViolationException exception) {
-        String messageTemplate = null;
-        Set<ConstraintViolation<?>> violations = exception.getConstraintViolations();
-        for (ConstraintViolation<?> violation : violations) {
-            messageTemplate = violation.getMessageTemplate();
-        }
-        return messageTemplate;
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException e) {
         Map<String, String> responseBody = new HashMap<>();
