@@ -4,9 +4,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
-  h2:
-    console:
-      enabled: true
 
 jwt:
   secret: "12345678901234567890123456789010"

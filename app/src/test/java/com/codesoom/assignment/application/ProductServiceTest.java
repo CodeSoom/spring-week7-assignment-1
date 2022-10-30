@@ -1,5 +1,6 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.application.dto.ProductCommand;
 import com.codesoom.assignment.application.dto.ProductCommand.Update;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.domain.ProductRepository;
@@ -150,26 +151,31 @@ class ProductServiceTest {
         @DisplayName("유효한 ID가 주어지면")
         class Context_with_valid_id extends JpaTest {
             private Product savedProduct;
-            private final ProductDto.RegisterParam updateProduct = new ProductDto.RegisterParam();
 
             @BeforeEach
             void prepare() {
                 savedProduct = getProductRepository().save(ProductSampleFactory.createProduct());
-
-                updateProduct.setName("수정_" + savedProduct.getName());
-                updateProduct.setMaker("수정_" + savedProduct.getMaker());
-                updateProduct.setPrice(savedProduct.getPrice() + 1000);
             }
 
             @Test
             @DisplayName("상품을 수정하고 수정된 상품을 리턴한다")
             void it_returns_modified_product() {
-                final Product actualProduct = getProductService().updateProduct(getProductMapper().of(savedProduct.getId(), updateProduct));
+                ProductCommand.Update.UpdateBuilder builder = ProductCommand.Update.builder();
+                System.out.println(builder.toString());
 
-                assertThat(actualProduct.getId()).isEqualTo(savedProduct.getId());
-                assertThat(actualProduct.getName()).isEqualTo(updateProduct.getName());
-                assertThat(actualProduct.getMaker()).isEqualTo(updateProduct.getMaker());
-                assertThat(actualProduct.getPrice()).isEqualTo(updateProduct.getPrice());
+                final ProductCommand.Update command = builder
+                        .id(savedProduct.getId())
+                        .name("수정_" + savedProduct.getName())
+                        .maker("수정_" + savedProduct.getMaker())
+                        .price(savedProduct.getPrice() + 1000)
+                        .build();
+
+                final Product actualProduct = getProductService().updateProduct(command);
+
+                assertThat(actualProduct.getId()).isEqualTo(command.getId());
+                assertThat(actualProduct.getName()).isEqualTo(command.getName());
+                assertThat(actualProduct.getMaker()).isEqualTo(command.getMaker());
+                assertThat(actualProduct.getPrice()).isEqualTo(command.getPrice());
             }
         }
 

@@ -30,7 +30,7 @@ class ProductTest {
                 .price(5000)
                 .build();
 
-        product.changeWith(Product.builder()
+        product.modifyProduct(Product.builder()
                 .name("쥐순이")
                 .maker("코드숨")
                 .price(10000)

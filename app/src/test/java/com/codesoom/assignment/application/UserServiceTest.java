@@ -109,7 +109,10 @@ class UserServiceTest {
             @Test
             @DisplayName("회원정보를 수정하고 리턴한다.")
             void it_returns_modified_user() {
-                final UserCommand.Update givenCommand = UserCommand.Update.builder()
+                UserCommand.Update.UpdateBuilder builder = UserCommand.Update.builder();
+                System.out.println(builder.toString());
+
+                final UserCommand.Update givenCommand = builder
                         .id(savedUser.getId())
                         .name("홍길동")
                         .password("modify_test1234")

@@ -53,7 +53,7 @@ public class UserSampleFactory {
         final UserDto.RegisterParam request = new UserDto.RegisterParam();
         request.setName(getRandomName());
         request.setPassword(getRandomPassword());
-        request.setEmail("test" + random.nextInt(100) + "@gmail.com");
+        request.setEmail("mailtest" + random.nextInt(100) + "@gmail.com");
 
         return request;
     }
@@ -80,7 +80,7 @@ public class UserSampleFactory {
 
         request.setName(fieldName == NAME ? testValue : getRandomName());
         request.setPassword(fieldName == PASSWORD ? testValue : getRandomPassword());
-        request.setEmail(fieldName == EMAIL ? testValue : "test" + random.nextInt(100) + "@gmail.com");
+        request.setEmail(fieldName == EMAIL ? testValue : "test" + random.nextInt(10000) + "@gmail.com");
 
         return request;
     }

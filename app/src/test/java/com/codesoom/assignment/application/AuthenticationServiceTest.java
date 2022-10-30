@@ -4,9 +4,12 @@ package com.codesoom.assignment.application;
 import com.codesoom.assignment.application.dto.SessionCommand;
 import com.codesoom.assignment.application.dto.UserCommand;
 import com.codesoom.assignment.domain.User;
+import com.codesoom.assignment.dto.SessionDto;
 import com.codesoom.assignment.errors.LoginFailException;
+import com.codesoom.assignment.mapper.SessionFactory;
 import com.codesoom.assignment.mapper.UserFactory;
 import com.codesoom.assignment.security.JwtTokenProvider;
+import com.codesoom.assignment.utils.LoginSampleFactory;
 import com.codesoom.assignment.utils.UserSampleFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,10 +47,14 @@ class AuthenticationServiceTest {
             @Test
             @DisplayName("액세스 토큰을 생성하고 리턴한다.")
             void it_returns_access_token() {
-                SessionCommand.SessionRequest command = SessionCommand.SessionRequest.builder()
-                        .email(register.getEmail())
-                        .password(register.getPassword())
-                        .build();
+                SessionDto.SessionRequestData loginParam = new SessionDto.SessionRequestData();
+                loginParam.setEmail(register.getEmail());
+                loginParam.setPassword(register.getPassword());
+
+                SessionCommand.SessionRequest.SessionRequestBuilder builder = SessionCommand.SessionRequest.builder();
+                System.out.println(builder.toString());
+
+                SessionCommand.SessionRequest command = SessionFactory.INSTANCE.of(loginParam);
 
                 String actualToken = authenticationService.login(command);
 
