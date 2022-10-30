@@ -8,6 +8,10 @@ import org.springframework.security.web.FilterInvocation;
 import java.util.Collection;
 import java.util.Objects;
 
+/**
+ * user 수정/삭제 작업에 접근하는 유저의 권한을 결정한다. <p>
+ * return : 요청하는 유저의 userId와 요청하는 url 의 userId가 일치하는 경우 ACCESS_GRANTED, 일치하지 않는 경우 ACCESS_DENIED
+ */
 public class UserEditVoter implements AccessDecisionVoter<FilterInvocation> {
     @Override
     public boolean supports(ConfigAttribute attribute) {
