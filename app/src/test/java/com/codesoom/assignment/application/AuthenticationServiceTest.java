@@ -38,6 +38,8 @@ class AuthenticationServiceTest {
         authenticationService = new AuthenticationService(userRepository, jwtUtil, passwordEncoder);
 
         User user = User.builder()
+                .id(1L)
+                .email("tester@exaple.com")
                 .password("test")
                 .build();
         user.changePassword("test", passwordEncoder);
