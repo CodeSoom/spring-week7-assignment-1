@@ -102,6 +102,10 @@ describe('Users', () => {
     });
 
     context('with wrong parameter', () => {
+      beforeEach(async () => {
+        id = user.id;
+      });
+
       it('responses Bad Request', async () => {
         const promises = [
           { name: '' },
