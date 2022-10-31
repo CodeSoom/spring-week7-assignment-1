@@ -25,4 +25,7 @@ public class UserRegistrationData {
     @Size(min = 4, max = 1024)
     @Mapping("password")
     private String password;
+
+    public UserRegistrationData() {
+    }
 }

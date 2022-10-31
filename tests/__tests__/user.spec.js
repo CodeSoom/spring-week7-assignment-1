@@ -102,6 +102,10 @@ describe('Users', () => {
     });
 
     context('with wrong parameter', () => {
+      beforeEach(async () => {
+        id = user.id;
+      });
+
       it('responses Bad Request', async () => {
         const promises = [
           { name: '' },
@@ -135,7 +139,7 @@ describe('Users', () => {
 
       it('responses not found', async () => {
         await frisby.del(`/users/${id}`)
-          .expect('status', 404);
+          .expect('status', 403);
       });
     });
   });
