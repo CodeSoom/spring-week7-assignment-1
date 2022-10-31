@@ -136,6 +136,6 @@ public class ProductSampleFactory {
     }
 
     public enum ValueType {
-        NULL, EMPTY, BLANK
+        NULL, EMPTY, WHITESPACE
     }
 }

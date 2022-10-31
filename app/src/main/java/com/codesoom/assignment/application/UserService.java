@@ -8,8 +8,9 @@ import com.codesoom.assignment.errors.UserNotFoundException;
 import com.codesoom.assignment.mapper.UserFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -49,7 +50,8 @@ public class UserService {
      * @throws UserNotFoundException 회원을 찾지 못한 경우
      */
     public User updateUser(UserCommand.Update command) {
-        final User user = findUser(command.getId());
+        final User user = userRepository.findByIdAndDeletedIsFalse(command.getId())
+                .orElseThrow(() -> new UserNotFoundException(command.getId()));
 
         user.modifyUserInfo(userFactory.toEntity(command));
         user.modifyPassword(command.getPassword(), passwordEncoder);
@@ -64,13 +66,19 @@ public class UserService {
      * @throws UserNotFoundException 회원을 찾지 못한 경우
      */
     public User deleteUser(Long id) {
-        final User user = findUser(id);
+        final User user = userRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
         user.deleteUser();
         return user;
     }
 
-    private User findUser(Long id) {
-        return userRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+    /**
+     * 회원 ID에 해당하는 회원정보를 리턴한다.
+     * @param id 회원 ID
+     * @return 회원정보
+     */
+    @Transactional(readOnly = true)
+    public Optional<User> findUserById(Long id) {
+        return userRepository.findByIdAndDeletedIsFalse(id);
     }
 }

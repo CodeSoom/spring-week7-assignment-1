@@ -1,5 +1,12 @@
 package com.codesoom.assignment;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
 class AppTest {
-    // TODO: 언젠가 필요하면 다시 돌아온다. - I'll be back!
+    @Test
+    void contextLoads() {
+        App.main(new String[]{});
+    }
 }

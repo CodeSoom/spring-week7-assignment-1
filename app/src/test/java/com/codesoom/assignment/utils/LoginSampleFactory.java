@@ -61,6 +61,6 @@ public class LoginSampleFactory {
     }
 
     public enum ValueType {
-        NULL, EMPTY, BLANK
+        NULL, EMPTY, WHITESPACE
     }
 }

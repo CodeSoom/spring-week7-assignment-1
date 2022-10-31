@@ -4,20 +4,19 @@ import com.codesoom.assignment.application.dto.SessionCommand;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.errors.LoginFailException;
-import com.codesoom.assignment.utils.JwtUtil;
-import io.jsonwebtoken.Claims;
+import com.codesoom.assignment.security.JwtTokenProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
+    private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthenticationService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
+    public AuthenticationService(UserRepository userRepository, JwtTokenProvider jwtTokenProvider, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.jwtUtil = jwtUtil;
+        this.jwtTokenProvider = jwtTokenProvider;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -35,16 +34,7 @@ public class AuthenticationService {
             throw new LoginFailException(command.getEmail());
         }
 
-        return jwtUtil.encode(user.getId());
+        return jwtTokenProvider.createToken(user.getId());
     }
 
-    /**
-     * 인증토큰을 검증 후 복호화된 사용자 ID를 리턴한다.
-     * @param accessToken 인증토큰
-     * @return 사용자 ID
-     */
-    public Long parseToken(String accessToken) {
-        final Claims claims = jwtUtil.decode(accessToken);
-        return claims.get("userId", Long.class);
-    }
 }

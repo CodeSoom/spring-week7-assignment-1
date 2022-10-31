@@ -1,87 +1,102 @@
 package com.codesoom.assignment.application;
 
-import com.codesoom.assignment.domain.User;
-import com.codesoom.assignment.domain.UserRepository;
-import com.codesoom.assignment.errors.InvalidTokenException;
-import com.codesoom.assignment.errors.LoginFailException;
-import com.codesoom.assignment.utils.JwtUtil;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
+import com.codesoom.assignment.application.dto.SessionCommand;
+import com.codesoom.assignment.application.dto.UserCommand;
+import com.codesoom.assignment.domain.User;
+import com.codesoom.assignment.dto.SessionDto;
+import com.codesoom.assignment.errors.LoginFailException;
+import com.codesoom.assignment.mapper.SessionFactory;
+import com.codesoom.assignment.mapper.UserFactory;
+import com.codesoom.assignment.security.JwtTokenProvider;
+import com.codesoom.assignment.utils.LoginSampleFactory;
+import com.codesoom.assignment.utils.UserSampleFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
+@SpringBootTest
+@DisplayName("AuthenticationService 클래스")
 class AuthenticationServiceTest {
-    private static final String SECRET = "12345678901234567890123456789012";
 
-    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
-    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
-
+    @Autowired
     private AuthenticationService authenticationService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private UserFactory userFactory;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
-    private UserRepository userRepository = mock(UserRepository.class);
+    @Nested
+    @DisplayName("login 메소드는")
+    class Describe_login {
+        @Nested
+        @DisplayName("유효한 로그인 정보가 주어지면")
+        class Context_with_valid_login_info {
+            private final UserCommand.Register register = userFactory.of(UserSampleFactory.createRequestParam());
+            private final User savedUser = userService.registerUser(register);
+            private final String givenToken = jwtTokenProvider.createToken(savedUser.getId());
 
-    @BeforeEach
-    void setUp() {
-        JwtUtil jwtUtil = new JwtUtil(SECRET);
+            @Test
+            @DisplayName("액세스 토큰을 생성하고 리턴한다.")
+            void it_returns_access_token() {
+                SessionDto.SessionRequestData loginParam = new SessionDto.SessionRequestData();
+                loginParam.setEmail(register.getEmail());
+                loginParam.setPassword(register.getPassword());
 
-        authenticationService = new AuthenticationService(
-                userRepository, jwtUtil);
+                SessionCommand.SessionRequest.SessionRequestBuilder builder = SessionCommand.SessionRequest.builder();
+                System.out.println(builder.toString());
 
-        User user = User.builder()
-                .password("test")
-                .build();
+                SessionCommand.SessionRequest command = SessionFactory.INSTANCE.of(loginParam);
 
-        given(userRepository.findByEmail("tester@example.com"))
-                .willReturn(Optional.of(user));
-    }
+                String actualToken = authenticationService.login(command);
 
-    @Test
-    void loginWithRightEmailAndPassword() {
-        String accessToken = authenticationService.login(
-                "tester@example.com", "test");
+                assertThat(actualToken).isEqualTo(givenToken);
+            }
+        }
 
-        assertThat(accessToken).isEqualTo(VALID_TOKEN);
+        @Nested
+        @DisplayName("유효하지않은 이메일이 주어지면")
+        class Context_with_invalid_email {
+            @Test
+            @DisplayName("예외를 던진다.")
+            void it_throws_exception() {
+                SessionCommand.SessionRequest command = SessionCommand.SessionRequest.builder()
+                        .email("invalid@email.com")
+                        .password("test1234")
+                        .build();
 
-        verify(userRepository).findByEmail("tester@example.com");
-    }
+                assertThatThrownBy(() -> authenticationService.login(command)).isInstanceOf(LoginFailException.class);
+            }
+        }
 
-    @Test
-    void loginWithWrongEmail() {
-        assertThatThrownBy(
-                () -> authenticationService.login("badguy@example.com", "test")
-        ).isInstanceOf(LoginFailException.class);
+        @Nested
+        @DisplayName("잘못된 비밀번호가 주어지면")
+        class Context_with_wrong_password {
+            private final UserCommand.Register register = userFactory.of(UserSampleFactory.createRequestParam());
 
-        verify(userRepository).findByEmail("badguy@example.com");
-    }
+            @BeforeEach
+            void prepare() {
+                final User savedUser = userService.registerUser(register);
+            }
 
-    @Test
-    void loginWithWrongPassword() {
-        assertThatThrownBy(
-                () -> authenticationService.login("tester@example.com", "xxx")
-        ).isInstanceOf(LoginFailException.class);
+            @Test
+            @DisplayName("예외를 던진다.")
+            void it_throws_exception() {
+                SessionCommand.SessionRequest command = SessionCommand.SessionRequest.builder()
+                        .email(register.getEmail())
+                        .password("invalid_password")
+                        .build();
 
-        verify(userRepository).findByEmail("tester@example.com");
-    }
-
-    @Test
-    void parseTokenWithValidToken() {
-        Long userId = authenticationService.parseToken(VALID_TOKEN);
-
-        assertThat(userId).isEqualTo(1L);
-    }
-
-    @Test
-    void parseTokenWithInvalidToken() {
-        assertThatThrownBy(
-                () -> authenticationService.parseToken(INVALID_TOKEN)
-        ).isInstanceOf(InvalidTokenException.class);
+                assertThatThrownBy(() -> authenticationService.login(command)).isInstanceOf(LoginFailException.class);
+            }
+        }
     }
 }

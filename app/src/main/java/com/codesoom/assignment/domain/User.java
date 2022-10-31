@@ -15,7 +15,6 @@ import javax.persistence.Table;
 @Generated
 @Entity
 @Getter
-@ToString(of = {"id", "name", "password", "email"})
 @Table(name = "users")
 public class User {
     @Id
