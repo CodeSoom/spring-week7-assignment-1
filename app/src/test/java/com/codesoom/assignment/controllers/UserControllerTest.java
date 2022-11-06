@@ -1,157 +1,208 @@
 package com.codesoom.assignment.controllers;
 
-import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
-import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.infra.JpaUserRepository;
+import com.codesoom.assignment.utils.JwtUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(UserController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@DisplayName("UserController 클래스")
 class UserControllerTest {
+
+    private static final String NAME = "tester";
+    private static final String EMAIL = "tester@example.com";
+    private static final String PASSWORD = "tester12345";
+
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Autowired
+    private JpaUserRepository userRepository;
+
+    @Autowired
     private UserService userService;
 
-    @MockBean
-    private AuthenticationService authenticationService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
-    @BeforeEach
-    void setUp() {
-        given(userService.registerUser(any(UserRegistrationData.class)))
-                .will(invocation -> {
-                    UserRegistrationData registrationData = invocation.getArgument(0);
-                    return User.builder()
-                            .id(13L)
-                            .email(registrationData.getEmail())
-                            .name(registrationData.getName())
-                            .build();
-                });
+    @Autowired
+    private ObjectMapper objectMapper;
 
-
-        given(userService.updateUser(eq(1L), any(UserModificationData.class)))
-                .will(invocation -> {
-                    Long id = invocation.getArgument(0);
-                    UserModificationData modificationData =
-                            invocation.getArgument(1);
-                    return User.builder()
-                            .id(id)
-                            .email("tester@example.com")
-                            .name(modificationData.getName())
-                            .build();
-                });
-
-        given(userService.updateUser(eq(100L), any(UserModificationData.class)))
-                .willThrow(new UserNotFoundException(100L));
-
-        given(userService.deleteUser(100L))
-                .willThrow(new UserNotFoundException(100L));
+    @AfterEach
+    void clear() {
+        userRepository.deleteAll();
     }
 
-    @Test
-    void registerUserWithValidAttributes() throws Exception {
-        mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"tester@example.com\"," +
-                                "\"name\":\"Tester\",\"password\":\"test\"}")
-        )
-                .andExpect(status().isCreated())
-                .andExpect(content().string(
-                        containsString("\"id\":13")
-                ))
-                .andExpect(content().string(
-                        containsString("\"email\":\"tester@example.com\"")
-                ))
-                .andExpect(content().string(
-                        containsString("\"name\":\"Tester\"")
-                ));
+    @Nested
+    @DisplayName("create 메소드는")
+    class Describe_create {
 
-        verify(userService).registerUser(any(UserRegistrationData.class));
+        @Nested
+        @DisplayName("입력값이 올바른 경우")
+        class Context_with_valid_input {
+
+            @Test
+            @DisplayName("201 응답을 생성한다")
+            void it_creates_created() throws Exception {
+                mockMvc.perform(post("/users")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(getCreateUserRequest())))
+                        .andExpect(status().isCreated());
+            }
+        }
+
+        @Nested
+        @DisplayName("입력값이 올바르지 않은 경우")
+        class Context_with_invalid_input {
+            private final UserRegistrationData registrationData = UserRegistrationData.builder()
+                    .name("")
+                    .email("")
+                    .password("")
+                    .build();
+
+            @Test
+            @DisplayName("400 응답을 생성한다")
+            void it_creates_bad_request() throws Exception {
+                mockMvc.perform(post("/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(registrationData)))
+                        .andExpect(status().isBadRequest());
+            }
+        }
     }
 
-    @Test
-    void registerUserWithInvalidAttributes() throws Exception {
-        mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}")
-        )
-                .andExpect(status().isBadRequest());
+    @Nested
+    @DisplayName("update 메소드는")
+    class Describe_update {
+        private final String AUTHORIZATION = "Authorization";
+        private final String BEARER = "Bearer ";
+
+        @Nested
+        @DisplayName("본인의 회원 정보 수정 요청이 들어오면")
+        class Context_with_valid_user_and_input {
+            private Long userId;
+            private String validToken;
+
+            @BeforeEach
+            void setUp() {
+                User user = userService.registerUser(getCreateUserRequest());
+                userId = user.getId();
+                validToken = jwtUtil.encode(userId);
+            }
+
+            @Test
+            @DisplayName("200 응답을 생성한다")
+            void it_creates_ok() throws Exception {
+                mockMvc.perform(patch("/users/{id}", userId)
+                                .header(AUTHORIZATION, BEARER + validToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(getUpdateUserRequest())))
+                        .andExpect(status().isOk());
+            }
+        }
+
+        @Nested
+        @DisplayName("본인이 아닌 다른 회원의 정보 수정 요청이 들어오면")
+        class Context_with_other_user {
+            private Long otherUserId;
+            private String validToken;
+
+            @BeforeEach
+            void setUp() {
+                User user = userService.registerUser(getCreateUserRequest());
+                validToken = jwtUtil.encode(user.getId());
+                otherUserId = user.getId() + 100;
+            }
+
+            @Test
+            @DisplayName("403 응답을 생성한다")
+            void it_creates_forbidden() throws Exception {
+                mockMvc.perform(patch("/users/{id}", otherUserId)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .header(AUTHORIZATION, BEARER + validToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(getUpdateUserRequest())))
+                        .andExpect(status().isForbidden());
+            }
+        }
     }
 
-    @Test
-    void updateUserWithValidAttributes() throws Exception {
-        mockMvc.perform(
-                patch("/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"test\"}")
-        )
-                .andExpect(status().isOk())
-                .andExpect(content().string(
-                        containsString("\"id\":1")
-                ))
-                .andExpect(content().string(
-                        containsString("\"name\":\"TEST\"")
-                ));
+    @Nested
+    @DisplayName("delete 메소드는")
+    class Describe_delete {
 
-        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
+        @Nested
+        @DisplayName("찾을 수 있는 회원 정보가 주어지면")
+        class Context_with_exist_user {
+            private Long userId;
+
+            @BeforeEach
+            void setUp() {
+                User user = userService.registerUser(getCreateUserRequest());
+                userId = user.getId();
+            }
+
+            @Test
+            @DisplayName("204 응답을 생성한다")
+            void it_creates_no_content() throws Exception {
+                mockMvc.perform(delete("/users/{id}", userId))
+                        .andExpect(status().isNoContent());
+            }
+        }
+
+        @Nested
+        @DisplayName("존재하지 않는 회원 정보가 주어지면")
+        class Context_with_not_exist_user {
+            private Long invalidUserId;
+
+            @BeforeEach
+            void setUp() {
+                User user = userService.registerUser(getCreateUserRequest());
+                invalidUserId = user.getId();
+                userService.deleteUser(invalidUserId);
+            }
+
+            @Test
+            @DisplayName("404 응답을 생성한다")
+            void it_creates_not_found() throws Exception {
+                mockMvc.perform(delete("/users/{id}", invalidUserId))
+                        .andExpect(status().isNotFound());
+            }
+        }
     }
 
-    @Test
-    void updateUserWithInvalidAttributes() throws Exception {
-        mockMvc.perform(
-                patch("/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"password\":\"\"}")
-        )
-                .andExpect(status().isBadRequest());
+    private UserModificationData getUpdateUserRequest() {
+        return UserModificationData.builder()
+                .name(NAME)
+                .password(PASSWORD)
+                .build();
     }
 
-    @Test
-    void updateUserWithNotExsitedId() throws Exception {
-        mockMvc.perform(
-                patch("/users/100")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
-        )
-                .andExpect(status().isNotFound());
-
-        verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
-    }
-
-    @Test
-    void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
-                .andExpect(status().isNoContent());
-
-        verify(userService).deleteUser(1L);
-    }
-
-    @Test
-    void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
-                .andExpect(status().isNotFound());
-
-        verify(userService).deleteUser(100L);
+    private UserRegistrationData getCreateUserRequest() {
+        return UserRegistrationData.builder()
+                .name(NAME)
+                .email(EMAIL)
+                .password(PASSWORD)
+                .build();
     }
 }

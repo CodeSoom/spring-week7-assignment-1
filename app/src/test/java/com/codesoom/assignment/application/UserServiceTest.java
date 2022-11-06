@@ -10,6 +10,8 @@ import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -24,15 +26,14 @@ class UserServiceTest {
     private static final String EXISTED_EMAIL_ADDRESS = "existed@example.com";
     private static final Long DELETED_USER_ID = 200L;
 
-    private UserService userService;
-
     private final UserRepository userRepository = mock(UserRepository.class);
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    private UserService userService;
 
     @BeforeEach
     void setUp() {
-        Mapper mapper = DozerBeanMapperBuilder.buildDefault();
-
-        userService = new UserService(mapper, userRepository);
+        userService = new UserService(userRepository, passwordEncoder);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
                 .willReturn(true);
@@ -43,6 +44,7 @@ class UserServiceTest {
                     .id(13L)
                     .email(source.getEmail())
                     .name(source.getName())
+                    .password(passwordEncoder.encode(source.getPassword()))
                     .build();
         });
 
@@ -52,7 +54,7 @@ class UserServiceTest {
                                 .id(1L)
                                 .email(EXISTED_EMAIL_ADDRESS)
                                 .name("Tester")
-                                .password("test")
+                                .password(passwordEncoder.encode("test"))
                                 .build()));
 
         given(userRepository.findByIdAndDeletedIsFalse(100L))
@@ -105,6 +107,8 @@ class UserServiceTest {
         assertThat(user.getId()).isEqualTo(1L);
         assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
         assertThat(user.getName()).isEqualTo("TEST");
+        assertThat(user.getPassword()).isNotEqualTo("TEST");
+        assertThat(passwordEncoder.matches("TEST", user.getPassword())).isTrue();
 
         verify(userRepository).findByIdAndDeletedIsFalse(1L);
     }

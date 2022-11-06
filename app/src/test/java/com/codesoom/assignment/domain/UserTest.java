@@ -9,10 +9,7 @@ class UserTest {
     void changeWith() {
         User user = User.builder().build();
 
-        user.changeWith(User.builder()
-                .name("TEST")
-                .password("TEST")
-                .build());
+        user.update("TEST", "TEST");
 
         assertThat(user.getName()).isEqualTo("TEST");
         assertThat(user.getPassword()).isEqualTo("TEST");
@@ -27,26 +24,5 @@ class UserTest {
         user.destroy();
 
         assertThat(user.isDeleted()).isTrue();
-    }
-
-    @Test
-    void authenticate() {
-        User user = User.builder()
-                .password("test")
-                .build();
-
-        assertThat(user.authenticate("test")).isTrue();
-        assertThat(user.authenticate("xxx")).isFalse();
-    }
-
-    @Test
-    void authenticateWithDeletedUser() {
-        User user = User.builder()
-                .password("test")
-                .deleted(true)
-                .build();
-
-        assertThat(user.authenticate("test")).isFalse();
-        assertThat(user.authenticate("xxx")).isFalse();
     }
 }
