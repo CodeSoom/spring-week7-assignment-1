@@ -16,10 +16,8 @@ public class ProductService {
     private final Mapper mapper;
     private final ProductRepository productRepository;
 
-    public ProductService(
-            Mapper dozerMapper,
-            ProductRepository productRepository
-    ) {
+    public ProductService(final Mapper dozerMapper,
+                          final ProductRepository productRepository) {
         this.mapper = dozerMapper;
         this.productRepository = productRepository;
     }
@@ -28,16 +26,16 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public Product getProduct(Long id) {
+    public Product getProduct(final Long id) {
         return findProduct(id);
     }
 
-    public Product createProduct(ProductData productData) {
+    public Product createProduct(final ProductData productData) {
         Product product = mapper.map(productData, Product.class);
         return productRepository.save(product);
     }
 
-    public Product updateProduct(Long id, ProductData productData) {
+    public Product updateProduct(final Long id, final ProductData productData) {
         Product product = findProduct(id);
 
         product.changeWith(mapper.map(productData, Product.class));
@@ -45,7 +43,7 @@ public class ProductService {
         return product;
     }
 
-    public Product deleteProduct(Long id) {
+    public Product deleteProduct(final Long id) {
         Product product = findProduct(id);
 
         productRepository.delete(product);
@@ -53,7 +51,7 @@ public class ProductService {
         return product;
     }
 
-    private Product findProduct(Long id) {
+    private Product findProduct(final Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
     }
