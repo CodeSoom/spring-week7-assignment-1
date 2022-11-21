@@ -32,8 +32,8 @@ public class ProductController {
 
     private final AuthenticationService authenticationService;
 
-    public ProductController(ProductService productService,
-                             AuthenticationService authenticationService) {
+    public ProductController(final ProductService productService,
+                             final AuthenticationService authenticationService) {
         this.productService = productService;
         this.authenticationService = authenticationService;
     }
@@ -44,34 +44,28 @@ public class ProductController {
     }
 
     @GetMapping("{id}")
-    public Product detail(@PathVariable Long id) {
+    public Product detail(@PathVariable final Long id) {
         return productService.getProduct(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Product create(
-            @RequestAttribute Long userId,
-            @RequestBody @Valid ProductData productData
-    ) {
+    public Product create(@RequestAttribute final Long userId,
+                          @RequestBody @Valid final ProductData productData) {
         return productService.createProduct(productData);
     }
 
     @PatchMapping("{id}")
-    public Product update(
-            @RequestAttribute Long userId,
-            @PathVariable Long id,
-            @RequestBody @Valid ProductData productData
-    ) {
+    public Product update(@RequestAttribute final Long userId,
+                          @PathVariable final Long id,
+                          @RequestBody @Valid final ProductData productData) {
         return productService.updateProduct(id, productData);
     }
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void destroy(
-            @RequestAttribute Long userId,
-            @PathVariable Long id
-    ) {
+    public void destroy(@RequestAttribute final Long userId,
+                        @PathVariable final Long id) {
         productService.deleteProduct(id);
     }
 }

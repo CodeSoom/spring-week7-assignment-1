@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -27,6 +28,7 @@ public class ProductData {
     private String maker;
 
     @NotNull
+    @Min(0)
     @Mapping("price")
     private Integer price;
 
