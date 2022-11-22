@@ -1,26 +1,36 @@
 package com.codesoom.assignment.user.domain;
 
+import com.codesoom.assignment.support.UserFixture;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.codesoom.assignment.support.UserFixture.USER_1;
+import static com.codesoom.assignment.support.UserFixture.USER_2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UserTest {
     @Test
-    void changeWith() {
-        User user = User.builder().build();
+    @DisplayName("User 빌더 테스트")
+    void builder() {
+        User user = USER_1.회원_엔티티_생성();
 
-        user.changeWith(User.builder()
-                .name("TEST")
-                .password("TEST")
-                .build());
-
-        assertThat(user.getName()).isEqualTo("TEST");
-        assertThat(user.getPassword()).isEqualTo("TEST");
+        USER_ID_제외_모든_값_검증(user, USER_1);
     }
 
     @Test
+    @DisplayName("User 수정 테스트")
+    void changeWith() {
+        User user = USER_1.회원_엔티티_생성();
+
+        user.changeWith(USER_2.회원_엔티티_생성());
+
+        USER_수정_값_검증(user, USER_2);
+    }
+
+    @Test
+    @DisplayName("User 삭제 테스트")
     void destroy() {
-        User user = User.builder().build();
+        User user = USER_1.회원_엔티티_생성();
 
         assertThat(user.isDeleted()).isFalse();
 
@@ -30,23 +40,44 @@ class UserTest {
     }
 
     @Test
+    @DisplayName("User 로그인 인증 테스트")
     void authenticate() {
-        User user = User.builder()
-                .password("test")
-                .build();
+        User user = USER_1.회원_엔티티_생성();
 
-        assertThat(user.authenticate("test")).isTrue();
-        assertThat(user.authenticate("xxx")).isFalse();
+        assertThat(user.authenticate(USER_1.비밀번호())).isTrue();
+        assertThat(user.authenticate(USER_2.비밀번호())).isFalse();
     }
 
     @Test
+    @DisplayName("삭제된 User 로그인 인증 테스트")
     void authenticateWithDeletedUser() {
-        User user = User.builder()
-                .password("test")
-                .deleted(true)
-                .build();
+        User user = USER_1.회원_엔티티_생성();
 
-        assertThat(user.authenticate("test")).isFalse();
-        assertThat(user.authenticate("xxx")).isFalse();
+        user.destroy();
+
+        assertThat(user.authenticate(USER_1.비밀번호())).isFalse();
+    }
+
+    @Test
+    @DisplayName("객체 비교 테스트")
+    void equals_and_hashcode() {
+        User user1 = USER_2.회원_엔티티_생성();
+        User user2 = USER_2.회원_엔티티_생성();
+
+        assertThat(user1).isEqualTo(user2);
+    }
+
+
+    private static void USER_ID_제외_모든_값_검증(User user, UserFixture userFixture) {
+        assertThat(user.getName()).isEqualTo(userFixture.이름());
+        assertThat(user.getEmail()).isEqualTo(userFixture.이메일());
+        assertThat(user.getPassword()).isEqualTo(userFixture.비밀번호());
+        assertThat(user.isDeleted()).isFalse();
+    }
+
+    private static void USER_수정_값_검증(User user, UserFixture userFixture) {
+        assertThat(user.getName()).isEqualTo(userFixture.이름());
+        assertThat(user.getPassword()).isEqualTo(userFixture.비밀번호());
+        assertThat(user.isDeleted()).isFalse();
     }
 }
