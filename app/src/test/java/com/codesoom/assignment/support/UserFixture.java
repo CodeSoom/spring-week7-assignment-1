@@ -1,6 +1,8 @@
 package com.codesoom.assignment.support;
 
 import com.codesoom.assignment.user.domain.User;
+import com.codesoom.assignment.user.presentation.dto.UserModificationData;
+import com.codesoom.assignment.user.presentation.dto.UserRegistrationData;
 
 public enum UserFixture {
     USER_1("기범", "dev.gibeom@gmail.com", "비밀번호486"),
@@ -29,6 +31,21 @@ public enum UserFixture {
                 .id(id)
                 .name(this.name)
                 .email(this.email)
+                .password(this.password)
+                .build();
+    }
+
+    public UserRegistrationData 등록_요청_데이터_생성() {
+        return UserRegistrationData.builder()
+                .name(this.name)
+                .email(this.email)
+                .password(this.password)
+                .build();
+    }
+
+    public UserModificationData 수정_요청_데이터_생성() {
+        return UserModificationData.builder()
+                .name(this.name)
                 .password(this.password)
                 .build();
     }
