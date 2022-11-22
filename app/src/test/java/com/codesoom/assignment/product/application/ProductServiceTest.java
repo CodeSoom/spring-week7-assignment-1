@@ -85,7 +85,7 @@ public class ProductServiceTest {
                 List<Product> products = productService.getProducts();
 
                 assertThat(products).isNotEmpty();
-                Product_ID_제외_모든_값_검증(products.get(0), PRODUCT_1);
+                PRODUCT_이름_메이커_가격_이미지주소_값_검증(products.get(0), PRODUCT_1);
 
                 verify(productRepository).findAll();
             }
@@ -113,7 +113,7 @@ public class ProductServiceTest {
                 Product product = productService.getProduct(ID_MIN.value());
 
                 assertThat(product.getId()).isEqualTo(ID_MIN.value());
-                Product_ID_제외_모든_값_검증(product, PRODUCT_1);
+                PRODUCT_이름_메이커_가격_이미지주소_값_검증(product, PRODUCT_1);
 
                 verify(productRepository).findById(ID_MIN.value());
             }
@@ -162,7 +162,7 @@ public class ProductServiceTest {
                 Product product = productService.createProduct(PRODUCT_2.등록_요청_데이터_생성());
 
                 assertThat(product.getId()).isEqualTo(ID_MIN.value());
-                Product_ID_제외_모든_값_검증(product, PRODUCT_2);
+                PRODUCT_이름_메이커_가격_이미지주소_값_검증(product, PRODUCT_2);
 
                 verify(productRepository).save(PRODUCT_2.엔티티_생성());
             }
@@ -189,7 +189,7 @@ public class ProductServiceTest {
             void it_returns_product() {
                 Product product = productService.updateProduct(ID_MIN.value(), PRODUCT_2.수정_요청_데이터_생성());
 
-                Product_ID_제외_모든_값_검증(product, PRODUCT_2);
+                PRODUCT_이름_메이커_가격_이미지주소_값_검증(product, PRODUCT_2);
 
                 verify(productRepository).findById(ID_MIN.value());
             }
@@ -244,7 +244,7 @@ public class ProductServiceTest {
         }
     }
 
-    private void Product_ID_제외_모든_값_검증(Product product, ProductFixture productFixture) {
+    private void PRODUCT_이름_메이커_가격_이미지주소_값_검증(Product product, ProductFixture productFixture) {
         assertThat(product.getName()).isEqualTo(productFixture.이름());
         assertThat(product.getMaker()).isEqualTo(productFixture.메이커());
         assertThat(product.getPrice()).isEqualTo(productFixture.가격());

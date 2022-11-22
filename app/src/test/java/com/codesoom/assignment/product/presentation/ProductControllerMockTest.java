@@ -155,13 +155,13 @@ class ProductControllerMockTest {
             @Test
             @DisplayName("201 코드로 응답한다")
             void it_responses_201() throws Exception {
-                ResultActions perform = requestPost(
+                ResultActions perform = 상품_등록_API_요청(
                         VALID_TOKEN_1.인증_헤더값(),
                         PRODUCT_1.등록_요청_데이터_생성()
                 );
 
                 perform.andExpect(status().isCreated());
-                Product_ID_제외_모든_값_검증(perform, PRODUCT_1);
+                PRODUCT_이름_메이커_가격_이미지주소_값_검증(perform, PRODUCT_1);
 
                 verify(productService).createProduct(any(ProductData.class));
             }
@@ -178,7 +178,7 @@ class ProductControllerMockTest {
                 @Test
                 @DisplayName("400 코드로 응답한다")
                 void it_responses_400() throws Exception {
-                    ResultActions perform = requestPost(
+                    ResultActions perform = 상품_등록_API_요청(
                             VALID_TOKEN_1.인증_헤더값(),
                             PRODUCT_INVALID_NAME.등록_요청_데이터_생성()
                     );
@@ -196,7 +196,7 @@ class ProductControllerMockTest {
                 @Test
                 @DisplayName("400 코드로 응답한다")
                 void it_responses_400() throws Exception {
-                    ResultActions perform = requestPost(
+                    ResultActions perform = 상품_등록_API_요청(
                             VALID_TOKEN_1.인증_헤더값(),
                             PRODUCT_INVALID_MAKER.등록_요청_데이터_생성()
                     );
@@ -214,7 +214,7 @@ class ProductControllerMockTest {
                 @Test
                 @DisplayName("400 코드로 응답한다")
                 void it_responses_400() throws Exception {
-                    ResultActions perform = requestPost(
+                    ResultActions perform = 상품_등록_API_요청(
                             VALID_TOKEN_1.인증_헤더값(),
                             PRODUCT_INVALID_PRICE.등록_요청_데이터_생성()
                     );
@@ -233,7 +233,7 @@ class ProductControllerMockTest {
             @Test
             @DisplayName("401 코드로 응답한다")
             void it_responses_401() throws Exception {
-                ResultActions perform = requestPost(
+                ResultActions perform = 상품_등록_API_요청(
                         INVALID_VALUE_TOKEN_1.인증_헤더값(),
                         PRODUCT_2.등록_요청_데이터_생성()
                 );
@@ -280,11 +280,11 @@ class ProductControllerMockTest {
                 void setUp() {
                     given(productService.updateProduct(eq(ID_MIN.value()), any(ProductData.class)))
                             .will(invocation -> {
-                                Long userId = invocation.getArgument(0);
+                                Long productId = invocation.getArgument(0);
                                 ProductData product = invocation.getArgument(1);
 
                                 return Product.builder()
-                                        .id(userId)
+                                        .id(productId)
                                         .name(product.getName())
                                         .maker(product.getMaker())
                                         .price(product.getPrice())
@@ -296,14 +296,14 @@ class ProductControllerMockTest {
                 @Test
                 @DisplayName("200 코드로 응답한다")
                 void it_responses_200() throws Exception {
-                    ResultActions perform = requestPatch(
+                    ResultActions perform = 상품_수정_API_요청(
                             ID_MIN.value(),
                             VALID_TOKEN_1.인증_헤더값(),
                             PRODUCT_1.등록_요청_데이터_생성()
                     );
 
                     perform.andExpect(status().isOk());
-                    Product_ID_제외_모든_값_검증(perform, PRODUCT_1);
+                    PRODUCT_이름_메이커_가격_이미지주소_값_검증(perform, PRODUCT_1);
 
                     verify(productService).updateProduct(eq(ID_MIN.value()), any(ProductData.class));
                 }
@@ -320,7 +320,7 @@ class ProductControllerMockTest {
                     @Test
                     @DisplayName("400 코드로 응답한다")
                     void it_responses_400() throws Exception {
-                        ResultActions perform = requestPatch(
+                        ResultActions perform = 상품_수정_API_요청(
                                 ID_MIN.value(),
                                 VALID_TOKEN_1.인증_헤더값(),
                                 PRODUCT_INVALID_NAME.수정_요청_데이터_생성()
@@ -339,7 +339,7 @@ class ProductControllerMockTest {
                     @Test
                     @DisplayName("400 코드로 응답한다")
                     void it_responses_400() throws Exception {
-                        ResultActions perform = requestPatch(
+                        ResultActions perform = 상품_수정_API_요청(
                                 ID_MIN.value(),
                                 VALID_TOKEN_1.인증_헤더값(),
                                 PRODUCT_INVALID_MAKER.수정_요청_데이터_생성()
@@ -358,7 +358,7 @@ class ProductControllerMockTest {
                     @Test
                     @DisplayName("400 코드로 응답한다")
                     void it_responses_400() throws Exception {
-                        ResultActions perform = requestPatch(
+                        ResultActions perform = 상품_수정_API_요청(
                                 ID_MIN.value(),
                                 VALID_TOKEN_1.인증_헤더값(),
                                 PRODUCT_INVALID_PRICE.수정_요청_데이터_생성()
@@ -385,7 +385,7 @@ class ProductControllerMockTest {
             @Test
             @DisplayName("404 코드로 응답한다")
             void it_responses_404() throws Exception {
-                ResultActions perform = requestPatch(
+                ResultActions perform = 상품_수정_API_요청(
                         ID_MAX.value(),
                         VALID_TOKEN_1.인증_헤더값(),
                         PRODUCT_2.수정_요청_데이터_생성()
@@ -404,7 +404,7 @@ class ProductControllerMockTest {
             @Test
             @DisplayName("401 코드로 응답한다")
             void it_responses_401() throws Exception {
-                ResultActions perform = requestPatch(
+                ResultActions perform = 상품_수정_API_요청(
                         ID_MIN.value(),
                         INVALID_VALUE_TOKEN_1.인증_헤더값(),
                         PRODUCT_1.수정_요청_데이터_생성()
@@ -447,7 +447,7 @@ class ProductControllerMockTest {
             @Test
             @DisplayName("204 코드로 응답한다")
             void it_responses_204() throws Exception {
-                ResultActions perform = requestDelete(
+                ResultActions perform = 상품_삭제_API_요청(
                         ID_MIN.value(),
                         VALID_TOKEN_1.인증_헤더값()
                 );
@@ -471,7 +471,7 @@ class ProductControllerMockTest {
             @Test
             @DisplayName("404 코드로 응답한다")
             void it_responses_404() throws Exception {
-                ResultActions perform = requestDelete(
+                ResultActions perform = 상품_삭제_API_요청(
                         ID_MAX.value(),
                         VALID_TOKEN_1.인증_헤더값()
                 );
@@ -489,7 +489,7 @@ class ProductControllerMockTest {
             @Test
             @DisplayName("401 코드로 응답한다")
             void it_responses_401() throws Exception {
-                ResultActions perform = requestDelete(
+                ResultActions perform = 상품_삭제_API_요청(
                         ID_MIN.value(),
                         INVALID_VALUE_TOKEN_1.인증_헤더값()
                 );
@@ -517,8 +517,8 @@ class ProductControllerMockTest {
         }
     }
 
-    private ResultActions requestPost(String authHeader,
-                                      ProductData requestData) throws Exception {
+    private ResultActions 상품_등록_API_요청(String authHeader,
+                                       ProductData requestData) throws Exception {
         return mockMvc.perform(
                 post(REQUEST_PRODUCT_URL)
                         .header(HttpHeaders.AUTHORIZATION, authHeader)
@@ -527,7 +527,7 @@ class ProductControllerMockTest {
         );
     }
 
-    private ResultActions requestPatch(Long productId,
+    private ResultActions 상품_수정_API_요청(Long productId,
                                        String authHeader,
                                        ProductData requestData) throws Exception {
         return mockMvc.perform(
@@ -538,15 +538,15 @@ class ProductControllerMockTest {
         );
     }
 
-    private ResultActions requestDelete(Long productId, String authHeader) throws Exception {
+    private ResultActions 상품_삭제_API_요청(Long productId, String authHeader) throws Exception {
         return mockMvc.perform(
                 delete(REQUEST_PRODUCT_URL + "/" + productId)
                         .header(HttpHeaders.AUTHORIZATION, authHeader)
         );
     }
 
-    private void Product_ID_제외_모든_값_검증(ResultActions perform,
-                                       ProductFixture productFixture) throws Exception {
+    private void PRODUCT_이름_메이커_가격_이미지주소_값_검증(ResultActions perform,
+                                              ProductFixture productFixture) throws Exception {
 
         perform.andExpect(content().string(containsString(productFixture.이름())))
                 .andExpect(content().string(containsString(productFixture.메이커())))
