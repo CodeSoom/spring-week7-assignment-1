@@ -17,13 +17,14 @@ public class UserService {
     private final Mapper mapper;
     private final UserRepository userRepository;
 
-    public UserService(Mapper dozerMapper, UserRepository userRepository) {
+    public UserService(final Mapper dozerMapper, final UserRepository userRepository) {
         this.mapper = dozerMapper;
         this.userRepository = userRepository;
     }
 
-    public User registerUser(UserRegistrationData registrationData) {
+    public User registerUser(final UserRegistrationData registrationData) {
         String email = registrationData.getEmail();
+
         if (userRepository.existsByEmail(email)) {
             throw new UserEmailDuplicationException(email);
         }
@@ -32,22 +33,22 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(Long id, UserModificationData modificationData) {
+    public User updateUser(final Long id,
+                           final UserModificationData modificationData) {
         User user = findUser(id);
 
         User source = mapper.map(modificationData, User.class);
         user.changeWith(source);
-
         return user;
     }
 
-    public User deleteUser(Long id) {
+    public User deleteUser(final Long id) {
         User user = findUser(id);
         user.destroy();
         return user;
     }
 
-    private User findUser(Long id) {
+    private User findUser(final Long id) {
         return userRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }

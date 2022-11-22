@@ -24,33 +24,31 @@ import javax.validation.Valid;
 public class UserController {
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public UserController(final UserService userService) {
         this.userService = userService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    UserResultData create(@RequestBody @Valid UserRegistrationData registrationData) {
+    UserResultData create(@RequestBody @Valid final UserRegistrationData registrationData) {
         User user = userService.registerUser(registrationData);
         return getUserResultData(user);
     }
 
     @PatchMapping("{id}")
-    UserResultData update(
-            @PathVariable Long id,
-            @RequestBody @Valid UserModificationData modificationData
-    ) {
+    UserResultData update(@PathVariable final Long id,
+                          @RequestBody @Valid final UserModificationData modificationData) {
         User user = userService.updateUser(id, modificationData);
         return getUserResultData(user);
     }
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void destroy(@PathVariable Long id) {
+    void destroy(@PathVariable final Long id) {
         userService.deleteUser(id);
     }
 
-    private UserResultData getUserResultData(User user) {
+    private UserResultData getUserResultData(final User user) {
         return UserResultData.builder()
                 .id(user.getId())
                 .email(user.getEmail())
