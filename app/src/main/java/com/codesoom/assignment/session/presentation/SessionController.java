@@ -15,17 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/session")
 @CrossOrigin
 public class SessionController {
-    private AuthenticationService authenticationService;
+    private final AuthenticationService authenticationService;
 
-    public SessionController(AuthenticationService authenticationService) {
+    public SessionController(final AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public SessionResponseData login(
-            @RequestBody SessionRequestData sessionRequestData
-    ) {
+    public SessionResponseData login(@RequestBody final SessionRequestData sessionRequestData) {
         String email = sessionRequestData.getEmail();
         String password = sessionRequestData.getPassword();
 
