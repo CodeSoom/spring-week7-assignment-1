@@ -12,13 +12,14 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
-    public AuthenticationService(UserRepository userRepository,
-                                 JwtUtil jwtUtil) {
+    public AuthenticationService(final UserRepository userRepository,
+                                 final JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
     }
 
-    public String login(String email, String password) {
+    public String login(final String email,
+                        final String password) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new LoginFailException(email));
 
@@ -26,10 +27,10 @@ public class AuthenticationService {
             throw new LoginFailException(email);
         }
 
-        return jwtUtil.encode(1L);
+        return jwtUtil.encode(user.getId());
     }
 
-    public Long parseToken(String accessToken) {
+    public Long parseToken(final String accessToken) {
         Claims claims = jwtUtil.decode(accessToken);
         return claims.get("userId", Long.class);
     }

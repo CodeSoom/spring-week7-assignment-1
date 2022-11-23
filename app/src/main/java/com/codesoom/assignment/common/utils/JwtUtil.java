@@ -14,18 +14,18 @@ import java.security.Key;
 public class JwtUtil {
     private final Key key;
 
-    public JwtUtil(@Value("${jwt.secret}") String secret) {
+    public JwtUtil(@Value("${jwt.secret}") final String secret) {
         key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String encode(Long userId) {
+    public String encode(final Long userId) {
         return Jwts.builder()
                 .claim("userId", 1L)
                 .signWith(key)
                 .compact();
     }
 
-    public Claims decode(String token) {
+    public Claims decode(final String token) {
         if (token == null || token.isBlank()) {
             throw new InvalidTokenException(token);
         }
