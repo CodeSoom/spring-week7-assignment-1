@@ -1,10 +1,12 @@
 package com.codesoom.assignment.common.authentication.filters;
 
+import com.codesoom.assignment.common.authentication.security.UserAuthentication;
 import com.codesoom.assignment.session.application.AuthenticationService;
-import com.codesoom.assignment.session.application.exception.InvalidTokenException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -26,37 +28,25 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(final HttpServletRequest request,
                                     final HttpServletResponse response,
                                     final FilterChain chain) throws IOException, ServletException {
-        if (isNotRequiredAuthorization(request)) {
-            chain.doFilter(request, response);
-            return;
-        }
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        validateAuthToken(request);
+        if (authorization != null) {
+            Long userId = getUserIdByAccessToken(authorization);
+            setAuthentication(userId);
+        }
 
         chain.doFilter(request, response);
     }
 
-    private void validateAuthToken(final HttpServletRequest request) {
-        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+    private static void setAuthentication(Long userId) {
+        Authentication authentication = new UserAuthentication(userId);
 
-        if (authorization == null) {
-            throw new InvalidTokenException("");
-        }
-
-        String accessToken = authorization.substring("Bearer ".length());
-        authenticationService.parseToken(accessToken);
+        SecurityContext context = SecurityContextHolder.getContext();
+        context.setAuthentication(authentication);
     }
 
-    private boolean isNotRequiredAuthorization(final HttpServletRequest request) {
-        if (!request.getRequestURI().startsWith("/products")) {
-            return true;
-        }
-
-        if (HttpMethod.GET.toString().equals(request.getMethod())
-                || HttpMethod.OPTIONS.toString().equals(request.getMethod())) {
-            return true;
-        }
-
-        return false;
+    private Long getUserIdByAccessToken(String authorization) {
+        String accessToken = authorization.substring("Bearer ".length());
+        return authenticationService.parseToken(accessToken);
     }
 }
