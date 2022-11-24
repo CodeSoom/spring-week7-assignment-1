@@ -310,38 +310,90 @@ class UserControllerMockTest {
     class 회원_삭제_API는 {
 
         @Nested
-        @DisplayName("찾을 수 있는 id가 주어지면")
-        class Context_with_exist_id {
+        @DisplayName("인증 토큰이 없다면")
+        class Context_with_not_exist_token {
 
             @Test
-            @DisplayName("204 코드로 응답한다")
-            void it_responses_204() throws Exception {
-                ResultActions perform = 회원_삭제_API_요청(ID_MIN.value());
+            @DisplayName("401 코드로 응답한다")
+            void it_responses_401() throws Exception {
+                ResultActions perform = mockMvc.perform(
+                        delete(REQUEST_USER_URL + "/" + ID_MIN.value())
+                );
 
-                perform.andExpect(status().isNoContent());
+                perform.andExpect(status().isUnauthorized());
 
-                verify(userService).deleteUser(ID_MIN.value());
+                // 아니 왜 해당 테스트를 단일로 실행하면 통과 되는데, 전체 실행을 하면 invoke가 됐다고 실패가 되지...?
+                // 해당 구문은 isAuthenticated()에서 실패돼서 컨트롤러로 못들어오는 로직이여야 하는데..
+                // 심지어 위에 status().isUnauthorized() 코드는 검증 성공으로 뜸.... (verfiy 구문 주석하면 테스트 올패스)
+                verify(userService, never()).deleteUser(ID_MIN.value());
             }
         }
 
         @Nested
-        @DisplayName("찾을 수 없는 id가 주어지면")
-        class Context_with_not_exist_id {
-
-            @BeforeEach
-            void setUp() {
-                given(userService.deleteUser(ID_MAX.value()))
-                        .willThrow(new UserNotFoundException(ID_MAX.value()));
-            }
+        @DisplayName("유효하지 않은 인증 토큰이 주어지면")
+        class Context_with_invalid_token {
 
             @Test
-            @DisplayName("404 코드로 응답한다")
-            void it_responses_404() throws Exception {
-                ResultActions perform = 회원_삭제_API_요청(ID_MAX.value());
+            @DisplayName("401 코드로 응답한다")
+            void it_responses_401() throws Exception {
+                ResultActions perform = 회원_삭제_API_요청(
+                        INVALID_VALUE_TOKEN_1.인증_헤더값(),
+                        ID_MIN.value()
+                );
 
-                perform.andExpect(status().isNotFound());
+                perform.andExpect(status().isUnauthorized());
 
-                verify(userService).deleteUser(ID_MAX.value());
+                // 아니 왜 해당 테스트를 단일로 실행하면 통과 되는데, 전체 실행을 하면 invoke가 됐다고 실패가 되지...?
+                // 해당 구문은 isAuthenticated()에서 실패돼서 컨트롤러로 못들어오는 로직이여야 하는데..
+                // 심지어 위에 status().isUnauthorized() 코드는 검증 성공으로 뜸.... (verfiy 구문 주석하면 테스트 올패스)
+                verify(userService, never()).deleteUser(ID_MIN.value());
+            }
+        }
+
+        @Nested
+        @DisplayName("유효한 인증 토큰이 주어지고")
+        class Context_with_valid_token {
+
+            @Nested
+            @DisplayName("찾을 수 있는 id가 주어지면")
+            class Context_with_exist_id {
+
+                @Test
+                @DisplayName("204 코드로 응답한다")
+                void it_responses_204() throws Exception {
+                    ResultActions perform = 회원_삭제_API_요청(
+                            VALID_TOKEN_1.인증_헤더값(),
+                            ID_MIN.value()
+                    );
+
+                    perform.andExpect(status().isNoContent());
+
+                    verify(userService).deleteUser(ID_MIN.value());
+                }
+            }
+
+            @Nested
+            @DisplayName("찾을 수 없는 id가 주어지면")
+            class Context_with_not_exist_id {
+
+                @BeforeEach
+                void setUp() {
+                    given(userService.deleteUser(ID_MAX.value()))
+                            .willThrow(new UserNotFoundException(ID_MAX.value()));
+                }
+
+                @Test
+                @DisplayName("404 코드로 응답한다")
+                void it_responses_404() throws Exception {
+                    ResultActions perform = 회원_삭제_API_요청(
+                            VALID_TOKEN_1.인증_헤더값(),
+                            ID_MAX.value()
+                    );
+
+                    perform.andExpect(status().isNotFound());
+
+                    verify(userService).deleteUser(ID_MAX.value());
+                }
             }
         }
     }
@@ -365,9 +417,11 @@ class UserControllerMockTest {
         );
     }
 
-    private ResultActions 회원_삭제_API_요청(Long userId) throws Exception {
+    private ResultActions 회원_삭제_API_요청(String authHeader,
+                                       Long userId) throws Exception {
         return mockMvc.perform(
                 delete(REQUEST_USER_URL + "/" + userId)
+                        .header(HttpHeaders.AUTHORIZATION, authHeader)
         );
     }
 
