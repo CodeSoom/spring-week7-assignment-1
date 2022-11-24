@@ -61,6 +61,9 @@ class ProductControllerMockTest {
 
     @BeforeEach
     void setUp() {
+        given(authenticationService.parseToken(eq(VALID_TOKEN_1.토큰_값())))
+                .willReturn(VALID_TOKEN_1.아이디());
+
         given(authenticationService.parseToken(eq(INVALID_VALUE_TOKEN_1.토큰_값())))
                 .willThrow(new InvalidTokenException(INVALID_VALUE_TOKEN_1.토큰_값()));
     }
