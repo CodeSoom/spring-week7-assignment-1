@@ -8,7 +8,6 @@ import com.codesoom.assignment.product.domain.Product;
 import com.codesoom.assignment.product.presentation.dto.ProductData;
 import com.codesoom.assignment.session.application.AuthenticationService;
 import com.codesoom.assignment.session.application.exception.InvalidTokenException;
-import com.codesoom.assignment.support.ProductFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -32,7 +31,6 @@ import static com.codesoom.assignment.support.ProductFixture.PRODUCT_2;
 import static com.codesoom.assignment.support.ProductFixture.PRODUCT_INVALID_MAKER;
 import static com.codesoom.assignment.support.ProductFixture.PRODUCT_INVALID_NAME;
 import static com.codesoom.assignment.support.ProductFixture.PRODUCT_INVALID_PRICE;
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -42,7 +40,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest({ProductController.class, MockMvcCharacterEncodingCustomizer.class})
@@ -75,10 +72,11 @@ class ProductControllerMockTest {
         @Test
         @DisplayName("200 코드로 응답한다")
         void it_responses_200() throws Exception {
-            mockMvc.perform(
-                            get("/products")
-                    )
-                    .andExpect(status().isOk());
+            ResultActions perform = mockMvc.perform(
+                    get("/products")
+            );
+
+            perform.andExpect(status().isOk());
 
             verify(productService).getProducts();
         }
@@ -101,10 +99,11 @@ class ProductControllerMockTest {
             @Test
             @DisplayName("200 코드로 응답한다")
             void it_responses_200() throws Exception {
-                mockMvc.perform(
-                                get("/products/" + ID_MIN.value())
-                        )
-                        .andExpect(status().isOk());
+                ResultActions perform = mockMvc.perform(
+                        get("/products/" + ID_MIN.value())
+                );
+
+                perform.andExpect(status().isOk());
 
                 verify(productService).getProduct(ID_MIN.value());
             }
@@ -123,8 +122,11 @@ class ProductControllerMockTest {
             @Test
             @DisplayName("404 코드로 응답한다")
             void it_responses_404() throws Exception {
-                mockMvc.perform(get("/products/" + ID_MAX.value()))
-                        .andExpect(status().isNotFound());
+                ResultActions perform = mockMvc.perform(
+                        get("/products/" + ID_MAX.value())
+                );
+
+                perform.andExpect(status().isNotFound());
 
                 verify(productService).getProduct(ID_MAX.value());
             }
@@ -164,7 +166,6 @@ class ProductControllerMockTest {
                 );
 
                 perform.andExpect(status().isCreated());
-                PRODUCT_이름_메이커_가격_이미지주소_값_검증(perform, PRODUCT_1);
 
                 verify(productService).createProduct(any(ProductData.class));
             }
@@ -302,11 +303,10 @@ class ProductControllerMockTest {
                     ResultActions perform = 상품_수정_API_요청(
                             ID_MIN.value(),
                             VALID_TOKEN_1.인증_헤더값(),
-                            PRODUCT_1.등록_요청_데이터_생성()
+                            PRODUCT_1.수정_요청_데이터_생성()
                     );
 
                     perform.andExpect(status().isOk());
-                    PRODUCT_이름_메이커_가격_이미지주소_값_검증(perform, PRODUCT_1);
 
                     verify(productService).updateProduct(eq(ID_MIN.value()), any(ProductData.class));
                 }
@@ -546,14 +546,5 @@ class ProductControllerMockTest {
                 delete(REQUEST_PRODUCT_URL + "/" + productId)
                         .header(HttpHeaders.AUTHORIZATION, authHeader)
         );
-    }
-
-    private void PRODUCT_이름_메이커_가격_이미지주소_값_검증(ResultActions perform,
-                                              ProductFixture productFixture) throws Exception {
-
-        perform.andExpect(content().string(containsString(productFixture.이름())))
-                .andExpect(content().string(containsString(productFixture.메이커())))
-                .andExpect(content().string(containsString(String.valueOf(productFixture.가격()))))
-                .andExpect(content().string(containsString(productFixture.이미지_URL())));
     }
 }

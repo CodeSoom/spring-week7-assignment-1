@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -32,7 +33,6 @@ import static com.codesoom.assignment.support.UserFixture.USER_1;
 import static com.codesoom.assignment.support.UserFixture.USER_INVALID_EMAIL;
 import static com.codesoom.assignment.support.UserFixture.USER_INVALID_NAME;
 import static com.codesoom.assignment.support.UserFixture.USER_INVALID_PASSWORD;
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -41,7 +41,6 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest({UserController.class, MockMvcCharacterEncodingCustomizer.class})
@@ -61,6 +60,8 @@ class UserControllerMockTest {
 
     @BeforeEach
     void setUp() {
+        Mockito.clearInvocations(userService);
+
         given(authenticationService.parseToken(eq(VALID_TOKEN_1.토큰_값())))
                 .willReturn(VALID_TOKEN_1.아이디());
 
@@ -95,7 +96,6 @@ class UserControllerMockTest {
                 ResultActions perform = 회원_등록_API_요청(USER_1);
 
                 perform.andExpect(status().isCreated());
-                USER_이름_이메일_값_검증(perform, USER_1);
 
                 verify(userService).registerUser(any(UserRegistrationData.class));
             }
@@ -171,9 +171,6 @@ class UserControllerMockTest {
 
                 perform.andExpect(status().isUnauthorized());
 
-                // 아니 왜 해당 테스트를 단일로 실행하면 통과 되는데, 전체 실행을 하면 invoke가 됐다고 실패가 되지...?
-                // 해당 구문은 isAuthenticated()에서 실패돼서 컨트롤러로 못들어오는 로직이여야 하는데..
-                // 심지어 위에 status().isUnauthorized() 코드는 검증 성공으로 뜸.... (verfiy 구문 주석하면 테스트 올패스)
                 verify(userService, never()).updateUser(eq(ID_MIN.value()), any(UserModificationData.class));
             }
         }
@@ -193,9 +190,6 @@ class UserControllerMockTest {
 
                 perform.andExpect(status().isUnauthorized());
 
-                // 아니 왜 해당 테스트를 단일로 실행하면 통과 되는데, 전체 실행을 하면 invoke가 됐다고 실패가 되지...?
-                // 해당 구문은 isAuthenticated()에서 실패돼서 컨트롤러로 못들어오는 로직이여야 하는데..
-                // 심지어 위에 status().isUnauthorized() 코드는 검증 성공으로 뜸.... (verfiy 구문 주석하면 테스트 올패스)
                 verify(userService, never()).updateUser(eq(ID_MIN.value()), any(UserModificationData.class));
             }
         }
@@ -228,7 +222,6 @@ class UserControllerMockTest {
                         );
 
                         perform.andExpect(status().isOk());
-                        USER_이름_이메일_값_검증(perform, USER_1);
 
                         verify(userService).updateUser(eq(ID_MIN.value()), any(UserModificationData.class));
                     }
@@ -322,9 +315,6 @@ class UserControllerMockTest {
 
                 perform.andExpect(status().isUnauthorized());
 
-                // 아니 왜 해당 테스트를 단일로 실행하면 통과 되는데, 전체 실행을 하면 invoke가 됐다고 실패가 되지...?
-                // 해당 구문은 isAuthenticated()에서 실패돼서 컨트롤러로 못들어오는 로직이여야 하는데..
-                // 심지어 위에 status().isUnauthorized() 코드는 검증 성공으로 뜸.... (verfiy 구문 주석하면 테스트 올패스)
                 verify(userService, never()).deleteUser(ID_MIN.value());
             }
         }
@@ -343,9 +333,6 @@ class UserControllerMockTest {
 
                 perform.andExpect(status().isUnauthorized());
 
-                // 아니 왜 해당 테스트를 단일로 실행하면 통과 되는데, 전체 실행을 하면 invoke가 됐다고 실패가 되지...?
-                // 해당 구문은 isAuthenticated()에서 실패돼서 컨트롤러로 못들어오는 로직이여야 하는데..
-                // 심지어 위에 status().isUnauthorized() 코드는 검증 성공으로 뜸.... (verfiy 구문 주석하면 테스트 올패스)
                 verify(userService, never()).deleteUser(ID_MIN.value());
             }
         }
@@ -423,10 +410,5 @@ class UserControllerMockTest {
                 delete(REQUEST_USER_URL + "/" + userId)
                         .header(HttpHeaders.AUTHORIZATION, authHeader)
         );
-    }
-
-    private void USER_이름_이메일_값_검증(ResultActions perform, UserFixture userFixture) throws Exception {
-        perform.andExpect(content().string(containsString(userFixture.이름())));
-        perform.andExpect(content().string(containsString(userFixture.이메일())));
     }
 }
