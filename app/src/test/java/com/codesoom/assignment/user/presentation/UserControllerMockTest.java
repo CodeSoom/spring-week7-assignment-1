@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -61,6 +62,8 @@ class UserControllerMockTest {
 
     @BeforeEach
     void setUp() {
+        Mockito.clearInvocations(userService);
+
         given(authenticationService.parseToken(eq(VALID_TOKEN_1.토큰_값())))
                 .willReturn(VALID_TOKEN_1.아이디());
 
