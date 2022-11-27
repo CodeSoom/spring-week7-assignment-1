@@ -30,6 +30,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
                 .csrf().disable()
+                .headers()
+                    .frameOptions().disable() // h2-console
+                .and()
                 .addFilterBefore(authenticationErrorFilter, JwtAuthenticationFilter.class)
                 .addFilter(authenticationFilter)
                 .sessionManagement()
