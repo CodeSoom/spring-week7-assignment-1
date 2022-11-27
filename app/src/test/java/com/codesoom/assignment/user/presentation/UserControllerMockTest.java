@@ -1,6 +1,7 @@
 package com.codesoom.assignment.user.presentation;
 
 import com.codesoom.assignment.MockMvcCharacterEncodingCustomizer;
+import com.codesoom.assignment.common.authorization.UserAuthorizationAop;
 import com.codesoom.assignment.common.utils.JsonUtil;
 import com.codesoom.assignment.session.application.AuthenticationService;
 import com.codesoom.assignment.session.application.exception.InvalidTokenException;
@@ -18,8 +19,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,9 +30,12 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import static com.codesoom.assignment.support.AuthHeaderFixture.INVALID_VALUE_TOKEN_1;
 import static com.codesoom.assignment.support.AuthHeaderFixture.VALID_TOKEN_1;
+import static com.codesoom.assignment.support.AuthHeaderFixture.VALID_TOKEN_2;
+import static com.codesoom.assignment.support.IdFixture.ID_2;
 import static com.codesoom.assignment.support.IdFixture.ID_MAX;
 import static com.codesoom.assignment.support.IdFixture.ID_MIN;
 import static com.codesoom.assignment.support.UserFixture.USER_1;
+import static com.codesoom.assignment.support.UserFixture.USER_2;
 import static com.codesoom.assignment.support.UserFixture.USER_INVALID_EMAIL;
 import static com.codesoom.assignment.support.UserFixture.USER_INVALID_NAME;
 import static com.codesoom.assignment.support.UserFixture.USER_INVALID_PASSWORD;
@@ -43,7 +49,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest({UserController.class, MockMvcCharacterEncodingCustomizer.class})
+@WebMvcTest(controllers = UserController.class)
+@Import({MockMvcCharacterEncodingCustomizer.class, AopAutoConfiguration.class, UserAuthorizationAop.class})
 @DisplayName("UserController 웹 유닛 테스트")
 class UserControllerMockTest {
 
@@ -59,11 +66,17 @@ class UserControllerMockTest {
     private AuthenticationService authenticationService;
 
     @BeforeEach
-    void setUp() {
+    void setUpClearMock() {
         Mockito.clearInvocations(userService);
+    }
 
+    @BeforeEach
+    void setUpParseToken() {
         given(authenticationService.parseToken(eq(VALID_TOKEN_1.토큰_값())))
                 .willReturn(VALID_TOKEN_1.아이디());
+
+        given(authenticationService.parseToken(eq(VALID_TOKEN_2.토큰_값())))
+                .willReturn(VALID_TOKEN_2.아이디());
 
         given(authenticationService.parseToken(eq(INVALID_VALUE_TOKEN_1.토큰_값())))
                 .willThrow(new InvalidTokenException(INVALID_VALUE_TOKEN_1.토큰_값()));
@@ -152,13 +165,14 @@ class UserControllerMockTest {
         }
     }
 
+
     @Nested
     @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
     class 회원_수정_API는 {
 
         @Nested
         @DisplayName("인증 토큰이 없다면")
-        class Context_with_not_exist_token {
+        class Context_with_token_not_exist {
 
             @Test
             @DisplayName("401 코드로 응답한다")
@@ -177,7 +191,7 @@ class UserControllerMockTest {
 
         @Nested
         @DisplayName("유효하지 않은 인증 토큰이 주어지면")
-        class Context_with_invalid_token {
+        class Context_with_invalid_token_value {
 
             @Test
             @DisplayName("401 코드로 응답한다")
@@ -195,8 +209,52 @@ class UserControllerMockTest {
         }
 
         @Nested
+        @DisplayName("다른 사람의 인증 토큰이 주어지면")
+        class Context_with_different_id_token_and_request {
+
+            @Test
+            @DisplayName("403 코드로 응답한다")
+            void it_returns_403() throws Exception {
+                ResultActions perform = 회원_수정_API_요청(
+                        VALID_TOKEN_2.인증_헤더값(),
+                        ID_MIN.value(),
+                        USER_1
+                );
+
+                perform.andExpect(status().isForbidden());
+
+                verify(userService, never()).updateUser(any(Long.class), any(UserModificationData.class));
+            }
+        }
+
+        @Nested
         @DisplayName("유효한 인증 토큰이 주어지고")
-        class Context_with_valid_token {
+        class Context_with_valid_token_value {
+
+            @Nested
+            @DisplayName("찾을 수 없는 id가 주어질 때")
+            class Context_with_not_exist_id {
+
+                @BeforeEach
+                void setUp() {
+                    given(userService.updateUser(eq(ID_2.value()), any(UserModificationData.class)))
+                            .willThrow(new UserNotFoundException(ID_2.value()));
+                }
+
+                @Test
+                @DisplayName("404 코드로 응답한다")
+                void it_responses_404() throws Exception {
+                    ResultActions perform = 회원_수정_API_요청(
+                            VALID_TOKEN_2.인증_헤더값(),
+                            ID_2.value(),
+                            USER_2
+                    );
+
+                    perform.andExpect(status().isNotFound());
+
+                    verify(userService).updateUser(eq(ID_2.value()), any(UserModificationData.class));
+                }
+            }
 
             @Nested
             @DisplayName("찾을 수 있는 id가 주어질 때")
@@ -209,26 +267,7 @@ class UserControllerMockTest {
                 }
 
                 @Nested
-                @DisplayName("유효한 회원 정보가 주어지면")
-                class Context_with_valid_user {
-
-                    @Test
-                    @DisplayName("200 코드로 응답한다")
-                    void it_responses_200() throws Exception {
-                        ResultActions perform = 회원_수정_API_요청(
-                                VALID_TOKEN_1.인증_헤더값(),
-                                ID_MIN.value(),
-                                USER_1
-                        );
-
-                        perform.andExpect(status().isOk());
-
-                        verify(userService).updateUser(eq(ID_MIN.value()), any(UserModificationData.class));
-                    }
-                }
-
-                @Nested
-                @DisplayName("유효하지 않은 회원 정보가 주어지면")
+                @DisplayName("유효하지 않은 회원 정보가 주어진다면")
                 class Context_with_invalid_user {
 
                     @Nested
@@ -269,34 +308,29 @@ class UserControllerMockTest {
                         }
                     }
                 }
-            }
 
-            @Nested
-            @DisplayName("찾을 수 없는 id가 주어질 때")
-            class Context_with_not_exist_id {
+                @Nested
+                @DisplayName("유효한 회원 정보가 주어진다면")
+                class Context_with_valid_user {
 
-                @BeforeEach
-                void setUp() {
-                    given(userService.updateUser(eq(ID_MAX.value()), any(UserModificationData.class)))
-                            .willThrow(new UserNotFoundException(ID_MAX.value()));
-                }
+                    @Test
+                    @DisplayName("200 코드로 응답한다")
+                    void it_responses_200() throws Exception {
+                        ResultActions perform = 회원_수정_API_요청(
+                                VALID_TOKEN_1.인증_헤더값(),
+                                ID_MIN.value(),
+                                USER_1
+                        );
 
-                @Test
-                @DisplayName("404 코드로 응답한다")
-                void it_responses_404() throws Exception {
-                    ResultActions perform = 회원_수정_API_요청(
-                            VALID_TOKEN_1.인증_헤더값(),
-                            ID_MAX.value(),
-                            USER_1
-                    );
+                        perform.andExpect(status().isOk());
 
-                    perform.andExpect(status().isNotFound());
-
-                    verify(userService).updateUser(eq(ID_MAX.value()), any(UserModificationData.class));
+                        verify(userService).updateUser(eq(ID_MIN.value()), any(UserModificationData.class));
+                    }
                 }
             }
         }
     }
+
 
     @Nested
     @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -384,6 +418,7 @@ class UserControllerMockTest {
             }
         }
     }
+
 
     private ResultActions 회원_등록_API_요청(UserFixture userFixture) throws Exception {
         return mockMvc.perform(

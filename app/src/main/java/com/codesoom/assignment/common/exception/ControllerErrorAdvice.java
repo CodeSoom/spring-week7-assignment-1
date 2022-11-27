@@ -6,17 +6,16 @@ import com.codesoom.assignment.session.application.exception.LoginFailException;
 import com.codesoom.assignment.user.application.exception.UserEmailDuplicationException;
 import com.codesoom.assignment.user.application.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.nio.file.AccessDeniedException;
 import java.util.Set;
 
-@ResponseBody
-@ControllerAdvice
+@RestControllerAdvice
 public class ControllerErrorAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(ProductNotFoundException.class)
@@ -48,15 +47,19 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Invalid access token");
     }
 
-    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ErrorResponse handleAccessDeniedException() {
+        return new ErrorResponse("Access denied");
+    }
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
-    public ErrorResponse handleConstraintValidateError(
-            ConstraintViolationException exception
-    ) {
+    public ErrorResponse handleConstraintValidateError(ConstraintViolationException exception) {
         String messageTemplate = getViolatedMessage(exception);
         return new ErrorResponse(messageTemplate);
     }
+
 
     private String getViolatedMessage(ConstraintViolationException exception) {
         String messageTemplate = null;

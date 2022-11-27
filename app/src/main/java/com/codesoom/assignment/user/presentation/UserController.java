@@ -1,5 +1,7 @@
 package com.codesoom.assignment.user.presentation;
 
+import com.codesoom.assignment.common.authentication.security.UserAuthentication;
+import com.codesoom.assignment.common.authorization.IdVerification;
 import com.codesoom.assignment.user.application.UserService;
 import com.codesoom.assignment.user.domain.User;
 import com.codesoom.assignment.user.presentation.dto.UserModificationData;
@@ -39,9 +41,10 @@ public class UserController {
 
     @PatchMapping("{id}")
     @PreAuthorize("isAuthenticated()")
+    @IdVerification
     UserResultData update(@PathVariable final Long id,
                           @RequestBody @Valid final UserModificationData modificationData,
-                          final Authentication authentication) {
+                          final UserAuthentication userAuthentication) {
         User user = userService.updateUser(id, modificationData);
         return getUserResultData(user);
     }

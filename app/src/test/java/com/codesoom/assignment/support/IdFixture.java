@@ -2,6 +2,7 @@ package com.codesoom.assignment.support;
 
 public enum IdFixture {
     ID_MIN(1L),
+    ID_2(2L),
     ID_MAX(Long.MAX_VALUE),
     ;
 
