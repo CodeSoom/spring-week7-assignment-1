@@ -8,6 +8,13 @@ public enum AuthHeaderFixture {
             "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.neCsyNLzy3lQ4o2yliotWT06FwSGZagaHpKdAkjnGGw",
             "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.neCsyNLzy3lQ4o2yliotWT06FwSGZagaHpKdAkjnGGw"
     ),
+    VALID_TOKEN_2(
+            "Bearer",
+            "12345678901234567890123456789010",
+            2L,
+            "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjJ9.i-iHszAs6H2JFTdm3vOVuN18tb_w6n2FqEYIRtr6gaU",
+            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjJ9.i-iHszAs6H2JFTdm3vOVuN18tb_w6n2FqEYIRtr6gaU"
+    ),
     INVALID_TYPE_TOKEN_1(
             "Gibeom",
             "12345678901234567890123456789010",
