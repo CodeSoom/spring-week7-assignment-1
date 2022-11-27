@@ -5,6 +5,7 @@ import com.codesoom.assignment.common.authorization.UserAuthorizationAop;
 import com.codesoom.assignment.common.utils.JsonUtil;
 import com.codesoom.assignment.session.application.AuthenticationService;
 import com.codesoom.assignment.session.application.exception.InvalidTokenException;
+import com.codesoom.assignment.session.domain.Role;
 import com.codesoom.assignment.support.UserFixture;
 import com.codesoom.assignment.user.application.UserService;
 import com.codesoom.assignment.user.application.exception.UserNotFoundException;
@@ -28,9 +29,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.util.Arrays;
+
 import static com.codesoom.assignment.support.AuthHeaderFixture.INVALID_VALUE_TOKEN_1;
+import static com.codesoom.assignment.support.AuthHeaderFixture.VALID_ADMIN_TOKEN_1004;
 import static com.codesoom.assignment.support.AuthHeaderFixture.VALID_TOKEN_1;
 import static com.codesoom.assignment.support.AuthHeaderFixture.VALID_TOKEN_2;
+import static com.codesoom.assignment.support.IdFixture.ID_1004;
 import static com.codesoom.assignment.support.IdFixture.ID_2;
 import static com.codesoom.assignment.support.IdFixture.ID_MAX;
 import static com.codesoom.assignment.support.IdFixture.ID_MIN;
@@ -74,9 +79,18 @@ class UserControllerMockTest {
     void setUpParseToken() {
         given(authenticationService.parseToken(eq(VALID_TOKEN_1.토큰_값())))
                 .willReturn(VALID_TOKEN_1.아이디());
+        given(authenticationService.roles(eq(VALID_TOKEN_1.아이디())))
+                .willReturn(Arrays.asList(new Role(VALID_TOKEN_1.아이디(), "USER")));
 
         given(authenticationService.parseToken(eq(VALID_TOKEN_2.토큰_값())))
                 .willReturn(VALID_TOKEN_2.아이디());
+        given(authenticationService.roles(eq(VALID_TOKEN_2.아이디())))
+                .willReturn(Arrays.asList(new Role(VALID_TOKEN_2.아이디(), "USER")));
+
+        given(authenticationService.parseToken(eq(VALID_ADMIN_TOKEN_1004.토큰_값())))
+                .willReturn(VALID_ADMIN_TOKEN_1004.아이디());
+        given(authenticationService.roles(eq(VALID_ADMIN_TOKEN_1004.아이디())))
+                .willReturn(Arrays.asList(new Role(VALID_ADMIN_TOKEN_1004.아이디(), "ADMIN")));
 
         given(authenticationService.parseToken(eq(INVALID_VALUE_TOKEN_1.토큰_값())))
                 .willThrow(new InvalidTokenException(INVALID_VALUE_TOKEN_1.토큰_값()));
@@ -372,8 +386,26 @@ class UserControllerMockTest {
         }
 
         @Nested
-        @DisplayName("유효한 인증 토큰이 주어지고")
-        class Context_with_valid_token {
+        @DisplayName("관리자가 아닌 토큰이 주어지면")
+        class Context_with_no_admin_token {
+
+            @Test
+            @DisplayName("403 코드로 응답한다")
+            void it_responses_403() throws Exception {
+                ResultActions perform = 회원_삭제_API_요청(
+                        VALID_TOKEN_1.인증_헤더값(),
+                        ID_MIN.value()
+                );
+
+                perform.andExpect(status().isForbidden());
+
+                verify(userService, never()).deleteUser(ID_MIN.value());
+            }
+        }
+
+        @Nested
+        @DisplayName("관리자 토큰이 주어지고")
+        class Context_with_admin_token {
 
             @Nested
             @DisplayName("찾을 수 있는 id가 주어지면")
@@ -383,13 +415,13 @@ class UserControllerMockTest {
                 @DisplayName("204 코드로 응답한다")
                 void it_responses_204() throws Exception {
                     ResultActions perform = 회원_삭제_API_요청(
-                            VALID_TOKEN_1.인증_헤더값(),
-                            ID_MIN.value()
+                            VALID_ADMIN_TOKEN_1004.인증_헤더값(),
+                            ID_1004.value()
                     );
 
                     perform.andExpect(status().isNoContent());
 
-                    verify(userService).deleteUser(ID_MIN.value());
+                    verify(userService).deleteUser(ID_1004.value());
                 }
             }
 
@@ -407,7 +439,7 @@ class UserControllerMockTest {
                 @DisplayName("404 코드로 응답한다")
                 void it_responses_404() throws Exception {
                     ResultActions perform = 회원_삭제_API_요청(
-                            VALID_TOKEN_1.인증_헤더값(),
+                            VALID_ADMIN_TOKEN_1004.인증_헤더값(),
                             ID_MAX.value()
                     );
 
