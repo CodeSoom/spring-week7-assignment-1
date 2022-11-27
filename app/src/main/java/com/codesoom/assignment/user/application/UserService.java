@@ -1,5 +1,7 @@
 package com.codesoom.assignment.user.application;
 
+import com.codesoom.assignment.session.domain.Role;
+import com.codesoom.assignment.session.domain.RoleRepository;
 import com.codesoom.assignment.user.application.exception.UserEmailDuplicationException;
 import com.codesoom.assignment.user.application.exception.UserNotFoundException;
 import com.codesoom.assignment.user.domain.User;
@@ -16,10 +18,14 @@ import javax.transaction.Transactional;
 public class UserService {
     private final Mapper mapper;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
-    public UserService(final Mapper dozerMapper, final UserRepository userRepository) {
+    public UserService(final Mapper dozerMapper,
+                       final UserRepository userRepository,
+                       RoleRepository roleRepository) {
         this.mapper = dozerMapper;
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
     }
 
     public User registerUser(final UserRegistrationData registrationData) {
@@ -29,8 +35,15 @@ public class UserService {
             throw new UserEmailDuplicationException(email);
         }
 
-        User user = mapper.map(registrationData, User.class);
-        return userRepository.save(user);
+        User user = userRepository.save(
+                mapper.map(registrationData, User.class)
+        );
+
+        roleRepository.save(
+                new Role(user.getId(), "USER")
+        );
+
+        return user;
     }
 
     public User updateUser(final Long id,
