@@ -1,5 +1,7 @@
 package com.codesoom.assignment.user.application;
 
+import com.codesoom.assignment.session.domain.Role;
+import com.codesoom.assignment.session.domain.RoleRepository;
 import com.codesoom.assignment.support.UserFixture;
 import com.codesoom.assignment.user.application.exception.UserEmailDuplicationException;
 import com.codesoom.assignment.user.application.exception.UserNotFoundException;
@@ -33,13 +35,13 @@ class UserServiceTest {
     private static final Long DELETED_USER_ID = 200L;
 
     private UserService userService;
-
     private final UserRepository userRepository = mock(UserRepository.class);
+    private final RoleRepository roleRepository = mock(RoleRepository.class);
 
     @BeforeEach
     void setUp() {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
-        userService = new UserService(mapper, userRepository);
+        userService = new UserService(mapper, userRepository, roleRepository);
     }
 
     @Nested
@@ -78,6 +80,7 @@ class UserServiceTest {
 
                 verify(userRepository).existsByEmail(USER_1.이메일());
                 verify(userRepository).save(USER_1.회원_엔티티_생성());
+                verify(roleRepository).save(any(Role.class));
             }
         }
 
