@@ -9,6 +9,7 @@ import com.codesoom.assignment.user.domain.UserRepository;
 import com.codesoom.assignment.user.presentation.dto.UserModificationData;
 import com.codesoom.assignment.user.presentation.dto.UserRegistrationData;
 import com.github.dozermapper.core.Mapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -19,13 +20,15 @@ public class UserService {
     private final Mapper mapper;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UserService(final Mapper dozerMapper,
                        final UserRepository userRepository,
-                       RoleRepository roleRepository) {
+                       RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.mapper = dozerMapper;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User registerUser(final UserRegistrationData registrationData) {
@@ -38,6 +41,8 @@ public class UserService {
         User user = userRepository.save(
                 mapper.map(registrationData, User.class)
         );
+
+        user.changePassword(registrationData.getPassword(), passwordEncoder);
 
         roleRepository.save(
                 new Role(user.getId(), "USER")

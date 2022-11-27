@@ -15,6 +15,8 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -41,7 +43,8 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
-        userService = new UserService(mapper, userRepository, roleRepository);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        userService = new UserService(mapper, userRepository, roleRepository, passwordEncoder);
     }
 
     @Nested
@@ -75,7 +78,7 @@ class UserServiceTest {
             void it_returns_user() {
                 User user = userService.registerUser(USER_1.등록_요청_데이터_생성());
 
-                USER_이메일_이름_비밀번호_값_검증(user, USER_1);
+                USER_이메일_이름_값_검증(user, USER_1);
                 assertThat(user.isDeleted()).isFalse();
 
                 verify(userRepository).existsByEmail(USER_1.이메일());
@@ -133,7 +136,7 @@ class UserServiceTest {
                 );
 
                 USER_이메일_값_검증(user, USER_1);
-                USER_이름_비밀번호_값_검증(user, USER_2);
+                USER_이름_값_검증(user, USER_2);
                 assertThat(user.isDeleted()).isFalse();
 
                 verify(userRepository).findByIdAndDeletedIsFalse(ID_MIN.value());
@@ -253,14 +256,13 @@ class UserServiceTest {
         }
     }
 
-    private static void USER_이메일_이름_비밀번호_값_검증(User user, UserFixture userFixture) {
+    private static void USER_이메일_이름_값_검증(User user, UserFixture userFixture) {
         USER_이메일_값_검증(user, userFixture);
-        USER_이름_비밀번호_값_검증(user, userFixture);
+        USER_이름_값_검증(user, userFixture);
     }
 
-    private static void USER_이름_비밀번호_값_검증(User user, UserFixture userFixture) {
+    private static void USER_이름_값_검증(User user, UserFixture userFixture) {
         assertThat(user.getName()).isEqualTo(userFixture.이름());
-        assertThat(user.getPassword()).isEqualTo(userFixture.비밀번호());
     }
 
     private static void USER_이메일_값_검증(User user, UserFixture USER_1) {

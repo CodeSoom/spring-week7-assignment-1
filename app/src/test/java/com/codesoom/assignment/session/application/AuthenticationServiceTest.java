@@ -5,6 +5,7 @@ import com.codesoom.assignment.session.application.exception.InvalidTokenExcepti
 import com.codesoom.assignment.session.application.exception.LoginFailException;
 import com.codesoom.assignment.session.domain.Role;
 import com.codesoom.assignment.session.domain.RoleRepository;
+import com.codesoom.assignment.user.domain.User;
 import com.codesoom.assignment.user.domain.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -38,11 +41,13 @@ class AuthenticationServiceTest {
 
     private final UserRepository userRepository = mock(UserRepository.class);
     private final RoleRepository roleRepository = mock(RoleRepository.class);
+    private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
         JwtUtil jwtUtil = new JwtUtil(SECRET);
-        authenticationService = new AuthenticationService(userRepository, roleRepository, jwtUtil);
+        passwordEncoder = new BCryptPasswordEncoder();
+        authenticationService = new AuthenticationService(userRepository, roleRepository, jwtUtil, passwordEncoder);
     }
 
     @Nested
@@ -55,8 +60,12 @@ class AuthenticationServiceTest {
 
             @BeforeEach
             void setUp() {
+                User user = USER_1.회원_엔티티_생성(ID_MIN.value());
+
+                user.changePassword(USER_1.비밀번호(), passwordEncoder);
+
                 given(userRepository.findByEmail(USER_1.이메일()))
-                        .willReturn(Optional.of(USER_1.회원_엔티티_생성(ID_MIN.value())));
+                        .willReturn(Optional.of(user));
             }
 
             @Test
