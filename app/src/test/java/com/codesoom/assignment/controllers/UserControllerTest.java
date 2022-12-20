@@ -5,6 +5,7 @@ import com.codesoom.assignment.application.UserService;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
+import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,13 +19,20 @@ import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String INVALID_TOKEN = VALID_TOKEN + "WRONG";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -64,6 +72,15 @@ class UserControllerTest {
 
         given(userService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
+
+        given(authenticationService.parseToken(VALID_TOKEN))
+                .willReturn(1L);
+
+        given(authenticationService.parseToken(INVALID_TOKEN))
+                .willThrow(new InvalidTokenException(INVALID_TOKEN));
+
+        given(authenticationService.parseToken(null))
+                .willThrow(new InvalidTokenException(null));
     }
 
     @Test
@@ -102,6 +119,7 @@ class UserControllerTest {
     void updateUserWithValidAttributes() throws Exception {
         mockMvc.perform(
                 patch("/users/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
         )
@@ -120,6 +138,7 @@ class UserControllerTest {
     void updateUserWithInvalidAttributes() throws Exception {
         mockMvc.perform(
                 patch("/users/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"password\":\"\"}")
         )
@@ -127,9 +146,10 @@ class UserControllerTest {
     }
 
     @Test
-    void updateUserWithNotExsitedId() throws Exception {
+    void updateUserWithNotExistedId() throws Exception {
         mockMvc.perform(
                 patch("/users/100")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
         )
@@ -140,8 +160,31 @@ class UserControllerTest {
     }
 
     @Test
+    void updateUserWithInvalidToken() throws Exception {
+        mockMvc.perform(
+                patch("/users/1")
+                        .header("Authorization", "Bearer " + INVALID_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+        )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void updateUserWithoutToken() throws Exception {
+        mockMvc.perform(
+                        patch("/users/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
+        mockMvc.perform(delete("/users/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                )
                 .andExpect(status().isNoContent());
 
         verify(userService).deleteUser(1L);
@@ -149,9 +192,25 @@ class UserControllerTest {
 
     @Test
     void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
+        mockMvc.perform(delete("/users/100")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                )
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
+    }
+
+    @Test
+    void destroyWithInvalidToken() throws Exception {
+        mockMvc.perform(delete("/users/1")
+                        .header("Authorization", "Bearer " + INVALID_TOKEN)
+                )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void destroyWithoutAccessToken() throws Exception {
+        mockMvc.perform(delete("/users/1"))
+                .andExpect(status().isUnauthorized());
     }
 }
