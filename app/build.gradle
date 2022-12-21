@@ -69,8 +69,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     runtimeOnly 'com.h2database:h2'
 
+    // Spring Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
     // Spring Developer Tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // Spring AOP
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
 
     // Spring Boot Test
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
