@@ -1,5 +1,6 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.Authority;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.repository.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Collections;
 
 @Service
 @Transactional
@@ -31,10 +33,19 @@ public class UserService {
             throw new UserEmailDuplicationException(email);
         }
 
-        User user = mapper.map(registrationData, User.class);
-        String password = user.getPassword();
+        Authority authority = Authority.builder()
+                .authorityName("USER")
+                .build();
 
-        user.changePassword(password, passwordEncoder);
+        User user = User.builder()
+                .email(registrationData.getEmail())
+                .name(registrationData.getName())
+                .password(registrationData.getPassword())
+                .authorities(Collections.singleton(authority))
+                .build();
+
+        user.changePassword(user.getPassword(), passwordEncoder);
+
         return userRepository.save(user);
     }
 

@@ -1,11 +1,12 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.Authority;
 import com.codesoom.assignment.domain.User;
-import com.codesoom.assignment.repository.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.repository.UserRepository;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -42,11 +45,16 @@ class UserServiceTest {
 
         given(userRepository.save(any(User.class))).will(invocation -> {
             User source = invocation.getArgument(0);
+            Authority authority = Authority.builder().authorityName("USER").build();
+            Set<Authority> authorities = new HashSet<>();
+            authorities.add(authority);
+
             return User.builder()
                     .id(13L)
                     .email(source.getEmail())
                     .name(source.getName())
                     .password(passwordEncoder.encode(source.getPassword()))
+                    .authorities(authorities)
                     .build();
         });
 
@@ -80,6 +88,8 @@ class UserServiceTest {
         assertThat(user.getEmail()).isEqualTo("tester@example.com");
         assertThat(user.getName()).isEqualTo("Tester");
         assertThat(user.getPassword()).isNotEqualTo("test");
+        assertThat(user.getAuthorities().stream().findFirst().get().getAuthorityName())
+                .isEqualTo("USER");
 
         verify(userRepository).save(any(User.class));
     }
