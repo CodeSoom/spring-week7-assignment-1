@@ -1,7 +1,7 @@
 package com.codesoom.assignment.application;
 
 import com.codesoom.assignment.domain.User;
-import com.codesoom.assignment.domain.UserRepository;
+import com.codesoom.assignment.repository.UserRepository;
 import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import io.jsonwebtoken.Claims;

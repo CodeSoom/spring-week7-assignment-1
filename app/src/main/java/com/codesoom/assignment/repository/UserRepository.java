@@ -1,13 +1,13 @@
-package com.codesoom.assignment.infra;
+package com.codesoom.assignment.repository;
 
 import com.codesoom.assignment.domain.User;
-import com.codesoom.assignment.domain.UserRepository;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-public interface JpaUserRepository
-        extends UserRepository, CrudRepository<User, Long> {
+@Repository
+public interface UserRepository extends CrudRepository<User, Long> {
     User save(User user);
 
     boolean existsByEmail(String email);
