@@ -42,6 +42,7 @@ class AuthenticationServiceTest {
                 userRepository, jwtUtil, passwordEncoder);
 
         User user = User.builder()
+                .id(1L)
                 .email("tester@example.com")
                 .password("test")
                 .build();
@@ -65,9 +66,8 @@ class AuthenticationServiceTest {
     void loginWithRightEmailAndPassword() {
         String accessToken = authenticationService.login(
                 "tester@example.com", "test");
-
-        //TODO VALID_TOKEN과 다름
-//        assertThat(accessToken).isEqualTo(VALID_TOKEN);
+        
+        assertThat(accessToken).isEqualTo(VALID_TOKEN);
 
         verify(userRepository).findByEmail("tester@example.com");
     }
