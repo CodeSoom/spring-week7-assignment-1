@@ -104,10 +104,9 @@ class UserServiceTest {
         assertThat(user.getEmail()).isEqualTo("tester@example.com");
         assertThat(user.getName()).isEqualTo("Tester");
         assertThat(user.getPassword()).isNotEqualTo("test");
-        //TODO 더 간단한 방법?
-        assertThat(user.getAuthorities().stream().findFirst().get().getAuthorityName())
+        assertThat(user.getAuthorities().iterator().next().getAuthorityName())
                 .isEqualTo("USER");
-
+        
         verify(userRepository).save(any(User.class));
     }
 
