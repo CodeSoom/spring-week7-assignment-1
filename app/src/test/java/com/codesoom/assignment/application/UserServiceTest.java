@@ -14,7 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -72,6 +74,20 @@ class UserServiceTest {
 
         given(userRepository.findByIdAndDeletedIsFalse(DELETED_USER_ID))
                 .willReturn(Optional.empty());
+
+        List<User> users = new ArrayList<>();
+        users.add(User.builder().name("test1").build());
+        users.add(User.builder().name("test2").build());
+
+        given(userRepository.findAll())
+                .willReturn(users);
+    }
+
+    @Test
+    void findUsers() {
+        List<User> users = userService.findUsers();
+
+        assertThat(users.get(0).getName()).isEqualTo("test1");
     }
 
     @Test
@@ -88,6 +104,7 @@ class UserServiceTest {
         assertThat(user.getEmail()).isEqualTo("tester@example.com");
         assertThat(user.getName()).isEqualTo("Tester");
         assertThat(user.getPassword()).isNotEqualTo("test");
+        //TODO 더 간단한 방법?
         assertThat(user.getAuthorities().stream().findFirst().get().getAuthorityName())
                 .isEqualTo("USER");
 

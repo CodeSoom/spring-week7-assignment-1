@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Collections;
+import java.util.List;
 
 @Service
 @Transactional
@@ -25,6 +26,10 @@ public class UserService {
         this.mapper = dozerMapper;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
+    }
+
+    public List<User> findUsers() {
+        return userRepository.findAll();
     }
 
     public User registerUser(UserRegistrationData registrationData) {
