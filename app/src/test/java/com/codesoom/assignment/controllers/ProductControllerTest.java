@@ -99,7 +99,7 @@ class ProductControllerTest {
     }
 
     @Test
-     void detailWithExistedProduct() throws Exception {
+    void detailWithExistedProduct() throws Exception {
         mockMvc.perform(
                 get("/products/1")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
