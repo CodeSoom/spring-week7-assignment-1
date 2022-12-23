@@ -11,8 +11,8 @@ public class UserAuthentication extends AbstractAuthenticationToken {
 
     private final Long userId;
 
-    public UserAuthentication(Long userId) {
-        super(authorities());
+    public UserAuthentication(Long userId, List<String> authorities) {
+        super(authorities(authorities));
         this.userId = userId;
     }
 
@@ -31,9 +31,13 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         return true;
     }
 
-    private static List<GrantedAuthority> authorities() {
+    private static List<GrantedAuthority> authorities(List<String> userAuthorities) {
         List<GrantedAuthority> authorities = new ArrayList<>();
-        //TODO 권한 나누기(USER/ADMIN)
+
+        if (userAuthorities.contains("ADMIN")) {
+            authorities.add(new SimpleGrantedAuthority("ADMIN"));
+        }
+
         authorities.add(new SimpleGrantedAuthority("USER"));
         return authorities;
     }
