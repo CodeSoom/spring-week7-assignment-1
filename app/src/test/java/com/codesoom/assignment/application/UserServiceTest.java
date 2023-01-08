@@ -1,17 +1,24 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.Authority;
 import com.codesoom.assignment.domain.User;
-import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.repository.UserRepository;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,22 +34,29 @@ class UserServiceTest {
     private UserService userService;
 
     private final UserRepository userRepository = mock(UserRepository.class);
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @BeforeEach
     void setUp() {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
 
-        userService = new UserService(mapper, userRepository);
+        userService = new UserService(mapper, passwordEncoder, userRepository);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
                 .willReturn(true);
 
         given(userRepository.save(any(User.class))).will(invocation -> {
             User source = invocation.getArgument(0);
+            Authority authority = Authority.builder().authorityName("USER").build();
+            Set<Authority> authorities = new HashSet<>();
+            authorities.add(authority);
+
             return User.builder()
                     .id(13L)
                     .email(source.getEmail())
                     .name(source.getName())
+                    .password(passwordEncoder.encode(source.getPassword()))
+                    .authorities(authorities)
                     .build();
         });
 
@@ -52,7 +66,7 @@ class UserServiceTest {
                                 .id(1L)
                                 .email(EXISTED_EMAIL_ADDRESS)
                                 .name("Tester")
-                                .password("test")
+                                .password(passwordEncoder.encode("test"))
                                 .build()));
 
         given(userRepository.findByIdAndDeletedIsFalse(100L))
@@ -60,6 +74,20 @@ class UserServiceTest {
 
         given(userRepository.findByIdAndDeletedIsFalse(DELETED_USER_ID))
                 .willReturn(Optional.empty());
+
+        List<User> users = new ArrayList<>();
+        users.add(User.builder().name("test1").build());
+        users.add(User.builder().name("test2").build());
+
+        given(userRepository.findAll())
+                .willReturn(users);
+    }
+
+    @Test
+    void findUsers() {
+        List<User> users = userService.findUsers();
+
+        assertThat(users.get(0).getName()).isEqualTo("test1");
     }
 
     @Test
@@ -75,7 +103,10 @@ class UserServiceTest {
         assertThat(user.getId()).isEqualTo(13L);
         assertThat(user.getEmail()).isEqualTo("tester@example.com");
         assertThat(user.getName()).isEqualTo("Tester");
-
+        assertThat(user.getPassword()).isNotEqualTo("test");
+        assertThat(user.getAuthorities().iterator().next().getAuthorityName())
+                .isEqualTo("USER");
+        
         verify(userRepository).save(any(User.class));
     }
 
