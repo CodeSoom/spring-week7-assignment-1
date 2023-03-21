@@ -8,6 +8,7 @@ import com.codesoom.assignment.security.UserAuthentication;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -100,6 +101,7 @@ class AuthenticationServiceTest {
 
     @Test
     void isNotPrincipal(){
-        assertThat(authenticationService.isPrincipal(2L)).isFalse();
+        assertThatThrownBy(() -> authenticationService.isPrincipal(2L))
+                .isInstanceOf(AccessDeniedException.class);
     }
 }

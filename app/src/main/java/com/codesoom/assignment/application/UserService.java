@@ -7,6 +7,7 @@ import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.Mapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +20,14 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationService authenticationService;
+
     public UserService(Mapper dozerMapper, UserRepository userRepository
-    ,PasswordEncoder passwordEncoder) {
+    ,PasswordEncoder passwordEncoder, AuthenticationService authenticationService) {
         this.mapper = dozerMapper;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authenticationService = authenticationService;
     }
 
     public User registerUser(UserRegistrationData registrationData) {
@@ -39,10 +43,14 @@ public class UserService {
     }
 
     public User updateUser(Long id, UserModificationData modificationData) {
+        if(!authenticationService.isPrincipal(id)){
+            throw new AccessDeniedException("");
+        }
         User user = findUser(id);
 
         User source = mapper.map(modificationData, User.class);
         user.changeWith(source);
+        user.changePassword(source.getPassword(), passwordEncoder);
 
         return user;
     }
@@ -57,4 +65,6 @@ public class UserService {
         return userRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
+
+
 }
