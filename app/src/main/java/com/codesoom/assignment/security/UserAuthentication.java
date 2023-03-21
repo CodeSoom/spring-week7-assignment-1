@@ -22,7 +22,7 @@ public class UserAuthentication extends AbstractAuthenticationToken {
         List<GrantedAuthority> authorities = new ArrayList<>();
         // TODO : userId에 따라서 다른 권한 부여 => elg. ADMIN, USER
         authorities.add(new SimpleGrantedAuthority("USER"));
-        return null;
+        return authorities;
     }
 
     @Override
