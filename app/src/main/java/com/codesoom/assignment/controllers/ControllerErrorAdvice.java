@@ -38,23 +38,5 @@ public class ControllerErrorAdvice {
     public ErrorResponse handleLoginFailException() {
         return new ErrorResponse("Log-in failed");
     }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ErrorResponse handleConstraintValidateError(
-            ConstraintViolationException exception
-    ) {
-        String messageTemplate = getViolatedMessage(exception);
-        return new ErrorResponse(messageTemplate);
-    }
-
-    private String getViolatedMessage(ConstraintViolationException exception) {
-        String messageTemplate = null;
-        Set<ConstraintViolation<?>> violations = exception.getConstraintViolations();
-        for (ConstraintViolation<?> violation : violations) {
-            messageTemplate = violation.getMessageTemplate();
-        }
-        return messageTemplate;
-    }
+    
 }
