@@ -4,9 +4,12 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.LoginFailException;
+import com.codesoom.assignment.security.UserAuthentication;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -32,6 +35,9 @@ class AuthenticationServiceTest {
 
     @BeforeEach
     void setUp() {
+        Authentication authentication = new UserAuthentication(1L);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
         JwtUtil jwtUtil = new JwtUtil(SECRET);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -85,5 +91,15 @@ class AuthenticationServiceTest {
         assertThatThrownBy(
                 () -> authenticationService.parseToken(INVALID_TOKEN)
         ).isInstanceOf(InvalidTokenException.class);
+    }
+
+    @Test
+    void isPrincipal(){
+        assertThat(authenticationService.isPrincipal(1L)).isTrue();
+    }
+
+    @Test
+    void isNotPrincipal(){
+        assertThat(authenticationService.isPrincipal(2L)).isFalse();
     }
 }
