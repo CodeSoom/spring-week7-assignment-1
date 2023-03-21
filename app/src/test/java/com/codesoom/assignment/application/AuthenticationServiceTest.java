@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -17,71 +19,74 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 class AuthenticationServiceTest {
-    private static final String SECRET = "12345678901234567890123456789012";
 
-    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
-    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+  private static final String SECRET = "12345678901234567890123456789012";
 
-    private AuthenticationService authenticationService;
+  private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+      "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+  private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+      "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
 
-    private UserRepository userRepository = mock(UserRepository.class);
+  private AuthenticationService authenticationService;
 
-    @BeforeEach
-    void setUp() {
-        JwtUtil jwtUtil = new JwtUtil(SECRET);
+  private UserRepository userRepository = mock(UserRepository.class);
 
-        authenticationService = new AuthenticationService(
-                userRepository, jwtUtil);
 
-        User user = User.builder()
-                .password("test")
-                .build();
+  @BeforeEach
+  void setUp() {
+    JwtUtil jwtUtil = new JwtUtil(SECRET);
 
-        given(userRepository.findByEmail("tester@example.com"))
-                .willReturn(Optional.of(user));
-    }
+    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    @Test
-    void loginWithRightEmailAndPassword() {
-        String accessToken = authenticationService.login(
-                "tester@example.com", "test");
+    authenticationService = new AuthenticationService(
+        userRepository, jwtUtil, passwordEncoder);
 
-        assertThat(accessToken).isEqualTo(VALID_TOKEN);
+    User user = User.builder().build();
+    user.changePassword("test",passwordEncoder);
 
-        verify(userRepository).findByEmail("tester@example.com");
-    }
+    given(userRepository.findByEmail("tester@example.com"))
+        .willReturn(Optional.of(user));
+  }
 
-    @Test
-    void loginWithWrongEmail() {
-        assertThatThrownBy(
-                () -> authenticationService.login("badguy@example.com", "test")
-        ).isInstanceOf(LoginFailException.class);
+  @Test
+  void loginWithRightEmailAndPassword() {
+    String accessToken = authenticationService.login(
+        "tester@example.com", "test");
 
-        verify(userRepository).findByEmail("badguy@example.com");
-    }
+    assertThat(accessToken).isEqualTo(VALID_TOKEN);
 
-    @Test
-    void loginWithWrongPassword() {
-        assertThatThrownBy(
-                () -> authenticationService.login("tester@example.com", "xxx")
-        ).isInstanceOf(LoginFailException.class);
+    verify(userRepository).findByEmail("tester@example.com");
+  }
 
-        verify(userRepository).findByEmail("tester@example.com");
-    }
+  @Test
+  void loginWithWrongEmail() {
+    assertThatThrownBy(
+        () -> authenticationService.login("badguy@example.com", "test")
+    ).isInstanceOf(LoginFailException.class);
 
-    @Test
-    void parseTokenWithValidToken() {
-        Long userId = authenticationService.parseToken(VALID_TOKEN);
+    verify(userRepository).findByEmail("badguy@example.com");
+  }
 
-        assertThat(userId).isEqualTo(1L);
-    }
+  @Test
+  void loginWithWrongPassword() {
+    assertThatThrownBy(
+        () -> authenticationService.login("tester@example.com", "xxx")
+    ).isInstanceOf(LoginFailException.class);
 
-    @Test
-    void parseTokenWithInvalidToken() {
-        assertThatThrownBy(
-                () -> authenticationService.parseToken(INVALID_TOKEN)
-        ).isInstanceOf(InvalidTokenException.class);
-    }
+    verify(userRepository).findByEmail("tester@example.com");
+  }
+
+  @Test
+  void parseTokenWithValidToken() {
+    Long userId = authenticationService.parseToken(VALID_TOKEN);
+
+    assertThat(userId).isEqualTo(1L);
+  }
+
+  @Test
+  void parseTokenWithInvalidToken() {
+    assertThatThrownBy(
+        () -> authenticationService.parseToken(INVALID_TOKEN)
+    ).isInstanceOf(InvalidTokenException.class);
+  }
 }

@@ -9,6 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Getter
@@ -17,29 +19,42 @@ import javax.persistence.Table;
 @AllArgsConstructor
 @Table(name = "users")
 public class User {
-    @Id
-    @GeneratedValue
-    private Long id;
 
-    private String email;
+  @Id
+  @GeneratedValue
+  private Long id;
 
-    private String name;
+  @Builder.Default
+  private String email = "";
 
-    private String password;
+  @Builder.Default
+  private String name = "";
 
-    @Builder.Default
-    private boolean deleted = false;
+  @Builder.Default
+  private String password = "";
 
-    public void changeWith(User source) {
-        name = source.name;
-        password = source.password;
-    }
+  @Builder.Default
+  private boolean deleted = false;
 
-    public void destroy() {
-        deleted = true;
-    }
+  public void changeWith(User source) {
+    name = source.name;
+//    password = source.password;
+  }
 
-    public boolean authenticate(String password) {
-        return !deleted && password.equals(this.password);
-    }
+
+  public void destroy() {
+    deleted = true;
+  }
+
+  public boolean authenticate(String password,
+      PasswordEncoder passwordEncoder) {
+     passwordEncoder = new BCryptPasswordEncoder();
+    return !deleted && passwordEncoder.matches(password, this.password);
+  }
+
+  public void changePassword(String password,
+      PasswordEncoder passwordEncoder) {
+     passwordEncoder = new BCryptPasswordEncoder();
+    this.password = passwordEncoder.encode(password);
+  }
 }
