@@ -38,5 +38,5 @@ public class ControllerErrorAdvice {
     public ErrorResponse handleLoginFailException() {
         return new ErrorResponse("Log-in failed");
     }
-    
+
 }
