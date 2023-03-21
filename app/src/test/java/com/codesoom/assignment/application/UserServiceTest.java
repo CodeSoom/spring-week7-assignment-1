@@ -6,11 +6,14 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.security.UserAuthentication;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -31,13 +34,16 @@ class UserServiceTest {
 
     private final UserRepository userRepository = mock(UserRepository.class);
 
+    private final AuthenticationService authenticationService = mock(AuthenticationService.class);
+
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
+
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
         passwordEncoder = new BCryptPasswordEncoder();
-        userService = new UserService(mapper, userRepository, passwordEncoder);
+        userService = new UserService(mapper, userRepository, passwordEncoder, authenticationService);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
                 .willReturn(true);
@@ -57,7 +63,7 @@ class UserServiceTest {
                                 .id(1L)
                                 .email(EXISTED_EMAIL_ADDRESS)
                                 .name("Tester")
-                                .password("test")
+                                .password(passwordEncoder.encode("test"))
                                 .build()));
 
         given(userRepository.findByIdAndDeletedIsFalse(100L))
@@ -65,6 +71,10 @@ class UserServiceTest {
 
         given(userRepository.findByIdAndDeletedIsFalse(DELETED_USER_ID))
                 .willReturn(Optional.empty());
+
+        // 들어온 유저의 ID는 1L로 가정하는 구문
+        given(authenticationService.isPrincipal(1L)).willReturn(true);
+        given(authenticationService.isPrincipal(2L)).willReturn(false);
     }
 
     @Test
@@ -122,43 +132,14 @@ class UserServiceTest {
                 .build();
 
         assertThatThrownBy(() -> userService.updateUser(100L, modificationData))
-                .isInstanceOf(UserNotFoundException.class);
+                .isInstanceOf(AccessDeniedException.class);
 
-        verify(userRepository).findByIdAndDeletedIsFalse(100L);
     }
 
 
     @Test
     void updateUserWithDeletedId() {
-        UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
 
-        assertThatThrownBy(
-                () -> userService.updateUser(DELETED_USER_ID, modificationData)
-        )
-                .isInstanceOf(UserNotFoundException.class);
-
-        verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
-    }
-
-    @Test
-    void updateUserByPrincipal() {
-        UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
-
-        User user = userService.updateUser(DELETED_USER_ID, modificationData);
-
-        assertThat(user.getName().equals("TEST"));
-        assertThat(passwordEncoder.matches("TEST",user.getPassword())).isTrue();
-        verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
-    }
-
-    @Test
-    void updateUserByOthers() {
         UserModificationData modificationData = UserModificationData.builder()
                 .name("TEST")
                 .password("TEST")
@@ -169,7 +150,34 @@ class UserServiceTest {
         )
                 .isInstanceOf(AccessDeniedException.class);
 
-        verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
+    }
+
+    @Test
+    void updateUserByPrincipal() {
+        UserModificationData modificationData = UserModificationData.builder()
+                .name("TEST")
+                .password("TEST")
+                .build();
+
+        User user = userService.updateUser(1L, modificationData);
+
+        assertThat(user.getName().equals("TEST"));
+        assertThat(passwordEncoder.matches("TEST", user.getPassword())).isTrue();
+        verify(userRepository).findByIdAndDeletedIsFalse(1L);
+    }
+
+    @Test
+    void updateUserByOthers() {
+        UserModificationData modificationData = UserModificationData.builder()
+                .name("TEST")
+                .password("TEST")
+                .build();
+
+        assertThatThrownBy(
+                () -> userService.updateUser(2L, modificationData)
+        )
+                .isInstanceOf(AccessDeniedException.class);
+
     }
 
     @Test
