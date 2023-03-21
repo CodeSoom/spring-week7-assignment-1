@@ -10,6 +10,7 @@ import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -30,11 +31,12 @@ class UserServiceTest {
 
     private final UserRepository userRepository = mock(UserRepository.class);
 
+    private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        passwordEncoder = new BCryptPasswordEncoder();
         userService = new UserService(mapper, userRepository, passwordEncoder);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
@@ -137,6 +139,35 @@ class UserServiceTest {
                 () -> userService.updateUser(DELETED_USER_ID, modificationData)
         )
                 .isInstanceOf(UserNotFoundException.class);
+
+        verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
+    }
+
+    @Test
+    void updateUserByPrincipal() {
+        UserModificationData modificationData = UserModificationData.builder()
+                .name("TEST")
+                .password("TEST")
+                .build();
+
+        User user = userService.updateUser(DELETED_USER_ID, modificationData);
+
+        assertThat(user.getName().equals("TEST"));
+        assertThat(passwordEncoder.matches("TEST",user.getPassword())).isTrue();
+        verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
+    }
+
+    @Test
+    void updateUserByOthers() {
+        UserModificationData modificationData = UserModificationData.builder()
+                .name("TEST")
+                .password("TEST")
+                .build();
+
+        assertThatThrownBy(
+                () -> userService.updateUser(DELETED_USER_ID, modificationData)
+        )
+                .isInstanceOf(AccessDeniedException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
     }
