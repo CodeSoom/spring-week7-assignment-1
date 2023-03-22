@@ -34,8 +34,6 @@ class UserServiceTest {
 
     private final UserRepository userRepository = mock(UserRepository.class);
 
-    private final AuthenticationService authenticationService = mock(AuthenticationService.class);
-
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
@@ -43,7 +41,7 @@ class UserServiceTest {
 
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
         passwordEncoder = new BCryptPasswordEncoder();
-        userService = new UserService(mapper, userRepository, passwordEncoder, authenticationService);
+        userService = new UserService(mapper, userRepository, passwordEncoder);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
                 .willReturn(true);
@@ -72,9 +70,6 @@ class UserServiceTest {
         given(userRepository.findByIdAndDeletedIsFalse(DELETED_USER_ID))
                 .willReturn(Optional.empty());
 
-        // 들어온 유저의 ID는 1L로 가정하는 구문
-        given(authenticationService.isPrincipal(1L)).willReturn(true);
-        given(authenticationService.isPrincipal(2L)).willReturn(false);
     }
 
     @Test
@@ -132,7 +127,7 @@ class UserServiceTest {
                 .build();
 
         assertThatThrownBy(() -> userService.updateUser(100L, modificationData))
-                .isInstanceOf(AccessDeniedException.class);
+                .isInstanceOf(UserNotFoundException.class);
 
     }
 
@@ -148,37 +143,10 @@ class UserServiceTest {
         assertThatThrownBy(
                 () -> userService.updateUser(DELETED_USER_ID, modificationData)
         )
-                .isInstanceOf(AccessDeniedException.class);
+                .isInstanceOf(UserNotFoundException.class);
 
     }
 
-    @Test
-    void updateUserByPrincipal() {
-        UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
-
-        User user = userService.updateUser(1L, modificationData);
-
-        assertThat(user.getName().equals("TEST"));
-        assertThat(passwordEncoder.matches("TEST", user.getPassword())).isTrue();
-        verify(userRepository).findByIdAndDeletedIsFalse(1L);
-    }
-
-    @Test
-    void updateUserByOthers() {
-        UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
-
-        assertThatThrownBy(
-                () -> userService.updateUser(2L, modificationData)
-        )
-                .isInstanceOf(AccessDeniedException.class);
-
-    }
 
     @Test
     void deleteUserWithExistedId() {

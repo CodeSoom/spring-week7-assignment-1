@@ -92,14 +92,4 @@ class AuthenticationServiceTest {
                 () -> authenticationService.parseToken(INVALID_TOKEN)
         ).isInstanceOf(InvalidTokenException.class);
     }
-
-    @Test
-    void isPrincipal(){
-        assertThat(authenticationService.isPrincipal(1L)).isTrue();
-    }
-
-    @Test
-    void isNotPrincipal(){
-        assertThat(authenticationService.isPrincipal(2L)).isFalse();
-    }
 }

@@ -34,6 +34,9 @@ class UserControllerTest {
     @MockBean
     private AuthenticationService authenticationService;
 
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+
     @BeforeEach
     void setUp() {
         given(userService.registerUser(any(UserRegistrationData.class)))
@@ -64,6 +67,8 @@ class UserControllerTest {
 
         given(userService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
+
+        given(authenticationService.parseToken(VALID_TOKEN)).willReturn(1L);
     }
 
     @Test
@@ -104,6 +109,7 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -132,11 +138,40 @@ class UserControllerTest {
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
         )
-                .andExpect(status().isNotFound());
+                .andExpect(status().isForbidden());
 
-        verify(userService)
-                .updateUser(eq(100L), any(UserModificationData.class));
+    }
+
+    @Test
+    void updatePrincipalUser() throws Exception {
+        mockMvc.perform(
+                        patch("/users/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                                .header("Authorization", "Bearer " + VALID_TOKEN)
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().string(
+                        containsString("\"id\":1")
+                ))
+                .andExpect(content().string(
+                        containsString("\"name\":\"TEST\"")
+                ));
+
+        verify(userService).updateUser(eq(1L), any(UserModificationData.class));
+    }
+
+    @Test
+    void updateOthersUser() throws Exception {
+        mockMvc.perform(
+                        patch("/users/2")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"TEST\",\"password\":\"test\"}")
+                                .header("Authorization", "Bearer " + VALID_TOKEN)
+                )
+                .andExpect(status().isForbidden());
     }
 
     @Test

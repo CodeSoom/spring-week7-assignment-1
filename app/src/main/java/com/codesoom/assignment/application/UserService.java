@@ -20,14 +20,12 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationService authenticationService;
 
     public UserService(Mapper dozerMapper, UserRepository userRepository
-    ,PasswordEncoder passwordEncoder, AuthenticationService authenticationService) {
+    ,PasswordEncoder passwordEncoder) {
         this.mapper = dozerMapper;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.authenticationService = authenticationService;
     }
 
     public User registerUser(UserRegistrationData registrationData) {
@@ -43,9 +41,7 @@ public class UserService {
     }
 
     public User updateUser(Long id, UserModificationData modificationData) {
-        if(!authenticationService.isPrincipal(id)){
-            throw new AccessDeniedException("");
-        }
+
         User user = findUser(id);
 
         User source = mapper.map(modificationData, User.class);

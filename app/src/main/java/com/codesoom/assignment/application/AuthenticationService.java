@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 public class AuthenticationService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
-
     private final PasswordEncoder passwordEncoder;
 
     public AuthenticationService(UserRepository userRepository,
@@ -41,8 +40,4 @@ public class AuthenticationService {
         return claims.get("userId", Long.class);
     }
 
-    public boolean isPrincipal(Long userId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getPrincipal().equals(userId);
-    }
 }

@@ -39,4 +39,5 @@ public class UserAuthentication extends AbstractAuthenticationToken {
     public boolean isAuthenticated() {
         return true;
     }
+
 }
