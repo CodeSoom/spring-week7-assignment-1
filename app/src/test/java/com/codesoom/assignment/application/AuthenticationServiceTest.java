@@ -1,5 +1,6 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.RoleRepository;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.errors.InvalidTokenException;
@@ -31,6 +32,7 @@ class AuthenticationServiceTest {
 
   private UserRepository userRepository = mock(UserRepository.class);
 
+  private RoleRepository roleRepository;
 
   @BeforeEach
   void setUp() {
@@ -39,10 +41,10 @@ class AuthenticationServiceTest {
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     authenticationService = new AuthenticationService(
-        userRepository, jwtUtil, passwordEncoder);
+        userRepository, jwtUtil, passwordEncoder, roleRepository);
 
     User user = User.builder().build();
-    user.changePassword("test",passwordEncoder);
+    user.changePassword("test", passwordEncoder);
 
     given(userRepository.findByEmail("tester@example.com"))
         .willReturn(Optional.of(user));

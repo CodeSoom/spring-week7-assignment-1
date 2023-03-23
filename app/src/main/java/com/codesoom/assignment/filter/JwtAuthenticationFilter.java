@@ -1,7 +1,9 @@
 package com.codesoom.assignment.filter;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.domain.Role;
 import com.codesoom.assignment.security.UserAuthentication;
+import java.util.List;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -17,6 +19,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     private final AuthenticationService authenticationService;
 
+
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager, AuthenticationService authenticationService) {
         super(authenticationManager);
         this.authenticationService = authenticationService;
@@ -27,11 +30,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws IOException, ServletException {
-//        //todo : 이 부분을 지우고 싶다.
-//        if (filterWithPathAndMethod(request)) {
-//            chain.doFilter(request, response);
-//            return;
-//        }
+
         String authorization = request.getHeader("Authorization");
 
 
@@ -39,31 +38,15 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
             String accessToken = authorization.substring("Bearer ".length());
             Long userId = authenticationService.parseToken(accessToken);
-            Authentication authentication = new UserAuthentication(userId);
+
+            List<String> roles = authenticationService.roleName(userId);
+
+            Authentication authentication = new UserAuthentication(userId,roles);
 
             SecurityContext context = SecurityContextHolder.getContext();
             context.setAuthentication(authentication);
-
         }
 
         chain.doFilter(request, response);
-    }
-
-    private boolean filterWithPathAndMethod(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        if (!path.startsWith("/products")) {
-            return true;
-        }
-
-        String method = request.getMethod();
-        if (method.equals("GET")) {
-            return true;
-        }
-
-        if (method.equals("OPTIONS")) {
-            return true;
-        }
-
-        return false;
     }
 }

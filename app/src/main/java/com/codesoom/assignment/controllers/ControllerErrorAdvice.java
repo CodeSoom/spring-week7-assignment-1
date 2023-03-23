@@ -45,6 +45,12 @@ public class ControllerErrorAdvice {
         return new ErrorResponse("Invalid access token");
     }
 
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(NotFoundRoleException.class)
+    public ErrorResponse notFoundRoleException() {
+        return new ErrorResponse("Not Found Role");
+    }
+
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
