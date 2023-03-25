@@ -40,6 +40,7 @@ public class UserController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_ADMIN')")
     void destroy(@PathVariable Long id) {
         userService.deleteUser(id);
     }

@@ -42,6 +42,7 @@ class UserControllerTest {
 
     private String validToken;
 
+    private String adminValidToken;
     private String invalidToken;
 
     private Key key = Keys.hmacShaKeyFor("12345678901234567890123456789010".getBytes());
@@ -56,6 +57,13 @@ class UserControllerTest {
 
         validToken = new JwtUtil("12345678901234567890123456789010").createAccessToken(user);
         invalidToken = validToken+"INVALID";
+
+        User adminUser = User.builder()
+                .id(10L)
+                .role("ROLE_ADMIN")
+                .build();
+
+        adminValidToken = new JwtUtil("12345678901234567890123456789010").createAccessToken(adminUser);
 
         given(userService.registerUser(any(UserRegistrationData.class)))
                 .will(invocation -> {
@@ -92,7 +100,14 @@ class UserControllerTest {
                 .parseClaimsJws(validToken)
                 .getBody();
 
+        Claims adminClaims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(adminValidToken)
+                .getBody();
+
         given(authenticationService.parseToken(validToken)).willReturn(claims);
+        given(authenticationService.parseToken(adminValidToken)).willReturn(adminClaims);
     }
 
 
@@ -201,7 +216,8 @@ class UserControllerTest {
 
     @Test
     void destroyWithExistedId() throws Exception {
-        mockMvc.perform(delete("/users/1"))
+        mockMvc.perform(delete("/users/1")
+                        .header("Authorization", "Bearer " + adminValidToken))
                 .andExpect(status().isNoContent());
 
         verify(userService).deleteUser(1L);
@@ -209,7 +225,8 @@ class UserControllerTest {
 
     @Test
     void destroyWithNotExistedId() throws Exception {
-        mockMvc.perform(delete("/users/100"))
+        mockMvc.perform(delete("/users/100")
+                .header("Authorization", "Bearer " + adminValidToken))
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(100L);
