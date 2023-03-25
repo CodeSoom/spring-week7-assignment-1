@@ -26,10 +26,9 @@ import static org.mockito.Mockito.verify;
 class AuthenticationServiceTest {
     private static final String SECRET = "12345678901234567890123456789012";
 
-    private static final String validToken = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
-    private static final String invalidToken = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
+    private String validToken;
+    private String invalidToken;
+    private String validRefreshToken;
 
     private AuthenticationService authenticationService;
 
@@ -41,13 +40,25 @@ class AuthenticationServiceTest {
         JwtUtil jwtUtil = new JwtUtil(SECRET);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+        User user = User.builder()
+                .id(1L)
+                .role("ROLE_USER")
+                .build();
+        user.changePassword("test",passwordEncoder);
+
+        validToken = jwtUtil.createAccessToken(user);
+        validRefreshToken = jwtUtil.createAccessToken(user);
+        user.registRefreshToken(validRefreshToken);
+
+        invalidToken = validToken+"INVALID";
+
         authenticationService = new AuthenticationService(
                 userRepository, jwtUtil, passwordEncoder);
 
-        User user = User.builder().build();
-        user.changePassword("test",passwordEncoder);
-
         given(userRepository.findByEmail("tester@example.com"))
+                .willReturn(Optional.of(user));
+
+        given(userRepository.findByRefreshTokenAndDeletedIsFalse(validRefreshToken))
                 .willReturn(Optional.of(user));
     }
 
@@ -95,5 +106,12 @@ class AuthenticationServiceTest {
         assertThatThrownBy(
                 () -> authenticationService.parseToken(invalidToken)
         ).isInstanceOf(InvalidTokenException.class);
+    }
+
+    @Test
+    void reissueAccessTokenWithValidRefreshToken() {
+        SessionResponseData responseData = authenticationService.reissueAccessToken(validToken);
+        assertThat(responseData.getAccessToken()).contains(".");
+        assertThat(responseData.getRefreshToken()).isEqualTo(validToken);
     }
 }

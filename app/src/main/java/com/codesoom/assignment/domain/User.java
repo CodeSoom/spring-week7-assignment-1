@@ -36,6 +36,8 @@ public class User {
     @Builder.Default
     private String role = "ROLE_USER";
 
+    private String refreshToken;
+
     public void changeWith(User source) {
         name = source.name;
     }
@@ -50,5 +52,9 @@ public class User {
 
     public void changePassword(String password, PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(password);
+    }
+
+    public void registRefreshToken(String refreshToken){
+        this.refreshToken = refreshToken;
     }
 }

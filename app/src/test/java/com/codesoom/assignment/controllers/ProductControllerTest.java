@@ -39,6 +39,8 @@ class ProductControllerTest {
 
     private String invalidToken;
 
+    private final static String EXPIRED_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VySWQiOjEsInJvbGUiOiJST0xFX1VTRVIiLCJleHAiOjE2Nzk3Mjk2NDh9.5O3vyNNgFM7_R1NjKs_NkGDZxaEFCALg9noeS_OhGl4";
     @Autowired
     private MockMvc mockMvc;
 
@@ -184,6 +186,19 @@ class ProductControllerTest {
                                 "\"price\":5000}")
                         .header("Authorization", "Bearer " + invalidToken)
         )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void createWithExpiredAccessToken() throws Exception {
+        mockMvc.perform(
+                        post("/products")
+                                .accept(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"쥐돌이\",\"maker\":\"냥이월드\"," +
+                                        "\"price\":5000}")
+                                .header("Authorization", "Bearer " + EXPIRED_TOKEN)
+                )
                 .andExpect(status().isUnauthorized());
     }
 

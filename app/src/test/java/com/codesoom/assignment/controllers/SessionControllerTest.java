@@ -48,14 +48,16 @@ class SessionControllerTest {
         given(authenticationService.login("tester@example.com", "xxx"))
                 .willThrow(new LoginFailException("tester@example.com"));
 
+        given(authenticationService.reissueAccessToken(refreshValidToken))
+                .willReturn(sessionResponseData);
+
         User user = User.builder()
                 .id(1L)
                 .role("ROLE_USER")
                 .build();
 
         refreshValidToken = jwtUtil.createRefreshToken(user);
-        Claims claims = jwtUtil.decode(refreshValidToken);
-        given(authenticationService.parseToken(refreshValidToken)).willReturn(claims);
+        given(authenticationService.reissueAccessToken(refreshValidToken)).willReturn(sessionResponseData);
     }
 
     @Test
@@ -92,12 +94,13 @@ class SessionControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+
     @Test
     void accessTokenReissueByRefreshToken() throws Exception {
         mockMvc.perform(
                         post("/session/reissue")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .header("Authorization", "Bearer " + refreshValidToken)
+                                .header("RefreshToken", "Bearer " + refreshValidToken)
                 )
                 .andExpect(content().string(containsString(".")));
     }

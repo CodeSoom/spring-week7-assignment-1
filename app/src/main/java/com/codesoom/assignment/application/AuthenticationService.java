@@ -3,6 +3,7 @@ package com.codesoom.assignment.application;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.SessionResponseData;
+import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -34,6 +35,7 @@ public class AuthenticationService {
         }
         String accessToken = jwtUtil.createAccessToken(user);
         String refreshToken = jwtUtil.createRefreshToken(user);
+        user.registRefreshToken(refreshToken);
 
         return SessionResponseData.builder()
                 .accessToken(accessToken)
@@ -46,4 +48,16 @@ public class AuthenticationService {
         return jwtUtil.decode(accessToken);
     }
 
+
+    public SessionResponseData reissueAccessToken(String refreshToken) {
+        User user = userRepository.findByRefreshTokenAndDeletedIsFalse(refreshToken)
+                .orElseThrow(() -> new InvalidTokenException(refreshToken));
+
+        String accessToken = jwtUtil.createAccessToken(user);
+
+        return SessionResponseData.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
 }
