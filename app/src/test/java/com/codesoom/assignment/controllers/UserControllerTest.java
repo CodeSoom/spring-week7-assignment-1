@@ -6,6 +6,10 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserNotFoundException;
+import com.codesoom.assignment.utils.JwtUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +17,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.security.Key;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,11 +40,23 @@ class UserControllerTest {
     @MockBean
     private AuthenticationService authenticationService;
 
-    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private String validToken;
+
+    private String invalidToken;
+
+    private Key key = Keys.hmacShaKeyFor("12345678901234567890123456789010".getBytes());
 
     @BeforeEach
     void setUp() {
+
+        User user = User.builder()
+                .id(1L)
+                .role("ROLE_USER")
+                .build();
+
+        validToken = new JwtUtil("12345678901234567890123456789010").createAccessToken(user);
+        invalidToken = validToken+"INVALID";
+
         given(userService.registerUser(any(UserRegistrationData.class)))
                 .will(invocation -> {
                     UserRegistrationData registrationData = invocation.getArgument(0);
@@ -68,8 +86,15 @@ class UserControllerTest {
         given(userService.deleteUser(100L))
                 .willThrow(new UserNotFoundException(100L));
 
-        given(authenticationService.parseToken(VALID_TOKEN)).willReturn(1L);
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(validToken)
+                .getBody();
+
+        given(authenticationService.parseToken(validToken)).willReturn(claims);
     }
+
 
     @Test
     void registerUserWithValidAttributes() throws Exception {
@@ -109,7 +134,7 @@ class UserControllerTest {
                 patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"test\"}")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                        .header("Authorization", "Bearer " + validToken)
         )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -138,7 +163,7 @@ class UserControllerTest {
                 patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
-                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                        .header("Authorization", "Bearer " + validToken)
         )
                 .andExpect(status().isForbidden());
 
@@ -150,7 +175,7 @@ class UserControllerTest {
                         patch("/users/1")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{\"name\":\"TEST\",\"password\":\"test\"}")
-                                .header("Authorization", "Bearer " + VALID_TOKEN)
+                                .header("Authorization", "Bearer " + validToken)
                 )
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -169,7 +194,7 @@ class UserControllerTest {
                         patch("/users/2")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{\"name\":\"TEST\",\"password\":\"test\"}")
-                                .header("Authorization", "Bearer " + VALID_TOKEN)
+                                .header("Authorization", "Bearer " + validToken)
                 )
                 .andExpect(status().isForbidden());
     }

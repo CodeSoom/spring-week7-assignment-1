@@ -33,6 +33,9 @@ public class User {
     @Builder.Default
     private boolean deleted = false;
 
+    @Builder.Default
+    private String role = "ROLE_USER";
+
     public void changeWith(User source) {
         name = source.name;
     }

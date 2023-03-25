@@ -2,10 +2,12 @@ package com.codesoom.assignment.application;
 
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
+import com.codesoom.assignment.dto.SessionResponseData;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.security.UserAuthentication;
 import com.codesoom.assignment.utils.JwtUtil;
+import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
@@ -24,9 +26,9 @@ import static org.mockito.Mockito.verify;
 class AuthenticationServiceTest {
     private static final String SECRET = "12345678901234567890123456789012";
 
-    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+    private static final String validToken = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
-    private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
+    private static final String invalidToken = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
 
     private AuthenticationService authenticationService;
@@ -35,8 +37,6 @@ class AuthenticationServiceTest {
 
     @BeforeEach
     void setUp() {
-        Authentication authentication = new UserAuthentication(1L);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         JwtUtil jwtUtil = new JwtUtil(SECRET);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -53,10 +53,13 @@ class AuthenticationServiceTest {
 
     @Test
     void loginWithRightEmailAndPassword() {
-        String accessToken = authenticationService.login(
+        SessionResponseData responseData = authenticationService.login(
                 "tester@example.com", "test");
 
-        assertThat(accessToken).isEqualTo(VALID_TOKEN);
+        String accessToken = responseData.getAccessToken();
+        String refreshToken = responseData.getRefreshToken();
+
+        assertThat(accessToken).contains(".");
 
         verify(userRepository).findByEmail("tester@example.com");
     }
@@ -81,7 +84,8 @@ class AuthenticationServiceTest {
 
     @Test
     void parseTokenWithValidToken() {
-        Long userId = authenticationService.parseToken(VALID_TOKEN);
+        Claims claims = authenticationService.parseToken(validToken);
+        Long userId = claims.get("userId",Long.class);
 
         assertThat(userId).isEqualTo(1L);
     }
@@ -89,7 +93,7 @@ class AuthenticationServiceTest {
     @Test
     void parseTokenWithInvalidToken() {
         assertThatThrownBy(
-                () -> authenticationService.parseToken(INVALID_TOKEN)
+                () -> authenticationService.parseToken(invalidToken)
         ).isInstanceOf(InvalidTokenException.class);
     }
 }

@@ -1,6 +1,7 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.dto.SessionResponseData;
 import com.codesoom.assignment.errors.LoginFailException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,8 +27,13 @@ class SessionControllerTest {
 
     @BeforeEach
     void setUp() {
+        SessionResponseData sessionResponseData = SessionResponseData.builder()
+                        .accessToken("a.b.c")
+                        .refreshToken("d.e.f")
+                        .build();
+
         given(authenticationService.login("tester@example.com", "test"))
-                .willReturn("a.b.c");
+                .willReturn(sessionResponseData);
 
         given(authenticationService.login("badguy@example.com", "test"))
                 .willThrow(new LoginFailException("badguy@example.com"));

@@ -41,7 +41,7 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public Product create(
             @RequestBody @Valid ProductData productData
     ) {

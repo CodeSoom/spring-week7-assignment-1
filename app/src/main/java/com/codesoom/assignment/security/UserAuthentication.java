@@ -1,5 +1,6 @@
 package com.codesoom.assignment.security;
 
+import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,15 +14,14 @@ public class UserAuthentication extends AbstractAuthenticationToken {
 
     private Long userId;
 
-    public UserAuthentication(Long userId) {
-        super(authorities());
-        this.userId = userId;
+    public UserAuthentication(Claims claims) {
+        super(authorities(claims.get("role",String.class)));
+        this.userId = claims.get("userId",Long.class);
     }
 
-    private static List<GrantedAuthority> authorities() {
+    private static List<GrantedAuthority> authorities(String role) {
         List<GrantedAuthority> authorities = new ArrayList<>();
-        // TODO : userId에 따라서 다른 권한 부여 => elg. ADMIN, USER
-        authorities.add(new SimpleGrantedAuthority("USER"));
+        authorities.add(new SimpleGrantedAuthority(role));
         return authorities;
     }
 

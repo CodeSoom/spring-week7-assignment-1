@@ -24,10 +24,6 @@ public class SessionController {
         String email = sessionRequestData.getEmail();
         String password = sessionRequestData.getPassword();
 
-        String accessToken = authenticationService.login(email, password);
-
-        return SessionResponseData.builder()
-                .accessToken(accessToken)
-                .build();
+        return authenticationService.login(email, password);
     }
 }
