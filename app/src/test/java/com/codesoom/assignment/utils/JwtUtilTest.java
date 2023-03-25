@@ -25,7 +25,7 @@ class JwtUtilTest {
 
     @Test
     void encode() {
-        String token = jwtUtil.encode(1L);
+        String token = jwtUtil.encode(1004L);
 
         assertThat(token).isEqualTo(VALID_TOKEN);
     }

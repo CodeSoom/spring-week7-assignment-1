@@ -12,25 +12,24 @@ import lombok.NoArgsConstructor;
 import org.checkerframework.common.value.qual.ArrayLen;
 
 @Entity
-@Getter@Builder
-@AllArgsConstructor
 @NoArgsConstructor
 public class Role {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "ROLE_ID")
+  @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  private Long userId;
 
   @Getter
   private String name;
 
 
-  public Long getId() {
-    return id;
+  public Role(Long userId, String name) {
+    this.userId = userId;
+    this.name = name;
+  }
+  public Role(String name) {
+    this(null,name);
   }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
 }

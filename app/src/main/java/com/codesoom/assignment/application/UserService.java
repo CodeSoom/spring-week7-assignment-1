@@ -6,11 +6,10 @@ import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
-import com.codesoom.assignment.errors.NotFoundRoleException;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.Mapper;
-import javax.management.relation.RoleNotFoundException;
+import java.nio.file.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,22 +32,22 @@ public class UserService {
     if (userRepository.existsByEmail(email)) {
       throw new UserEmailDuplicationException(email);
     }
-
-
-    User user = User.builder()
-        .email(registrationData.getEmail())
-        .name(registrationData.getName())
-        .password(registrationData.getPassword())
-        .role(Role.builder().name("USER").build())
-        .build();
-
+//    User user = mapper.map(registrationData, User.class);
+    User user = userRepository.save(
+        mapper.map(registrationData, User.class));
+    Role role = roleRepository.save(new Role(user.getId(), "USER"));
     user.changePassword(registrationData.getPassword(), passwordEncoder);
 
-    return userRepository.save(user);
+    return user;
   }
 
 
-  public User updateUser(Long id, UserModificationData modificationData) {
+  public User updateUser(Long id, UserModificationData modificationData, Long userId)
+      throws AccessDeniedException {
+    if (id != userId) {
+      throw new AccessDeniedException("권한이 없습니다.");
+    }
+
     User user = findUser(id);
 
     User source = mapper.map(modificationData, User.class);

@@ -48,9 +48,6 @@ public class ProductController {
             @RequestBody @Valid ProductData productData,
             Authentication authentication
     ) {
-        System.out.println("======================");
-        System.out.println("authentication = " + authentication);
-        System.out.println("======================");
         return productService.createProduct(productData);
     }
     @PreAuthorize("isAuthenticated()")

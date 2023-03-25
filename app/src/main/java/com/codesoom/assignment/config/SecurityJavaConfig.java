@@ -20,24 +20,29 @@ import javax.servlet.Filter;
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private AuthenticationService authenticationService;
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-//        super.configure(http);
-        Filter authenticationFilter = new JwtAuthenticationFilter(authenticationManager(),authenticationService);
-        Filter authenticationErrorFilter = new AuthenticationErrorFilter();
-        http
-                .csrf().disable()
-                .addFilter(authenticationFilter)
-                .addFilterBefore(authenticationErrorFilter,
-                        JwtAuthenticationFilter.class)
-                .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .exceptionHandling()
-                .authenticationEntryPoint(
-                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
-    }
+
+  @Autowired
+  private AuthenticationService authenticationService;
+
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    Filter authenticationFilter = new JwtAuthenticationFilter(authenticationManager(),
+        authenticationService);
+    Filter authenticationErrorFilter = new AuthenticationErrorFilter();
+    http
+        .csrf().disable()
+        .headers()
+        .frameOptions().disable()
+        .and()
+        .addFilter(authenticationFilter)
+        .addFilterBefore(authenticationErrorFilter,
+            JwtAuthenticationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(
+            new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+  }
 
 }

@@ -2,6 +2,7 @@ package com.codesoom.assignment.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -43,12 +44,6 @@ public class User {
   private boolean deleted = false;
 
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "ROLE_ID")
-  @Builder.Default
-  private Role role = Role.builder()
-      .name("USER")
-      .build();
 
 
   public void changeWith(User source) {
@@ -75,6 +70,5 @@ public class User {
     this.email = email;
     this.name = name;
     this.password = password;
-    this.role = role;
   }
 }

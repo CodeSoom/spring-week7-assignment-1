@@ -18,35 +18,27 @@ import java.io.IOException;
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     private final AuthenticationService authenticationService;
-
-
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager, AuthenticationService authenticationService) {
         super(authenticationManager);
         this.authenticationService = authenticationService;
     }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws IOException, ServletException {
-
         String authorization = request.getHeader("Authorization");
-
-
         if (authorization != null) {
 
             String accessToken = authorization.substring("Bearer ".length());
             Long userId = authenticationService.parseToken(accessToken);
+            List<Role> roles = authenticationService.roles(userId);
 
-            List<String> roles = authenticationService.roleName(userId);
-
-            Authentication authentication = new UserAuthentication(userId,roles);
+            Authentication authentication = new UserAuthentication(userId, roles);
 
             SecurityContext context = SecurityContextHolder.getContext();
             context.setAuthentication(authentication);
         }
-
         chain.doFilter(request, response);
     }
 }

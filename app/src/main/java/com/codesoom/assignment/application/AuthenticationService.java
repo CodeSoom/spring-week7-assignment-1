@@ -7,6 +7,7 @@ import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -38,9 +39,8 @@ public class AuthenticationService {
     return claims.get("userId", Long.class);
   }
 
-  public List<String> roleName(Long userId) {
-    return userRepository.findById(userId).stream()
-        .map(u -> u.getRole().getName())
-        .collect(Collectors.toList());
+  public List<Role> roles(Long userId) {
+    return roleRepository.findAllByUserId(userId);
   }
+
 }
