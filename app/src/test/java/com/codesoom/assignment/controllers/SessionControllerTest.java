@@ -1,8 +1,12 @@
 package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.SessionResponseData;
 import com.codesoom.assignment.errors.LoginFailException;
+import com.codesoom.assignment.utils.JwtUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +23,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(SessionController.class)
 class SessionControllerTest {
+
+    private String refreshValidToken;
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
     private AuthenticationService authenticationService;
 
+    private JwtUtil jwtUtil = new JwtUtil("12345678901234567890123456789010");
     @BeforeEach
     void setUp() {
         SessionResponseData sessionResponseData = SessionResponseData.builder()
@@ -40,6 +47,15 @@ class SessionControllerTest {
 
         given(authenticationService.login("tester@example.com", "xxx"))
                 .willThrow(new LoginFailException("tester@example.com"));
+
+        User user = User.builder()
+                .id(1L)
+                .role("ROLE_USER")
+                .build();
+
+        refreshValidToken = jwtUtil.createRefreshToken(user);
+        Claims claims = jwtUtil.decode(refreshValidToken);
+        given(authenticationService.parseToken(refreshValidToken)).willReturn(claims);
     }
 
     @Test
@@ -74,5 +90,15 @@ class SessionControllerTest {
                                 "\"password\":\"xxx\"}")
         )
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void accessTokenReissueByRefreshToken() throws Exception {
+        mockMvc.perform(
+                        post("/session/reissue")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + refreshValidToken)
+                )
+                .andExpect(content().string(containsString(".")));
     }
 }

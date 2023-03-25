@@ -1,5 +1,6 @@
 package com.codesoom.assignment.filters;
 
+import com.codesoom.assignment.errors.ExpiredTokenException;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import org.springframework.http.HttpStatus;
 
@@ -23,6 +24,8 @@ public class AuthenticationErrorFilter extends HttpFilter {
             chain.doFilter(request, response);
         }catch(InvalidTokenException e){
             response.sendError(HttpStatus.UNAUTHORIZED.value());
+        }catch(ExpiredTokenException e){
+            response.sendError(HttpStatus.UNAUTHORIZED.value(), e.getMessage());
         }
 
     }

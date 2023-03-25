@@ -1,8 +1,10 @@
 package com.codesoom.assignment.utils;
 
 import com.codesoom.assignment.domain.User;
+import com.codesoom.assignment.errors.ExpiredTokenException;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -37,6 +39,8 @@ public class JwtUtil {
                     .getBody();
         } catch (SignatureException e) {
             throw new InvalidTokenException(token);
+        } catch(ExpiredJwtException e){
+            throw new ExpiredTokenException(token);
         }
     }
 
