@@ -61,7 +61,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .claim("userId", user.getId())
                 .claim("role", user.getRole())
-                .setExpiration(new Date(now.getTime()))
+                .setExpiration(new Date(now.getTime() + HOUR_TIME))
                 .signWith(key)
                 .compact();
     }
