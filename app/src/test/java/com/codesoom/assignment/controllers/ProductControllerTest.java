@@ -5,6 +5,7 @@ import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.dto.ProductData;
+import com.codesoom.assignment.errors.ExpiredTokenException;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.ProductNotFoundException;
 import com.codesoom.assignment.utils.JwtUtil;
@@ -107,6 +108,9 @@ class ProductControllerTest {
 
         given(authenticationService.parseToken(invalidToken))
                 .willThrow(new InvalidTokenException(invalidToken));
+
+        given(authenticationService.parseToken(EXPIRED_TOKEN))
+                .willThrow(new ExpiredTokenException(EXPIRED_TOKEN));
     }
 
     @Test
