@@ -9,4 +9,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class SessionResponseData {
     private String accessToken;
+    private String refreshToken;
 }
