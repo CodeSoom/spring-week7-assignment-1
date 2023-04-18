@@ -34,6 +34,9 @@ dependencies {
     // Use JUnit Jupiter API for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
 
+    //Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
     // AssertJ
     testImplementation 'org.assertj:assertj-core:3.18.1'
 

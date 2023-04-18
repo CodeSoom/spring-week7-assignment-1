@@ -1,5 +1,7 @@
 package com.codesoom.assignment.application;
 
+import com.codesoom.assignment.domain.Role;
+import com.codesoom.assignment.domain.RoleRepository;
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
 import com.codesoom.assignment.dto.UserModificationData;
@@ -8,10 +10,13 @@ import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
+import java.nio.file.AccessDeniedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -28,11 +33,15 @@ class UserServiceTest {
 
     private final UserRepository userRepository = mock(UserRepository.class);
 
+    private  RoleRepository roleRepository = mock(RoleRepository.class);
+
     @BeforeEach
     void setUp() {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
 
-        userService = new UserService(mapper, userRepository);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+        userService = new UserService(mapper, userRepository, passwordEncoder, roleRepository);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
                 .willReturn(true);
@@ -45,6 +54,7 @@ class UserServiceTest {
                     .name(source.getName())
                     .build();
         });
+
 
         given(userRepository.findByIdAndDeletedIsFalse(1L))
                 .willReturn(Optional.of(
@@ -77,6 +87,7 @@ class UserServiceTest {
         assertThat(user.getName()).isEqualTo("Tester");
 
         verify(userRepository).save(any(User.class));
+        verify(roleRepository).save(any(Role.class));
     }
 
     @Test
@@ -94,13 +105,14 @@ class UserServiceTest {
     }
 
     @Test
-    void updateUserWithExistedId() {
+    void updateUserWithExistedId() throws AccessDeniedException {
         UserModificationData modificationData = UserModificationData.builder()
                 .name("TEST")
                 .password("TEST")
                 .build();
 
-        User user = userService.updateUser(1L, modificationData);
+        Long userId = 1L;
+        User user = userService.updateUser(userId, modificationData, userId);
 
         assertThat(user.getId()).isEqualTo(1L);
         assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
@@ -109,6 +121,25 @@ class UserServiceTest {
         verify(userRepository).findByIdAndDeletedIsFalse(1L);
     }
 
+
+    //todo: 업데이트 대상과 업데이트 주체가 다른 경우
+    @Test
+    public void updateUserByOthersAccess() throws Exception{
+        UserModificationData modificationData = UserModificationData.builder()
+            .name("TEST")
+            .password("TEST")
+            .build();
+
+        Long targetUserId = 1L;
+        Long currentUserId = 2L;
+
+        assertThatThrownBy(()->{
+            userService.updateUser(targetUserId,modificationData,currentUserId);
+        })
+            .isInstanceOf(AccessDeniedException.class);
+    }
+
+
     @Test
     void updateUserWithNotExistedId() {
         UserModificationData modificationData = UserModificationData.builder()
@@ -116,7 +147,8 @@ class UserServiceTest {
                 .password("TEST")
                 .build();
 
-        assertThatThrownBy(() -> userService.updateUser(100L, modificationData))
+        Long userId = 100L;
+        assertThatThrownBy(() -> userService.updateUser(userId, modificationData, userId))
                 .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(100L);
@@ -129,9 +161,9 @@ class UserServiceTest {
                 .name("TEST")
                 .password("TEST")
                 .build();
-
+        Long userId = DELETED_USER_ID;
         assertThatThrownBy(
-                () -> userService.updateUser(DELETED_USER_ID, modificationData)
+                () -> userService.updateUser(userId, modificationData, userId)
         )
                 .isInstanceOf(UserNotFoundException.class);
 

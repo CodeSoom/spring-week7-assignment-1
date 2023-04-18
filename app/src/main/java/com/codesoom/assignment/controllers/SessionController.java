@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/session")
 @CrossOrigin
 public class SessionController {
-    private AuthenticationService authenticationService;
+    private final AuthenticationService authenticationService;
 
     public SessionController(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
@@ -19,8 +19,7 @@ public class SessionController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public SessionResponseData login(
-            @RequestBody SessionRequestData sessionRequestData
-    ) {
+            @RequestBody SessionRequestData sessionRequestData) {
         String email = sessionRequestData.getEmail();
         String password = sessionRequestData.getPassword();
 
