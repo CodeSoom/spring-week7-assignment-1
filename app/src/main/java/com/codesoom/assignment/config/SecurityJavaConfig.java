@@ -26,10 +26,11 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         Filter jwtAuthentication = new JwtAuthentication(authenticationManager(), authenticationService);
         Filter beforeAuthentication = new BeforeAuthentication();
+
         http.csrf()
                 .disable()
-                .addFilter(jwtAuthentication)
                 .addFilterBefore(beforeAuthentication, JwtAuthentication.class)
+                .addFilter(jwtAuthentication)
                 .exceptionHandling()
                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
     }

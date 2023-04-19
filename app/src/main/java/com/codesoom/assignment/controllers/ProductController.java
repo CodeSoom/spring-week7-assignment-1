@@ -6,6 +6,7 @@ package com.codesoom.assignment.controllers;
 
 import com.codesoom.assignment.application.AuthenticationService;
 import com.codesoom.assignment.application.ProductService;
+import com.codesoom.assignment.authetication.UserAuthentication;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
 import org.springframework.http.HttpStatus;
@@ -41,17 +42,18 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("isAuthenticated() and hasAuthority('USER')" )
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     public Product create(
-            @RequestAttribute Long userId,
+            UserAuthentication authentication,
             @RequestBody @Valid ProductData productData
     ) {
         return productService.createProduct(productData);
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     public Product update(
-            @RequestAttribute Long userId,
+            UserAuthentication authentication,
             @PathVariable Long id,
             @RequestBody @Valid ProductData productData
     ) {

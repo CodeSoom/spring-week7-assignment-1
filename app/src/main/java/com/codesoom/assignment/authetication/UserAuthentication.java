@@ -1,6 +1,7 @@
-package com.codesoom.assignment.filter;
+package com.codesoom.assignment.authetication;
 
 import com.codesoom.assignment.domain.UserType;
+import lombok.Getter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -8,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class UserAuthentication extends AbstractAuthenticationToken {
     private final Long userId;
     private final UserType userType;

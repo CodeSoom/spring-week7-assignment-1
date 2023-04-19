@@ -1,6 +1,7 @@
 package com.codesoom.assignment.filter;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.authetication.UserAuthentication;
 import com.codesoom.assignment.domain.UserType;
 import com.codesoom.assignment.dto.ClaimData;
 import org.springframework.security.authentication.AuthenticationManager;
