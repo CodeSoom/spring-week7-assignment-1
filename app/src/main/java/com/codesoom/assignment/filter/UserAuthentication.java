@@ -1,5 +1,6 @@
 package com.codesoom.assignment.filter;
 
+import com.codesoom.assignment.domain.UserType;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -9,10 +10,12 @@ import java.util.List;
 
 public class UserAuthentication extends AbstractAuthenticationToken {
     private final Long userId;
+    private final UserType userType;
 
-    public UserAuthentication(Long userId) {
-        super(authorities());
+    public UserAuthentication(Long userId, UserType userType) {
+        super(authorities(userType));
         this.userId = userId;
+        this.userType = userType;
     }
 
     @Override
@@ -22,6 +25,7 @@ public class UserAuthentication extends AbstractAuthenticationToken {
 
     /**
      * Used to indicate to AbstractSecurityInterceptor whether it should present the authentication token to the AuthenticationManager.
+     *
      * @return
      */
     @Override
@@ -32,6 +36,7 @@ public class UserAuthentication extends AbstractAuthenticationToken {
     /**
      * userId 같이 인증할 떄 들어오는 아이디 같은걸 반환한다.
      * 대부분 userDetail을 사용한다 pricipal을 위해서
+     *
      * @return
      */
     @Override
@@ -46,11 +51,11 @@ public class UserAuthentication extends AbstractAuthenticationToken {
                 '}';
     }
 
-    private static List<? extends GrantedAuthority> authorities() {
+    private static List<? extends GrantedAuthority> authorities(UserType userType) {
         List<GrantedAuthority> authorities = new ArrayList<>();
         //TODO userID에 따라서 유저 권한 나눠주기
 
-        authorities.add(new SimpleGrantedAuthority("USER"));
+        authorities.add(new SimpleGrantedAuthority(userType.toString()));
         return authorities;
     }
 

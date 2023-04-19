@@ -1,6 +1,8 @@
 package com.codesoom.assignment.filter;
 
 import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.domain.UserType;
+import com.codesoom.assignment.dto.ClaimData;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -32,11 +34,13 @@ public class JwtAuthentication extends BasicAuthenticationFilter {
 
         if (authorization != null) {
             String accessToken = authorization.substring("Bearer ".length());
-            Long userId = authenticationService.parseToken(accessToken);
+            ClaimData claimData = authenticationService.parseToken(accessToken);
+            Long userId = claimData.getUserId();
+            UserType userType = claimData.getUserType();
             request.setAttribute("userId", userId);
 
             // 인증
-            Authentication authentication = new UserAuthentication(userId);
+            Authentication authentication = new UserAuthentication(userId,userType);
             SecurityContext context = SecurityContextHolder.getContext();
             context.setAuthentication(authentication);
         }

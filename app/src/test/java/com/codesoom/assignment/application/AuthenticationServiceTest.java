@@ -2,6 +2,8 @@ package com.codesoom.assignment.application;
 
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
+import com.codesoom.assignment.domain.UserType;
+import com.codesoom.assignment.dto.ClaimData;
 import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
@@ -19,8 +21,7 @@ import static org.mockito.Mockito.verify;
 class AuthenticationServiceTest {
     private static final String SECRET = "12345678901234567890123456789012";
 
-    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
-            "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
+    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInVzZXJUeXBlIjoiVVNFUiJ9.QLWTYHUmIadJyVzqaLPdrMP0FsH4GvAen1QM2gUJVsA";
     private static final String INVALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9." +
             "eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaD0";
 
@@ -36,7 +37,9 @@ class AuthenticationServiceTest {
                 userRepository, jwtUtil);
 
         User user = User.builder()
+                .id(1L)
                 .password("test")
+                .userType(UserType.USER)
                 .build();
 
         given(userRepository.findByEmail("tester@example.com"))
@@ -73,9 +76,10 @@ class AuthenticationServiceTest {
 
     @Test
     void parseTokenWithValidToken() {
-        Long userId = authenticationService.parseToken(VALID_TOKEN);
+        ClaimData claimData = authenticationService.parseToken(VALID_TOKEN);
 
-        assertThat(userId).isEqualTo(1L);
+        assertThat(claimData.getUserId()).isEqualTo(1L);
+        assertThat(claimData.getUserType()).isEqualTo(UserType.USER);
     }
 
     @Test
