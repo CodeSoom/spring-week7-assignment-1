@@ -2,6 +2,8 @@ package com.codesoom.assignment.application;
 
 import com.codesoom.assignment.domain.User;
 import com.codesoom.assignment.domain.UserRepository;
+import com.codesoom.assignment.domain.UserType;
+import com.codesoom.assignment.dto.ClaimData;
 import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -26,11 +28,13 @@ public class AuthenticationService {
             throw new LoginFailException(email);
         }
 
-        return jwtUtil.encode(1L);
+        return jwtUtil.encode(user.getId(), user.getUserType());
     }
 
-    public Long parseToken(String accessToken) {
+    public ClaimData parseToken(String accessToken) {
         Claims claims = jwtUtil.decode(accessToken);
-        return claims.get("userId", Long.class);
+        Long userId = claims.get("userId", Long.class);
+        UserType userType = UserType.valueOf(claims.get("userType", String.class));
+        return new ClaimData(userId, userType);
     }
 }

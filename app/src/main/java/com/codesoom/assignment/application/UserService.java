@@ -7,6 +7,8 @@ import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.errors.UserEmailDuplicationException;
 import com.codesoom.assignment.errors.UserNotFoundException;
 import com.github.dozermapper.core.Mapper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -27,9 +29,10 @@ public class UserService {
         if (userRepository.existsByEmail(email)) {
             throw new UserEmailDuplicationException(email);
         }
-
-        User user = mapper.map(registrationData, User.class);
-        return userRepository.save(user);
+        PasswordEncoder passwordEncoder = new  BCryptPasswordEncoder();
+        User user = userRepository.save(mapper.map(registrationData, User.class));
+        user.changePassword(user.getPassword(), passwordEncoder);
+        return user;
     }
 
     public User updateUser(Long id, UserModificationData modificationData) {
