@@ -6,6 +6,7 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -22,7 +23,10 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    UserResultData create(@RequestBody @Valid UserRegistrationData registrationData) {
+    UserResultData create(@RequestBody @Valid UserRegistrationData registrationData,
+                          Authentication authentication) {
+//        System.out.println("userId : " + request.getAttribute("userId"));
+        System.out.println("userId : " + authentication);
         User user = userService.registerUser(registrationData);
         return getUserResultData(user);
     }
