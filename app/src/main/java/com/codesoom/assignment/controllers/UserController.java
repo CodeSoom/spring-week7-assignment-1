@@ -25,8 +25,6 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     UserResultData create(@RequestBody @Valid UserRegistrationData registrationData,
                           Authentication authentication) {
-//        System.out.println("userId : " + request.getAttribute("userId"));
-        System.out.println("userId : " + authentication);
         User user = userService.registerUser(registrationData);
         return getUserResultData(user);
     }
