@@ -12,6 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -19,8 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 class UserServiceTest {
 
@@ -124,9 +125,9 @@ class UserServiceTest {
                 .build();
 
         assertThatThrownBy(() -> userService.updateUser(NOT_EXISTS_USER_ID, modificationData, MY_USER_ID))
-                .isInstanceOf(UserNotFoundException.class);
+                .isInstanceOf(AccessDeniedException.class);
 
-        verify(userRepository).findByIdAndDeletedIsFalse(100L);
+        verify(userRepository, never()).findByIdAndDeletedIsFalse(100L);
     }
 
 
@@ -140,9 +141,9 @@ class UserServiceTest {
         assertThatThrownBy(
                 () -> userService.updateUser(DELETED_USER_ID, modificationData, MY_USER_ID)
         )
-                .isInstanceOf(UserNotFoundException.class);
+                .isInstanceOf(AccessDeniedException.class);
 
-        verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
+        verify(userRepository, never()).findByIdAndDeletedIsFalse(DELETED_USER_ID);
     }
 
     @Test
