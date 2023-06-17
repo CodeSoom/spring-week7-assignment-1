@@ -35,7 +35,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 									 HttpServletResponse response)
 			throws IOException {
 		String authorization = request.getHeader("Authorization");
-		System.out.println(">>>>>>>>>> authorization : " + authorization);
 
 		if (authorization != null) {
 			String accessToken = authorization.substring("Bearer ".length());
@@ -44,6 +43,8 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 			Authentication authentication = new UserAuthentication(userId);
 			SecurityContext context = SecurityContextHolder.getContext();
 			context.setAuthentication(authentication);
+
+			System.out.println("getAuthorities : " + context.getAuthentication().getAuthorities());
 		}
 
 		return true;

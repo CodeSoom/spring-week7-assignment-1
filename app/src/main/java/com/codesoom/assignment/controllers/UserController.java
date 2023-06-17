@@ -6,6 +6,7 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +31,7 @@ public class UserController {
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     UserResultData update(
             @PathVariable Long id,
             @RequestBody @Valid UserModificationData modificationData
@@ -40,6 +42,7 @@ public class UserController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     void destroy(@PathVariable Long id) {
         userService.deleteUser(id);
     }
