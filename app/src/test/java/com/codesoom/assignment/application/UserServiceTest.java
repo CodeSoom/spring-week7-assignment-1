@@ -23,8 +23,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 class UserServiceTest {
-    private static final String EXISTED_EMAIL_ADDRESS = "existed@example.com";
+
+    private static final Long MY_USER_ID = 1L;
+    private static final Long OTHER_USER_ID = 99L;
+    private static final Long NOT_EXISTS_USER_ID = 100L;
     private static final Long DELETED_USER_ID = 200L;
+    private static final String EXISTED_EMAIL_ADDRESS = "existed@example.com";
 
     private UserService userService;
 
@@ -49,7 +53,7 @@ class UserServiceTest {
                     .build();
         });
 
-        given(userRepository.findByIdAndDeletedIsFalse(1L))
+        given(userRepository.findByIdAndDeletedIsFalse(MY_USER_ID))
                 .willReturn(Optional.of(
                         User.builder()
                                 .id(1L)
@@ -103,7 +107,7 @@ class UserServiceTest {
                 .password("TEST")
                 .build();
 
-        User user = userService.updateUser(1L, modificationData);
+        User user = userService.updateUser(MY_USER_ID, modificationData, MY_USER_ID);
 
         assertThat(user.getId()).isEqualTo(1L);
         assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
@@ -119,7 +123,7 @@ class UserServiceTest {
                 .password("TEST")
                 .build();
 
-        assertThatThrownBy(() -> userService.updateUser(100L, modificationData))
+        assertThatThrownBy(() -> userService.updateUser(NOT_EXISTS_USER_ID, modificationData, MY_USER_ID))
                 .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(100L);
@@ -134,7 +138,7 @@ class UserServiceTest {
                 .build();
 
         assertThatThrownBy(
-                () -> userService.updateUser(DELETED_USER_ID, modificationData)
+                () -> userService.updateUser(DELETED_USER_ID, modificationData, MY_USER_ID)
         )
                 .isInstanceOf(UserNotFoundException.class);
 

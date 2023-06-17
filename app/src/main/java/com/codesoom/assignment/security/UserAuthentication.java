@@ -37,4 +37,8 @@ public class UserAuthentication extends AbstractAuthenticationToken {
 	public boolean isAuthenticated() {
 		return true;
 	}
+
+	public Long getUserId() {
+		return this.userId;
+	}
 }

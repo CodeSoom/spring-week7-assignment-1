@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.nio.file.AccessDeniedException;
 import java.util.Set;
 
 @ResponseBody
@@ -53,6 +54,15 @@ public class ControllerErrorAdvice {
     ) {
         String messageTemplate = getViolatedMessage(exception);
         return new ErrorResponse(messageTemplate);
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ErrorResponse handleAccessDeniedError(
+            AccessDeniedException exception
+    ) {
+        return new ErrorResponse("Access Denied.");
     }
 
     private String getViolatedMessage(ConstraintViolationException exception) {
