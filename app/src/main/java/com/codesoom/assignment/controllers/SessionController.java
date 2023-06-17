@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/session")
 @CrossOrigin
 public class SessionController {
-    private AuthenticationService authenticationService;
+    private final AuthenticationService authenticationService;
 
     public SessionController(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;

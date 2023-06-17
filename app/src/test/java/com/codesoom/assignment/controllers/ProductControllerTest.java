@@ -82,6 +82,8 @@ class ProductControllerTest {
 
         given(authenticationService.parseToken(INVALID_TOKEN))
                 .willThrow(new InvalidTokenException(INVALID_TOKEN));
+
+        given(authenticationService.getUserRoles(1L)).willReturn(Collections.singletonList("USER"));
     }
 
     @Test

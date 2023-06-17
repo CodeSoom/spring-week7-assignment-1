@@ -118,6 +118,17 @@ class UserServiceTest {
     }
 
     @Test
+    void updateUserWithOtherUserId() {
+        UserModificationData modificationData = UserModificationData.builder()
+                .name("TEST")
+                .password("TEST")
+                .build();
+
+        assertThatThrownBy(() -> userService.updateUser(OTHER_USER_ID, modificationData, MY_USER_ID)).isInstanceOf(AccessDeniedException.class);
+
+    }
+
+    @Test
     void updateUserWithNotExistedId() {
         UserModificationData modificationData = UserModificationData.builder()
                 .name("TEST")

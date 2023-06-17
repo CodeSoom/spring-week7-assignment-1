@@ -38,16 +38,9 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
 			.sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS)		// session 무상태 처리
 			.and()
-//			.authorizeRequests()
-//			.anyRequest().hasAnyRole()
-//			.and()
 			.exceptionHandling()
 			.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
 		;
 	}
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
 }

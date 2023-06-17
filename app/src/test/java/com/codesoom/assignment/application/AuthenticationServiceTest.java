@@ -8,6 +8,7 @@ import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.Optional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,10 +41,13 @@ class AuthenticationServiceTest {
 
         User user = User.builder()
                 .password("test")
+                .roles(Collections.singletonList("USER"))
                 .build();
         user.changePassword("test", passwordEncoder);
 
         given(userRepository.findByEmail("tester@example.com"))
+                .willReturn(Optional.of(user));
+        given(userRepository.findById(1L))
                 .willReturn(Optional.of(user));
     }
 
@@ -87,5 +91,10 @@ class AuthenticationServiceTest {
         assertThatThrownBy(
                 () -> authenticationService.parseToken(INVALID_TOKEN)
         ).isInstanceOf(InvalidTokenException.class);
+    }
+
+    @Test
+    void getUserRoleWithUser() {
+        assertThat(authenticationService.getUserRoles(1L)).isEqualTo(Collections.singletonList("USER"));
     }
 }
