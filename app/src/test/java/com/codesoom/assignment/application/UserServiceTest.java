@@ -26,7 +26,6 @@ import static org.mockito.Mockito.*;
 class UserServiceTest {
 
     private static final Long MY_USER_ID = 1L;
-    private static final Long OTHER_USER_ID = 99L;
     private static final Long NOT_EXISTS_USER_ID = 100L;
     private static final Long DELETED_USER_ID = 200L;
     private static final String EXISTED_EMAIL_ADDRESS = "existed@example.com";
@@ -108,7 +107,7 @@ class UserServiceTest {
                 .password("TEST")
                 .build();
 
-        User user = userService.updateUser(MY_USER_ID, modificationData, MY_USER_ID);
+        User user = userService.updateUser(MY_USER_ID, modificationData);
 
         assertThat(user.getId()).isEqualTo(1L);
         assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
@@ -118,27 +117,16 @@ class UserServiceTest {
     }
 
     @Test
-    void updateUserWithOtherUserId() {
-        UserModificationData modificationData = UserModificationData.builder()
-                .name("TEST")
-                .password("TEST")
-                .build();
-
-        assertThatThrownBy(() -> userService.updateUser(OTHER_USER_ID, modificationData, MY_USER_ID)).isInstanceOf(AccessDeniedException.class);
-
-    }
-
-    @Test
     void updateUserWithNotExistedId() {
         UserModificationData modificationData = UserModificationData.builder()
                 .name("TEST")
                 .password("TEST")
                 .build();
 
-        assertThatThrownBy(() -> userService.updateUser(NOT_EXISTS_USER_ID, modificationData, MY_USER_ID))
-                .isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> userService.updateUser(NOT_EXISTS_USER_ID, modificationData))
+                .isInstanceOf(UserNotFoundException.class);
 
-        verify(userRepository, never()).findByIdAndDeletedIsFalse(100L);
+        verify(userRepository).findByIdAndDeletedIsFalse(100L);
     }
 
 
@@ -150,11 +138,11 @@ class UserServiceTest {
                 .build();
 
         assertThatThrownBy(
-                () -> userService.updateUser(DELETED_USER_ID, modificationData, MY_USER_ID)
+                () -> userService.updateUser(DELETED_USER_ID, modificationData)
         )
-                .isInstanceOf(AccessDeniedException.class);
+                .isInstanceOf(UserNotFoundException.class);
 
-        verify(userRepository, never()).findByIdAndDeletedIsFalse(DELETED_USER_ID);
+        verify(userRepository).findByIdAndDeletedIsFalse(DELETED_USER_ID);
     }
 
     @Test

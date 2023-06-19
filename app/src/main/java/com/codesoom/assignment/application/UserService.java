@@ -41,9 +41,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(Long id, UserModificationData modificationData, Long reqUserId) {
-        checkUserAccess(id, reqUserId);
-
+    public User updateUser(Long id, UserModificationData modificationData) {
         User user = findUser(id);
 
         User source = mapper.map(modificationData, User.class);
@@ -63,9 +61,4 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    private void checkUserAccess(Long targetUserId, Long requestUserId) {
-        if (!Objects.equals(targetUserId, requestUserId)) {
-            throw new AccessDeniedException("Access Denied : " + targetUserId);
-        }
-    }
 }

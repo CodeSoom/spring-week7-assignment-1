@@ -6,6 +6,7 @@ import com.codesoom.assignment.dto.UserModificationData;
 import com.codesoom.assignment.dto.UserRegistrationData;
 import com.codesoom.assignment.dto.UserResultData;
 import com.codesoom.assignment.security.UserAuthentication;
+import com.codesoom.assignment.validator.UserAccessValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,8 +40,9 @@ public class UserController {
             @RequestBody @Valid UserModificationData modificationData,
             UserAuthentication authentication
     ) {
+        UserAccessValidator.validateAuthorizeUserAccess(authentication, id);
 
-        User user = userService.updateUser(id, modificationData, authentication.getUserId());
+        User user = userService.updateUser(id, modificationData);
         return getUserResultData(user);
     }
 

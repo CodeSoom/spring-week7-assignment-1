@@ -91,7 +91,7 @@ class UserControllerTest {
                 });
 
 
-        given(userService.updateUser(eq(MY_USER_ID), any(UserModificationData.class), eq(MY_USER_ID)))
+        given(userService.updateUser(eq(MY_USER_ID), any(UserModificationData.class)))
                 .will(invocation -> {
                     Long id = invocation.getArgument(0);
                     UserModificationData modificationData =
@@ -103,9 +103,7 @@ class UserControllerTest {
                             .build();
                 });
 
-        given(userService.updateUser(eq(MY_USER_ID), any(UserModificationData.class), eq(OTHER_USER_ID))).willThrow(new AccessDeniedException("Access Denied"));
-
-        given(userService.updateUser(eq(NOT_EXISTS_USER_ID), any(UserModificationData.class), eq(MY_USER_ID)))
+        given(userService.updateUser(eq(NOT_EXISTS_USER_ID), any(UserModificationData.class)))
                 .willThrow(new UserNotFoundException(NOT_EXISTS_USER_ID));
 
         given(userService.deleteUser(NOT_EXISTS_USER_ID))
@@ -167,7 +165,7 @@ class UserControllerTest {
                         containsString("\"name\":\"TEST\"")
                 ));
 
-        verify(userService).updateUser(eq(MY_USER_ID), any(UserModificationData.class), eq(MY_USER_ID));
+        verify(userService).updateUser(eq(MY_USER_ID), any(UserModificationData.class));
     }
 
     @Test
@@ -181,7 +179,7 @@ class UserControllerTest {
                 )
                 .andExpect(status().isForbidden());
 
-        verify(userService).updateUser(eq(MY_USER_ID), any(UserModificationData.class), eq(OTHER_USER_ID));
+        verify(userService, never()).updateUser(eq(MY_USER_ID), any(UserModificationData.class));
     }
 
     @Test
@@ -203,10 +201,10 @@ class UserControllerTest {
                         .content("{\"name\":\"TEST\",\"password\":\"TEST\"}")
                         .header("Authorization", "Bearer " + MY_TOKEN)
         )
-                .andExpect(status().isNotFound());
+                .andExpect(status().isForbidden());
 
-        verify(userService)
-                .updateUser(eq(NOT_EXISTS_USER_ID), any(UserModificationData.class), eq(MY_USER_ID));
+        verify(userService, never())
+                .updateUser(eq(NOT_EXISTS_USER_ID), any(UserModificationData.class));
     }
 
     @Test
