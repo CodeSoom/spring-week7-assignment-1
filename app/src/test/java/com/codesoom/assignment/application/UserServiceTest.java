@@ -13,16 +13,22 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 class UserServiceTest {
-    private static final String EXISTED_EMAIL_ADDRESS = "existed@example.com";
+
+    private static final Long MY_USER_ID = 1L;
+    private static final Long NOT_EXISTS_USER_ID = 100L;
     private static final Long DELETED_USER_ID = 200L;
+    private static final String EXISTED_EMAIL_ADDRESS = "existed@example.com";
 
     private UserService userService;
 
@@ -31,8 +37,9 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         Mapper mapper = DozerBeanMapperBuilder.buildDefault();
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-        userService = new UserService(mapper, userRepository);
+        userService = new UserService(mapper, userRepository, passwordEncoder);
 
         given(userRepository.existsByEmail(EXISTED_EMAIL_ADDRESS))
                 .willReturn(true);
@@ -46,7 +53,7 @@ class UserServiceTest {
                     .build();
         });
 
-        given(userRepository.findByIdAndDeletedIsFalse(1L))
+        given(userRepository.findByIdAndDeletedIsFalse(MY_USER_ID))
                 .willReturn(Optional.of(
                         User.builder()
                                 .id(1L)
@@ -100,7 +107,7 @@ class UserServiceTest {
                 .password("TEST")
                 .build();
 
-        User user = userService.updateUser(1L, modificationData);
+        User user = userService.updateUser(MY_USER_ID, modificationData);
 
         assertThat(user.getId()).isEqualTo(1L);
         assertThat(user.getEmail()).isEqualTo(EXISTED_EMAIL_ADDRESS);
@@ -116,7 +123,7 @@ class UserServiceTest {
                 .password("TEST")
                 .build();
 
-        assertThatThrownBy(() -> userService.updateUser(100L, modificationData))
+        assertThatThrownBy(() -> userService.updateUser(NOT_EXISTS_USER_ID, modificationData))
                 .isInstanceOf(UserNotFoundException.class);
 
         verify(userRepository).findByIdAndDeletedIsFalse(100L);

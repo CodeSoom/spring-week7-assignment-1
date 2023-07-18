@@ -14,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
@@ -49,7 +50,7 @@ class ProductControllerTest {
                 .maker("냥이월드")
                 .price(5000)
                 .build();
-        given(productService.getProducts()).willReturn(List.of(product));
+        given(productService.getProducts()).willReturn(Collections.singletonList((product)));
 
         given(productService.getProduct(1L)).willReturn(product);
 
@@ -81,6 +82,8 @@ class ProductControllerTest {
 
         given(authenticationService.parseToken(INVALID_TOKEN))
                 .willThrow(new InvalidTokenException(INVALID_TOKEN));
+
+        given(authenticationService.getUserRoles(1L)).willReturn(Collections.singletonList("USER"));
     }
 
     @Test
