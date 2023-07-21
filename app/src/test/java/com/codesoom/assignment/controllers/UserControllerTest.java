@@ -15,6 +15,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,8 +39,11 @@ class UserControllerTest {
 
     private static final Long MY_ID = 1L;
     private static final Long OTHER_ID = 2L;
+    private static final Long ADMIN_ID = 1000L;
+    private static final Long NOT_EXISTING_ID = 9999L;
     private static final String MY_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
     private static final String OTHER_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjJ9.TEM6MULsZeqkBbUKziCR4Dg_8kymmZkyxsCXlfNJ3g0";
+    private static final String ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEwMDB9.nnjhgy2R3Qo48tUtI-ib-D-Aqjfz4338xMhAHg2OFxA";
     private static final String INVALID_TOKEN = "ABChbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
 
     @BeforeEach
@@ -65,10 +70,18 @@ class UserControllerTest {
                             .build();
                 });
 
-        given(authenticationService.parseToken(MY_TOKEN)).willReturn(1L);
-        given(authenticationService.parseToken(OTHER_TOKEN)).willReturn(2L);
+        given(userService.deleteUser(NOT_EXISTING_ID)).willThrow(UserNotFoundException.class);
+
+        given(authenticationService.parseToken(MY_TOKEN)).willReturn(MY_ID);
+        given(authenticationService.parseToken(OTHER_TOKEN)).willReturn(OTHER_ID);
+        given(authenticationService.parseToken(ADMIN_TOKEN)).willReturn(ADMIN_ID);
         given(authenticationService.parseToken(INVALID_TOKEN))
                 .willThrow(new InvalidTokenException(INVALID_TOKEN));
+
+        given(authenticationService.getUserRoles(MY_ID)).willReturn(Collections.singletonList("USER"));
+        given(authenticationService.getUserRoles(OTHER_ID)).willReturn(Collections.singletonList("USER"));
+        given(authenticationService.getUserRoles(ADMIN_ID)).willReturn(Collections.singletonList("ADMIN"));
+
     }
 
     @Test
@@ -140,23 +153,15 @@ class UserControllerTest {
     }
 
     @Test
-    void destroyWithMyAccessToken() throws Exception {
-        mockMvc.perform(delete("/users/"+MY_ID)
-                        .header("Authorization", "Bearer " + MY_TOKEN))
-                .andExpect(status().isNoContent());
-        verify(userService).deleteUser(1L);
-    }
-
-    @Test
     void destroyWithoutAccessToken() throws Exception {
-        mockMvc.perform(delete("/users/" + MY_ID))
+        mockMvc.perform(delete("/users/"+MY_ID))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void destroyWithNotMyAccessToken() throws Exception {
-        mockMvc.perform(delete("/users/"+MY_ID)
-                        .header("Authorization", "Bearer " + OTHER_TOKEN))
-                .andExpect(status().isForbidden());
+    void destroyWithNotExistingUser() throws Exception {
+        mockMvc.perform(delete("/users/" + NOT_EXISTING_ID)
+                        .header("Authorization", "Bearer " + ADMIN_TOKEN))
+                .andExpect(status().isNotFound());
     }
 }

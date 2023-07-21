@@ -30,11 +30,10 @@ public class UserController {
     }
 
     @PatchMapping("{id}")
-    @PreAuthorize("isAuthenticated() and authentication.principal == #id")
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER') and authentication.principal == #id" )
     UserResultData update(
             @PathVariable Long id,
-            @RequestBody @Valid UserModificationData modificationData,
-            Authentication authentication
+            @RequestBody @Valid UserModificationData modificationData
     ) {
         User user = userService.updateUser(id, modificationData);
         return getUserResultData(user);
@@ -42,9 +41,8 @@ public class UserController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("isAuthenticated() and authentication.principal == #id")
-    void destroy(@PathVariable Long id
-    , Authentication authentication) {
+    @PreAuthorize("isAuthenticated()")
+    void destroy(@PathVariable Long id) {
         userService.deleteUser(id);
     }
 

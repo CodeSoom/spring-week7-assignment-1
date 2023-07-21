@@ -14,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
@@ -78,6 +79,8 @@ class ProductControllerTest {
                 .willThrow(new ProductNotFoundException(1000L));
 
         given(authenticationService.parseToken(VALID_TOKEN)).willReturn(1L);
+
+        given(authenticationService.getUserRoles(1L)).willReturn(Collections.singletonList("USER"));
 
         given(authenticationService.parseToken(INVALID_TOKEN))
                 .willThrow(new InvalidTokenException(INVALID_TOKEN));

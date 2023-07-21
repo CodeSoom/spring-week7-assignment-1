@@ -14,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     private final AuthenticationService authenticationService;
@@ -33,7 +34,8 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         if (authorization != null) {
             String accessToken = authorization.substring("Bearer ".length());
             Long userId = authenticationService.parseToken(accessToken);
-            Authentication authentication = new UserAuthentication(userId);
+            List<String> roles = authenticationService.getUserRoles(userId);
+            Authentication authentication = new UserAuthentication(userId,roles);
 
             SecurityContext context = SecurityContextHolder.getContext();
             context.setAuthentication(authentication);
