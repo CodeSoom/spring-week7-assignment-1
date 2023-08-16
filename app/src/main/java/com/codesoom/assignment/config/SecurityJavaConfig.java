@@ -59,51 +59,27 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .requestMatchers(this::matchesDeleteUserRequest).authenticated();
     }
-    /**
-     * POST /products or /products/{상품아이디} 요청에 대해서만 인증을 요구합니다.
-     * @param req
-     * @return
-     */
+
     private boolean matchesPostProductRequest(HttpServletRequest req) {
         return req.getMethod().equals("POST") &&
                 (req.getRequestURI().matches("^/products$") ||
                         req.getRequestURI().matches("^/products/[0-9]+$"));
     }
 
-    /**
-     * PATCH /products or /products/{상품아이디} 요청에 대해서만 인증을 요구합니다.
-     * @param req
-     * @return
-     */
     private boolean matchesPatchProductRequest(HttpServletRequest req) {
         return req.getMethod().equals("PATCH") &&
                         req.getRequestURI().matches("^/products/[0-9]+$");
     }
 
-    /**
-     * DELETE /products or /products/{상품아이디} 요청에 대해서만 인증을 요구합니다.
-     * @param req
-     * @return
-     */
     private boolean matchesDeleteProductRequest(HttpServletRequest req) {
         return req.getMethod().equals("DELETE") &&
                 req.getRequestURI().matches("^/products/[0-9]+$");
     }
 
-    /**
-     * POST /users/{유저아이디} 요청에 대해서만 인증을 요구합니다.
-     * @param req
-     * @return
-     */
     private boolean matchesPostUserRequest(HttpServletRequest req) {
         return req.getMethod().equals("POST") && req.getRequestURI().matches("^/users/[0-9]+$");
     }
 
-    /**
-     * DELETE /users/{유저아이디} 요청에 대해서만 인증을 요구합니다.
-     * @param req
-     * @return
-     */
     private boolean matchesDeleteUserRequest(HttpServletRequest req) {
         return req.getMethod().equals("DELETE") && req.getRequestURI().matches("^/users/[0-9]+$");
     }
