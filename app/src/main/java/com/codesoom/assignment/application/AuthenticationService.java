@@ -25,7 +25,7 @@ public class AuthenticationService {
             throw new LoginFailException(email);
         }
 
-        return jwtUtil.encode(1L);
+        return jwtUtil.encode(user.getId());
     }
 
 }
