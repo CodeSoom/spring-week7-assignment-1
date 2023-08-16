@@ -240,10 +240,6 @@ class ProductControllerTest {
             @Nested
             @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
             class 상품요청이_비정상적인_경우 {
-                @BeforeEach
-                void setUp() {
-                    given(jwtUtil.decode(VALID_TOKEN)).willReturn(null);
-                }
 
                 @ParameterizedTest
                 @MethodSource("com.codesoom.assignment.utils.TestHelper#provideInvalidProductRequests")
