@@ -12,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 import javax.servlet.Filter;
+import javax.servlet.http.HttpServletRequest;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -27,6 +28,8 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
         Filter authenticationFilter = new JwtAuthenticationFilter(authenticationManager(), jwtUtil);
         Filter authenticationErrorFilter = new AuthenticationErrorFilter();
 
+        configureAuthorizations(http);
+
         http
                 .csrf().disable()
                 .addFilter(authenticationFilter)
@@ -38,5 +41,70 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling()
                 .authenticationEntryPoint(
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+    }
+
+    private void configureAuthorizations(HttpSecurity http) throws Exception {
+        http.authorizeRequests()
+                .requestMatchers(this::matchesPostProductRequest).authenticated()
+                .and()
+                .authorizeRequests()
+                .requestMatchers(this::matchesPatchProductRequest).authenticated()
+                .and()
+                .authorizeRequests()
+                .requestMatchers(this::matchesDeleteProductRequest).authenticated()
+                .and()
+                .authorizeRequests()
+                .requestMatchers(this::matchesPostUserRequest).authenticated()
+                .and()
+                .authorizeRequests()
+                .requestMatchers(this::matchesDeleteUserRequest).authenticated();
+    }
+    /**
+     * POST /products or /products/{상품아이디} 요청에 대해서만 인증을 요구합니다.
+     * @param req
+     * @return
+     */
+    private boolean matchesPostProductRequest(HttpServletRequest req) {
+        return req.getMethod().equals("POST") &&
+                (req.getRequestURI().matches("^/products$") ||
+                        req.getRequestURI().matches("^/products/[0-9]+$"));
+    }
+
+    /**
+     * PATCH /products or /products/{상품아이디} 요청에 대해서만 인증을 요구합니다.
+     * @param req
+     * @return
+     */
+    private boolean matchesPatchProductRequest(HttpServletRequest req) {
+        return req.getMethod().equals("PATCH") &&
+                        req.getRequestURI().matches("^/products/[0-9]+$");
+    }
+
+    /**
+     * DELETE /products or /products/{상품아이디} 요청에 대해서만 인증을 요구합니다.
+     * @param req
+     * @return
+     */
+    private boolean matchesDeleteProductRequest(HttpServletRequest req) {
+        return req.getMethod().equals("DELETE") &&
+                req.getRequestURI().matches("^/products/[0-9]+$");
+    }
+
+    /**
+     * POST /users/{유저아이디} 요청에 대해서만 인증을 요구합니다.
+     * @param req
+     * @return
+     */
+    private boolean matchesPostUserRequest(HttpServletRequest req) {
+        return req.getMethod().equals("POST") && req.getRequestURI().matches("^/users/[0-9]+$");
+    }
+
+    /**
+     * DELETE /users/{유저아이디} 요청에 대해서만 인증을 요구합니다.
+     * @param req
+     * @return
+     */
+    private boolean matchesDeleteUserRequest(HttpServletRequest req) {
+        return req.getMethod().equals("DELETE") && req.getRequestURI().matches("^/users/[0-9]+$");
     }
 }
