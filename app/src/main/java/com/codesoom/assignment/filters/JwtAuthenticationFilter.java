@@ -1,7 +1,9 @@
 package com.codesoom.assignment.filters;
 
+import com.codesoom.assignment.errors.InvalidTokenException;
 import com.codesoom.assignment.security.UserAuthentication;
 import com.codesoom.assignment.utils.JwtUtil;
+import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -29,8 +31,13 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
         if (authorization != null) {
             String accessToken = authorization.substring("Bearer ".length());
-            Long userId = jwtUtil.decode(accessToken)
-                    .get("userId", Long.class);
+            Claims claims = jwtUtil.decode(accessToken);
+
+            if(claims == null){
+                throw new InvalidTokenException(accessToken);
+            }
+
+            Long userId = claims.get("userId", Long.class);
             Authentication authentication = new UserAuthentication(userId);
 
 
