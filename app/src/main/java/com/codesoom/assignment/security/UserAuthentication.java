@@ -36,7 +36,6 @@ public class UserAuthentication extends AbstractAuthenticationToken {
 
     private static List<GrantedAuthority> authorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
-        // todo : userId에 따른 다른 권한 부여 => e.g ADMIN, USER
         authorities.add((GrantedAuthority) () -> "USER");
         return authorities;
     }
