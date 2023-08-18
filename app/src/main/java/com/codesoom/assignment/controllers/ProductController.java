@@ -4,6 +4,7 @@
 
 package com.codesoom.assignment.controllers;
 
+import com.codesoom.assignment.aop.annotation.CheckOwner;
 import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
@@ -39,15 +40,15 @@ public class ProductController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     public Product create(
-            @RequestBody @Valid ProductData productData,
-            Authentication authentication
+            @RequestBody @Valid ProductData productData
     ) {
         return productService.createProduct(productData);
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
+    @CheckOwner
     public Product update(
-            Authentication authentication,
             @PathVariable Long id,
             @RequestBody @Valid ProductData productData
     ) {
