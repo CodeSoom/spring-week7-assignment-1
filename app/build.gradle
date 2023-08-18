@@ -78,6 +78,10 @@ dependencies {
     }
     // Spring Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // Spring AOP
+    implementation 'org.springframework:spring-aop'
+
 }
 
 application {
