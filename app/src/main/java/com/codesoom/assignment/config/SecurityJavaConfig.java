@@ -28,22 +28,26 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
         Filter authenticationFilter = new JwtAuthenticationFilter(authenticationManager(), jwtUtil);
         Filter authenticationErrorFilter = new AuthenticationErrorFilter();
-
-        configureAuthorizations(http);
 
         http
                 .csrf().disable()
                 .addFilter(authenticationFilter)
-                .addFilterBefore(authenticationErrorFilter,
-                        JwtAuthenticationFilter.class)
+                .addFilterBefore(authenticationErrorFilter, JwtAuthenticationFilter.class)
                 .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and();
+
+        configureAuthorizations(http);
+
+        http
+                .authorizeRequests()
+                .anyRequest().permitAll()
                 .and()
                 .exceptionHandling()
-                .authenticationEntryPoint(
-                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
     }
 
     private void configureAuthorizations(HttpSecurity http) throws Exception {
@@ -63,26 +67,51 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers(this::matchesDeleteUserRequest).authenticated();
     }
 
+    /**
+     * 요청이 상품 생성 요청인 경우 true를 아닌경우 false를 반환합니다.
+     * @param req
+     * @return
+     */
     private boolean matchesPostProductRequest(HttpServletRequest req) {
         return req.getMethod().equals("POST") &&
                 (req.getRequestURI().matches("^/products$") ||
                         req.getRequestURI().matches("^/products/[0-9]+$"));
     }
 
+    /**
+     * 요청이 상품 수정 요청인 경우 true를 아닌경우 false를 반환합니다.
+     * @param req
+     * @return
+     */
     private boolean matchesPatchProductRequest(HttpServletRequest req) {
         return req.getMethod().equals("PATCH") &&
                         req.getRequestURI().matches("^/products/[0-9]+$");
     }
 
+    /**
+     * 요청이 상품 삭제 요청인 경우 true를 아닌경우 false를 반환합니다.
+     * @param req
+     * @return
+     */
     private boolean matchesDeleteProductRequest(HttpServletRequest req) {
         return req.getMethod().equals("DELETE") &&
                 req.getRequestURI().matches("^/products/[0-9]+$");
     }
 
+    /**
+     * 요청이 유저 생성 요청인 경우 true를 아닌경우 false를 반환합니다.
+     * @param req
+     * @return
+     */
     private boolean matchesPostUserRequest(HttpServletRequest req) {
         return req.getMethod().equals("POST") && req.getRequestURI().matches("^/users/[0-9]+$");
     }
 
+    /**
+     * 요청이 유저 삭제 요청인 경우 true를 아닌경우 false를 반환합니다.
+     * @param req
+     * @return
+     */
     private boolean matchesDeleteUserRequest(HttpServletRequest req) {
         return req.getMethod().equals("DELETE") && req.getRequestURI().matches("^/users/[0-9]+$");
     }
