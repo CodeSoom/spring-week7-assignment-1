@@ -49,6 +49,13 @@ public class ControllerErrorAdvice {
         return new ErrorResponse(messageTemplate);
     }
 
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(UserNoPermission.class)
+    public ErrorResponse handleUserNoPermission(UserNoPermission exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
+
     private String getViolatedMessage(ConstraintViolationException exception) {
         String messageTemplate = null;
         Set<ConstraintViolation<?>> violations = exception.getConstraintViolations();
