@@ -275,6 +275,31 @@ class ProductControllerTest {
                 }
             }
 
+            @Nested
+            @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+            class 상품을_수정할_권한이_없는_경우 {
+                @BeforeEach
+                void setUp() {
+                    Mockito.reset(jwtUtil);
+                    Mockito.reset(productService);
+                    given(jwtUtil.decode(OTHER_USER_VALID_TOKEN)).will(invocation -> {
+                        String accessToken = invocation.getArgument(0);
+                        Claims claims = new JwtUtil("12345678901234567890123456789010").decode(accessToken);
+                        return claims;
+                    });
+                }
+                @Test
+                @DisplayName("에러메시지를 반환한다")
+                void It_returns_403_error() throws Exception {
+                    mockMvc.perform(patch("/products/1")
+                                    .header("Authorization", "Bearer " + OTHER_USER_VALID_TOKEN)
+                                    .accept(MediaType.APPLICATION_JSON_UTF8)
+                                    .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                    .content(objectMapper.writeValueAsString(UPDATE_PRODUCT_DATA)))
+                            .andExpect(status().isForbidden())
+                            .andDo(print());
+                }
+            }
         }
 
         @Nested
@@ -349,7 +374,6 @@ class ProductControllerTest {
                             .andDo(print());
                 }
             }
-
         }
 
         @Nested
