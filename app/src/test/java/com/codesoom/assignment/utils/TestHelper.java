@@ -58,6 +58,7 @@ public class TestHelper {
             .name(TEST_PRODUCT_NAME)
             .maker(TEST_PRODUCT_MAKER)
             .price(TEST_PRODUCT_PRICE)
+            .createUserId(1L)
             .build();
 
     public static final ProductData TEST_PRODUCT_DATA = ProductData.builder()
