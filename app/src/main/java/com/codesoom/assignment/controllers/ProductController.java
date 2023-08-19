@@ -40,9 +40,10 @@ public class ProductController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     public Product create(
-            @RequestBody @Valid ProductData productData
+            @RequestBody @Valid ProductData productData,
+            Authentication authentication
     ) {
-        return productService.createProduct(productData);
+        return productService.createProduct(productData, (Long)authentication.getPrincipal());
     }
 
     @PatchMapping("{id}")
@@ -56,11 +57,13 @@ public class ProductController {
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @CheckOwner
     public void destroy(
-            Authentication authentication,
             @PathVariable Long id
     ) {
         productService.deleteProduct(id);
     }
+
 }
