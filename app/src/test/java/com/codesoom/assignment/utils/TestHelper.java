@@ -12,8 +12,9 @@ import java.util.stream.Stream;
 public class TestHelper {
 
     public static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.neCsyNLzy3lQ4o2yliotWT06FwSGZagaHpKdAkjnGGw";
-    public static final String OTHER_USER_VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjJ9.TEM6MULsZeqkBbUKziCR4Dg_8kymmZkyxsCXlfNJ3g0";
+    public static final String OTHER_USER_VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjJ9.i-iHszAs6H2JFTdm3vOVuN18tb_w6n2FqEYIRtr6gaU";
     public static final String INVALID_TOKEN = VALID_TOKEN + "INVALID";
+    public static final String SECRET = "12345678901234567890123456789010";
     public static final String AUTH_NAME = "AUTH_NAME";
     public static final String AUTH_EMAIL = "auth@foo.com";
     public static final String INVALID_EMAIL = AUTH_EMAIL + "INVALID";
