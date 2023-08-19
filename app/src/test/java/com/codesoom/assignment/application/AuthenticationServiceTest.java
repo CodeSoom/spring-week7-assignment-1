@@ -7,6 +7,8 @@ import com.codesoom.assignment.errors.LoginFailException;
 import com.codesoom.assignment.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -28,16 +30,18 @@ class AuthenticationServiceTest {
 
     private UserRepository userRepository = mock(UserRepository.class);
 
+
     @BeforeEach
     void setUp() {
         JwtUtil jwtUtil = new JwtUtil(SECRET);
-
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         authenticationService = new AuthenticationService(
-                userRepository, jwtUtil);
+                userRepository, jwtUtil, passwordEncoder);
 
         User user = User.builder()
-                .password("test")
+                .id(1L)
                 .build();
+        user.changePassword("test", passwordEncoder);
 
         given(userRepository.findByEmail("tester@example.com"))
                 .willReturn(Optional.of(user));
@@ -71,17 +75,4 @@ class AuthenticationServiceTest {
         verify(userRepository).findByEmail("tester@example.com");
     }
 
-    @Test
-    void parseTokenWithValidToken() {
-        Long userId = authenticationService.parseToken(VALID_TOKEN);
-
-        assertThat(userId).isEqualTo(1L);
-    }
-
-    @Test
-    void parseTokenWithInvalidToken() {
-        assertThatThrownBy(
-                () -> authenticationService.parseToken(INVALID_TOKEN)
-        ).isInstanceOf(InvalidTokenException.class);
-    }
 }

@@ -4,11 +4,13 @@
 
 package com.codesoom.assignment.controllers;
 
-import com.codesoom.assignment.application.AuthenticationService;
+import com.codesoom.assignment.aop.annotation.CheckOwner;
 import com.codesoom.assignment.application.ProductService;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.dto.ProductData;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -20,12 +22,8 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
 
-    private final AuthenticationService authenticationService;
-
-    public ProductController(ProductService productService,
-                             AuthenticationService authenticationService) {
+    public ProductController(ProductService productService) {
         this.productService = productService;
-        this.authenticationService = authenticationService;
     }
 
     @GetMapping
@@ -40,16 +38,18 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     public Product create(
-            @RequestAttribute Long userId,
-            @RequestBody @Valid ProductData productData
+            @RequestBody @Valid ProductData productData,
+            Authentication authentication
     ) {
-        return productService.createProduct(productData);
+        return productService.createProduct(productData, (Long)authentication.getPrincipal());
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
+    @CheckOwner
     public Product update(
-            @RequestAttribute Long userId,
             @PathVariable Long id,
             @RequestBody @Valid ProductData productData
     ) {
@@ -57,11 +57,13 @@ public class ProductController {
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("isAuthenticated() and hasAuthority('USER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @CheckOwner
     public void destroy(
-            @RequestAttribute Long userId,
             @PathVariable Long id
     ) {
         productService.deleteProduct(id);
     }
+
 }

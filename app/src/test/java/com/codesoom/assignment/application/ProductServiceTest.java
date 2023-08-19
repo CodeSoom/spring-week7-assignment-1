@@ -99,7 +99,7 @@ class ProductServiceTest {
                 .price(5000)
                 .build();
 
-        Product product = productService.createProduct(productData);
+        Product product = productService.createProduct(productData ,1L);
 
         verify(productRepository).save(any(Product.class));
 

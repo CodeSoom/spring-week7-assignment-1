@@ -43,10 +43,16 @@ public class Product {
 
     private String imageUrl;
 
+    private Long createUserId;
+
     public void changeWith(Product source) {
         this.name = source.name;
         this.maker = source.maker;
         this.price = source.price;
         this.imageUrl = source.imageUrl;
+    }
+
+    public void setCreateUserId(Long createUserId) {
+        this.createUserId = createUserId;
     }
 }
