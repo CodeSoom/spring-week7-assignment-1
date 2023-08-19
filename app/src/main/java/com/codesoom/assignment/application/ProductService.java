@@ -32,8 +32,9 @@ public class ProductService {
         return findProduct(id);
     }
 
-    public Product createProduct(ProductData productData) {
+    public Product createProduct(ProductData productData, Long createUserId) {
         Product product = mapper.map(productData, Product.class);
+        product.setCreateUserId(createUserId);
         return productRepository.save(product);
     }
 
